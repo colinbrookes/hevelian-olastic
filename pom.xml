@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.hevelian.odataelastic</groupId>
+	<artifactId>parent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>OData-Elasticseatch Aggregation Pom</name>
+	<description>OData bridge for Elasticsearch based on Apache Olingo library - aggregation pom</description>
+	<packaging>pom</packaging>
+
+	<!-- TODO use global parent pom for all hevelian products -->
+
+	<properties>
+		<olingo.version>4.2.0</olingo.version>
+		<elasticsearch.version>2.3.5</elasticsearch.version>
+	</properties>
+
+	<modules>
+		<module>core</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
