@@ -80,8 +80,8 @@
 
 
 		<dependency>
-			<groupId>com.hevelian.odataelastic</groupId>
-			<artifactId>core</artifactId>
+			<groupId>com.hevelian</groupId>
+			<artifactId>odataelastic-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
