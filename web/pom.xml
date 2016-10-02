@@ -16,6 +16,17 @@
 		<javax.servlet.version>3.1.0</javax.servlet.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>release-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshot-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<dependencies>
 		<!-- Servlet API -->
 		<dependency>
