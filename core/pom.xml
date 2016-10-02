@@ -6,11 +6,22 @@
 	<description>OData bridge for Elasticsearch based on Apache Olingo library</description>
 
 	<parent>
-		<groupId>com.hevelian.odataelastic</groupId>
-		<artifactId>parent</artifactId>
+		<groupId>com.hevelian</groupId>
+		<artifactId>odataelastic-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
+	<distributionManagement>
+		<repository>
+			<id>release-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshot-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
 	<dependencies>
 		<!-- Olingo libraries -->
 		<dependency>
