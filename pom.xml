@@ -20,6 +20,17 @@
 		<module>web</module>
 	</modules>
 
+	<distributionManagement>
+		<repository>
+			<id>release-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshot-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>
