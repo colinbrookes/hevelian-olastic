@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hevelian.olastic</groupId>
 	<artifactId>olastic-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-RELEASE</version>
 	<name>OData-Elasticseatch Parent Pom</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library - parent pom</description>
 	<packaging>pom</packaging>
@@ -23,7 +23,7 @@
 	<distributionManagement>
 		<repository>
 			<id>release-repository</id>
-			<url>https://oss.sonatype.org/content/repositories/releases</url>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshot-repository</id>
@@ -39,7 +39,7 @@
 				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>snapshot-repository</serverId>
+					<serverId>release-repository</serverId>
 					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
