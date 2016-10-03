@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Hevelian/hevelian-odata-elasticsearch.svg?branch=master)](https://travis-ci.org/Hevelian/hevelian-odata-elasticsearch)
+[![Build Status](https://travis-ci.org/Hevelian/hevelian-olastic.svg?branch=master)](https://travis-ci.org/Hevelian/hevelian-olastic)
 
 
 # hevelian-olastic
