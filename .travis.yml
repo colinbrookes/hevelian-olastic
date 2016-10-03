@@ -3,5 +3,5 @@ jdk:
   - oraclejdk7
   
 after_success:
-  - echo "<settings><servers><server><id>snapshot-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server></servers></settings>" > ~/travis-settings.xml
+  - echo "<settings><servers><server><id>release-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server></servers></settings>" > ~/travis-settings.xml
   - mvn deploy --settings ~/travis-settings.xml
