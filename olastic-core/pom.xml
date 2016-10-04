@@ -4,6 +4,33 @@
 	<artifactId>olastic-core</artifactId>
 	<name>OData-Elasticseatch Core</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library</description>
+	<url>https://github.com/Hevelian/hevelian-olastic</url>
+	
+	<scm>
+		<url>https://github.com/Hevelian/hevelian-olastic</url>
+	</scm>
+	
+	<organization>
+		<name>Hevelian</name>
+	</organization>
+	<inceptionYear>2012</inceptionYear>
+
+	<developers>
+		<developer>
+			<name>Colin Brookes</name>
+		</developer>
+		<developer>
+			<name>Yuriy Flyud</name>
+		</developer>
+	</developers>
+
+	<!--######### DISTRIBUTION INFO ######### -->
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+		</license>
+	</licenses>
 
 	<parent>
 		<groupId>com.hevelian.olastic</groupId>
