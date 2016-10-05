@@ -112,7 +112,7 @@
 				<version>1.5</version>
 				
 				<configuration>
-					<useAgent>false</useAgent>
+					<useAgent>true</useAgent>
 					<gpgArguments>
 						<gpgArgument>--no-tty</gpgArgument>
 					</gpgArguments>
