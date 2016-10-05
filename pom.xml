@@ -113,7 +113,9 @@
 				
 				<configuration>
 					<useAgent>false</useAgent>
-					<gpgArguments>--no-tty</gpgArguments>
+					<gpgArguments>
+						<gpgArgument>--no-tty</gpgArgument>
+					</gpgArguments>
 				</configuration>
 				<executions>
 					<execution>
