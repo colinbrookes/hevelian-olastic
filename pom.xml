@@ -116,6 +116,7 @@
 					<gpgArguments>
 						<gpgArgument>--no-tty</gpgArgument>
 					</gpgArguments>
+					<passphrase>hevelian</passphrase>
 				</configuration>
 				<executions>
 					<execution>
