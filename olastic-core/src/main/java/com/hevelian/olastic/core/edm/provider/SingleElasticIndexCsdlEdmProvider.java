@@ -7,21 +7,29 @@ import org.elasticsearch.client.Client;
 
 public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
-	private final String index;
+    private final String index;
 
-	public SingleElasticIndexCsdlEdmProvider(Client client, String index) {
-		super(client);
-		this.index = index;
-	}
+    /**
+     * Constructor to initialize ES Client and single index to work with.
+     * 
+     * @param client
+     *            ES Client
+     * @param index
+     *            index name
+     */
+    public SingleElasticIndexCsdlEdmProvider(Client client, String index) {
+        super(client);
+        this.index = index;
+    }
 
-	@Override
-	protected List<String> getSchemaNamespaces() {
-		return Arrays.asList(getNamespace());
-	}
+    @Override
+    protected List<String> getSchemaNamespaces() {
+        return Arrays.asList(csdlMapper.eIndexToCsdlNamespace(index));
+    }
 
-	@Override
-	protected String namespaceToIndex(String namespace) {
-		return index;
-	}
+    @Override
+    protected String namespaceToIndex(String namespace) {
+        return index;
+    }
 
 }

@@ -7,7 +7,7 @@
 	<!-- Register the HttpServlet implementation -->
 	<servlet>
 		<servlet-name>ODataServlet</servlet-name>
-		<servlet-class>com.hevelian.odataelastic.web.ODataServlet</servlet-class>
+		<servlet-class>com.hevelian.olastic.web.ODataServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -56,8 +55,7 @@ public class ODataServlet extends HttpServlet {
             throws ServletException, IOException {
         OData odata = OData.newInstance();
         ServiceMetadata edm = odata.createServiceMetadata(
-                new MultyElasticIndexCsdlEdmProvider(CLIENT,
-                        Arrays.asList(INDICES.toArray(new String[] {}))),
+                new MultyElasticIndexCsdlEdmProvider(CLIENT, INDICES),
                 new ArrayList<EdmxReference>());
         ODataHttpHandler handler = odata.createHandler(edm);
         // handler.register(new DefaultDebugSupport());

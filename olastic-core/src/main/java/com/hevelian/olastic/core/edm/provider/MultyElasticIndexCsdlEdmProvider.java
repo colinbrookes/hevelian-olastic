@@ -2,14 +2,26 @@ package com.hevelian.olastic.core.edm.provider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
+
+import com.hevelian.olastic.core.edm.utils.MetaDataUtils;
 
 public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
-    private final List<String> indices;
+    private final Set<String> indices;
 
-    public MultyElasticIndexCsdlEdmProvider(Client client, List<String> indices) {
+    /**
+     * Constructor to initialize ES Client and multiple indices to work with.
+     * 
+     * @param client
+     *            ES Client
+     * @param indices
+     *            indices names
+     */
+    public MultyElasticIndexCsdlEdmProvider(Client client, Set<String> indices) {
         super(client);
         this.indices = indices;
     }
@@ -17,18 +29,17 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     @Override
     protected List<String> getSchemaNamespaces() {
         List<String> namespaces = new ArrayList<>(indices.size());
-        for (String str : indices) {
-            namespaces.add(getNamespace() + "." + str);
+        for (String index : indices) {
+            namespaces.add(csdlMapper.eIndexToCsdlNamespace(index));
         }
         return namespaces;
     }
 
     @Override
     protected String namespaceToIndex(String namespace) {
-        if(!getSchemaNamespaces().contains(namespace)){
-            return null;
-        }
-        return namespace.substring(namespace.lastIndexOf(".")+1);
+        return getSchemaNamespaces().contains(namespace)
+                ? StringUtils.substringAfterLast(namespace, MetaDataUtils.NEMESPACE_SEPARATOR)
+                : null;
     }
 
 }
