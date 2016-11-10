@@ -1,17 +1,19 @@
 package com.hevelian.olastic.core.edm.provider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 
-import com.hevelian.olastic.core.edm.utils.MetaDataUtils;
+import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
 
 public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
-    private final Set<String> indices;
+    private final Map<String, String> namespaceToIndexMap = new HashMap<>();
+    private List<String> namespaces;
 
     /**
      * Constructor to initialize ES Client and multiple indices to work with.
@@ -23,23 +25,49 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      */
     public MultyElasticIndexCsdlEdmProvider(Client client, Set<String> indices) {
         super(client);
-        this.indices = indices;
+        initalizeNamespaces(indices);
+    }
+
+    /**
+     * Constructor to initialize ES Client and multiple indices to work with and
+     * custom {@link IElasticToCsdlMapper} implementation.
+     * 
+     * @param client
+     *            ES Client
+     * @param indices
+     *            indices names
+     * @param csdlMapper
+     *            ES to CSDL mapper
+     */
+    public MultyElasticIndexCsdlEdmProvider(Client client, Set<String> indices,
+            IElasticToCsdlMapper csdlMapper) {
+        super(client, csdlMapper);
+        initalizeNamespaces(indices);
+    }
+
+    /**
+     * Method to initialize list of schema namespace to work with.
+     * 
+     * @param indices
+     *            list of indices from Elasticsearch
+     */
+    protected void initalizeNamespaces(Set<String> indices) {
+        this.namespaces = new ArrayList<>(indices.size());
+        for (String index : indices) {
+            String namespace = csdlMapper.eIndexToCsdlNamespace(index);
+            namespaces.add(namespace);
+            namespaceToIndexMap.put(namespace, index);
+        }
     }
 
     @Override
     protected List<String> getSchemaNamespaces() {
-        List<String> namespaces = new ArrayList<>(indices.size());
-        for (String index : indices) {
-            namespaces.add(csdlMapper.eIndexToCsdlNamespace(index));
-        }
         return namespaces;
     }
 
     @Override
     protected String namespaceToIndex(String namespace) {
-        return getSchemaNamespaces().contains(namespace)
-                ? StringUtils.substringAfterLast(namespace, MetaDataUtils.NEMESPACE_SEPARATOR)
-                : null;
+        return namespaceToIndexMap.get(namespace);
     }
 
 }

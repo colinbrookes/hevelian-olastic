@@ -44,15 +44,14 @@ import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 // delegate and filter out some unnecessary methods.
 public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
-    private static final String DEFAULT_CONTAINER_NAME = "ODataService";
-    private static final String DEFAULT_CONTAINER_NAMESPACE = "OData";
+    private static final FullQualifiedName DEFAULT_CONTAINER_NAME = new FullQualifiedName("OData",
+            "ODataService");
 
     private final PrimitiveTypeMapper primitiveTypeMapper;
     private final MappingMetaDataProvider mappingMetaDataProvider;
     protected final IElasticToCsdlMapper csdlMapper;
 
-    private String containerNamespace;
-    private String containerName;
+    private FullQualifiedName containerName;
 
     /**
      * Initializes ES client with default {@link IElasticToCsdlMapper}
@@ -79,7 +78,6 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         this.mappingMetaDataProvider = new MappingMetaDataProvider(client);
         this.csdlMapper = esToCsdlMapper;
         setContainerName(DEFAULT_CONTAINER_NAME);
-        setContainerNamespace(DEFAULT_CONTAINER_NAMESPACE);
     }
 
     /**
@@ -96,15 +94,18 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         if (eIndex == null) {
             return null;
         }
-        CsdlEntityType entityType = new CsdlEntityType();
-        entityType.setName(entityTypeName.getName());
-        // Retrieve type fields from Elasticsearch
         // TODO check type exists
+        String eType = entityTypeName.getName();
+        ElasticCsdlEntityType entityType = new ElasticCsdlEntityType();
+        entityType.setEIndex(eIndex);
+        entityType.setEType(eType);
+        entityType.setName(eType);
+        // Retrieve type fields from Elasticsearch
         entityType.setProperties(getProperties(entityTypeName,
-                mappingMetaDataProvider.getMappingForType(eIndex, entityTypeName.getName())));
+                mappingMetaDataProvider.getMappingForType(eIndex, eType)));
 
         // Add _id property
-        CsdlProperty idProperty = new CsdlProperty().setName(ElasticConstants.ID_FIELD_NAME)
+        CsdlProperty idProperty = new ElasticCsdlProperty().setName(ElasticConstants.ID_FIELD_NAME)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()).setNullable(false);
         entityType.getProperties().add(idProperty);
 
@@ -131,16 +132,16 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
             ParsedMapWrapper eTypeProperties = new ParsedMapWrapper(metaData.sourceAsMap())
                     .mapValue(ElasticConstants.PROPERTIES_PROPERTY);
             List<CsdlProperty> properties = new ArrayList<>();
+            String eIndex = namespaceToIndex(entityTypeName.getNamespace());
+            String eType = entityTypeName.getName();
             for (String eFieldName : eTypeProperties.map.keySet()) {
-                String name = csdlMapper.eFieldToCsdlProperty(
-                        namespaceToIndex(entityTypeName.getNamespace()), entityTypeName.getName(),
-                        eFieldName);
-
+                String name = csdlMapper.eFieldToCsdlProperty(eIndex, eType, eFieldName);
                 String eFieldType = eTypeProperties.mapValue(eFieldName)
                         .stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
                 // TODO handle nested properties
                 FullQualifiedName type = primitiveTypeMapper.map(eFieldType).getFullQualifiedName();
-                properties.add(new CsdlProperty().setName(name).setType(type));
+                properties.add(new ElasticCsdlProperty().setEIndex(eIndex).setEType(eType)
+                        .setEField(eFieldName).setName(name).setType(type));
             }
             return properties;
         } catch (IOException e) {
@@ -203,9 +204,11 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         if (entityTypeName == null) {
             return null;
         }
-        CsdlEntitySet entitySet = new CsdlEntitySet();
-        entitySet.setName(csdlMapper
-                .eTypeToEntitySet(namespaceToIndex(entityContainer.getNamespace()), entitySetName));
+        String eIndex = namespaceToIndex(entityContainer.getNamespace());
+        ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
+        entitySet.setEIndex(eIndex);
+        entitySet.setEType(entitySetName);
+        entitySet.setName(csdlMapper.eTypeToEntitySet(eIndex, entitySetName));
         entitySet.setType(entityTypeName);
 
         // define navigation property bindings
@@ -251,11 +254,9 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     @Override
     public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) {
         CsdlEntityContainerInfo entityContainerInfo = null;
-        FullQualifiedName myEntityContainerName = new FullQualifiedName(getContainerNamespace(),
-                getContainerName());
         if (entityContainerName == null) {
             entityContainerInfo = new CsdlEntityContainerInfo();
-            entityContainerInfo.setContainerName(myEntityContainerName);
+            entityContainerInfo.setContainerName(getContainerName());
         }
         return entityContainerInfo;
     }
@@ -292,13 +293,13 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     protected CsdlEntityContainer getEntityContainerForSchema(String namespace)
             throws ODataException {
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
-        entityContainer.setName(getContainerName());
+        entityContainer.setName(getContainerName().getName());
 
         List<CsdlEntitySet> entitySets = new ArrayList<>();
         for (ObjectCursor<String> key : mappingMetaDataProvider
                 .getAllMappings(namespaceToIndex(namespace)).keys()) {
-            entitySets.add(
-                    getEntitySet(new FullQualifiedName(namespace, getContainerName()), key.value));
+            entitySets.add(getEntitySet(
+                    new FullQualifiedName(namespace, getContainerName().getName()), key.value));
         }
         entityContainer.setEntitySets(entitySets);
         return entityContainer;
@@ -308,7 +309,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     public CsdlEntityContainer getEntityContainer() throws ODataException {
         // create EntityContainer
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
-        entityContainer.setName(getContainerName());
+        entityContainer.setName(getContainerName().getName());
 
         List<CsdlSchema> schemas = getSchemas();
         for (CsdlSchema schema : schemas) {
@@ -342,26 +343,11 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         return csdlMapper;
     }
 
-    /**
-     * Get the namespace of the root entity container.
-     */
-    public String getContainerNamespace() {
-        return containerNamespace;
-    }
-
-    /**
-     * Get the name of the root entity container.
-     */
-    public String getContainerName() {
+    public FullQualifiedName getContainerName() {
         return containerName;
     }
 
-    public void setContainerName(String containerName) {
+    public void setContainerName(FullQualifiedName containerName) {
         this.containerName = containerName;
     }
-
-    public void setContainerNamespace(String containerNamespace) {
-        this.containerNamespace = containerNamespace;
-    }
-
 }

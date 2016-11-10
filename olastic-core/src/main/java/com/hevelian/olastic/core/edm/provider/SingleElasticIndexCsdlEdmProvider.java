@@ -29,7 +29,7 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
     @Override
     protected String namespaceToIndex(String namespace) {
-        return index;
+        return getSchemaNamespaces().contains(namespace) ? index : null;
     }
 
 }
