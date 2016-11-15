@@ -8,8 +8,13 @@ import java.util.Set;
 
 import org.elasticsearch.client.Client;
 
+import com.hevelian.olastic.core.common.NestedMappingStrategy;
 import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
 
+/**
+ * Implementation of {@link ElasticCsdlEdmProvider} to work with Elasticsearch
+ * multiple indices.
+ */
 public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
     private final Map<String, String> namespaceToIndexMap = new HashMap<>();
@@ -29,7 +34,24 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     }
 
     /**
-     * Constructor to initialize ES Client and multiple indices to work with and
+     * Constructor to initialize ES Client, multiple indices to work with and
+     * custom {@link NestedMappingStrategy} implementation.
+     * 
+     * @param client
+     *            ES Client
+     * @param indices
+     *            indices names
+     * @param nestedMappingStrategy
+     *            mapping strategy
+     */
+    public MultyElasticIndexCsdlEdmProvider(Client client, Set<String> indices,
+            NestedMappingStrategy nestedMappingStrategy) {
+        super(client, nestedMappingStrategy);
+        initalizeNamespaces(indices);
+    }
+
+    /**
+     * Constructor to initialize ES Client, multiple indices to work with and
      * custom {@link IElasticToCsdlMapper} implementation.
      * 
      * @param client
@@ -42,6 +64,26 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     public MultyElasticIndexCsdlEdmProvider(Client client, Set<String> indices,
             IElasticToCsdlMapper csdlMapper) {
         super(client, csdlMapper);
+        initalizeNamespaces(indices);
+    }
+
+    /**
+     * Constructor to initialize ES Client, multiple indices to work with,
+     * {@link IElasticToCsdlMapper} and {@link NestedMappingStrategy}
+     * implementations.
+     * 
+     * @param client
+     *            ES Client
+     * @param indices
+     *            indices names
+     * @param csdlMapper
+     *            ES to CSDL mapper
+     * @param nestedMappingStrategy
+     *            mapping strategy
+     */
+    public MultyElasticIndexCsdlEdmProvider(Client client, Set<String> indices,
+            IElasticToCsdlMapper csdlMapper, NestedMappingStrategy nestedMappingStrategy) {
+        super(client, csdlMapper, nestedMappingStrategy);
         initalizeNamespaces(indices);
     }
 

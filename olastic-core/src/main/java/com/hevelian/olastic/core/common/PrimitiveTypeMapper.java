@@ -19,8 +19,6 @@ import lombok.extern.log4j.Log4j2;
  * 
  * @author yuflyud
  */
-// TODO handle nested types properly. Actually maybe do not handle them at all
-// here.
 @Log4j2
 public class PrimitiveTypeMapper {
 
