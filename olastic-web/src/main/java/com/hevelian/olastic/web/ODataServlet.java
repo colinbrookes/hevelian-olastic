@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
@@ -35,6 +36,7 @@ import com.hevelian.olastic.core.processors.ESEntityProcessor;
  */
 // TODO implement data providers, specify client url through some config. Make
 // some abstraction for servlets to make them more flexible.
+@Log4j2
 public class ODataServlet extends HttpServlet {
     private static final long serialVersionUID = -7048611704658443045L;
     private static Client CLIENT;
@@ -49,7 +51,7 @@ public class ODataServlet extends HttpServlet {
             INDICES = CLIENT.admin().indices().stats(new IndicesStatsRequest()).actionGet()
                     .getIndices().keySet();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            log.debug(e);
         }
     }
 
