@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
@@ -22,6 +23,8 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.hevelian.olastic.core.edm.provider.MultyElasticIndexCsdlEdmProvider;
+import com.hevelian.olastic.core.processors.ESEntityCollectionProcessor;
+import com.hevelian.olastic.core.processors.ESEntityProcessor;
 
 /**
  * OData servlet that currently connects to the local instance of the
@@ -37,7 +40,7 @@ public class ODataServlet extends HttpServlet {
     private static Client CLIENT;
     private static Set<String> INDICES;
 
-    // TODOdo no do the initialization in a static block.
+    // TODO do no do the initialization in a static block.
     static {
         Settings settings = Settings.settingsBuilder().build();
         try {
@@ -58,7 +61,9 @@ public class ODataServlet extends HttpServlet {
                 new MultyElasticIndexCsdlEdmProvider(CLIENT, INDICES),
                 new ArrayList<EdmxReference>());
         ODataHttpHandler handler = odata.createHandler(edm);
-        // handler.register(new DefaultDebugSupport());
+        handler.register(new ESEntityProcessor(CLIENT));
+        handler.register(new ESEntityCollectionProcessor(CLIENT));
+        handler.register(new ESPrimitiveProcessor(CLIENT));
         handler.process(req, resp);
     }
 }

@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>olastic-core</artifactId>
-	<name>OData-Elasticseatch Core</name>
+	<name>OData-Elasticsearch Core</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library</description>
 
 	<parent>
@@ -21,6 +21,16 @@
 		<dependency>
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>odata-commons-core</artifactId>
+			<version>${olingo.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.olingo</groupId>
+			<artifactId>odata-server-api</artifactId>
+			<version>${olingo.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.olingo</groupId>
+			<artifactId>odata-server-core</artifactId>
 			<version>${olingo.version}</version>
 		</dependency>
 		<dependency>
