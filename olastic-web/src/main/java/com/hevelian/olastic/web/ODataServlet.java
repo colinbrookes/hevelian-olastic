@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
@@ -24,8 +22,12 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.hevelian.olastic.core.edm.provider.MultyElasticIndexCsdlEdmProvider;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.processors.ESEntityCollectionProcessor;
 import com.hevelian.olastic.core.processors.ESEntityProcessor;
+import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * OData servlet that currently connects to the local instance of the
@@ -60,7 +62,7 @@ public class ODataServlet extends HttpServlet {
             throws ServletException, IOException {
         OData odata = OData.newInstance();
         ServiceMetadata edm = odata.createServiceMetadata(
-                new MultyElasticIndexCsdlEdmProvider(CLIENT, INDICES),
+                new MultyElasticIndexCsdlEdmProvider(new MappingMetaDataProvider(CLIENT), INDICES),
                 new ArrayList<EdmxReference>());
         ODataHttpHandler handler = odata.createHandler(edm);
         handler.register(new ESEntityProcessor(CLIENT));

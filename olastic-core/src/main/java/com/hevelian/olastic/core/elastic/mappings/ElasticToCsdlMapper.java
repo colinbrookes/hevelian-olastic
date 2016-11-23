@@ -12,7 +12,7 @@ import com.hevelian.olastic.core.edm.utils.MetaDataUtils;
 public class ElasticToCsdlMapper implements IElasticToCsdlMapper {
 
     /** Default sFchema name space. */
-    private static final String DEFAULT_NAMESPACE = "Olastic.OData";
+    public static final String DEFAULT_NAMESPACE = "Olastic.OData";
 
     private final String namespace;
 

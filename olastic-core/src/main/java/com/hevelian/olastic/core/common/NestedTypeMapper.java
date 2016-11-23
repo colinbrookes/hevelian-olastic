@@ -69,8 +69,8 @@ public class NestedTypeMapper {
                 ParsedMapWrapper fieldMap = eTypeProperties.mapValue(eFieldName);
                 if (ObjectMapper.NESTED_CONTENT_TYPE
                         .equals(fieldMap.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY))) {
-                    String complexTypeName = nestedMappingStrategy.getComplexTypeName(key.value,
-                            eFieldName);
+                    String complexTypeName = getNestedMappingStrategy()
+                            .getComplexTypeName(key.value, eFieldName);
                     Set<CsdlProperty> nestedProperties = getNestedProperties(index, eFieldName,
                             fieldMap.mapValue(ElasticConstants.PROPERTIES_PROPERTY));
                     getAndPut(complexMappings, complexTypeName, nestedProperties);
@@ -139,6 +139,10 @@ public class NestedTypeMapper {
     public FullQualifiedName map(String index, String type, String field) {
         return new FullQualifiedName(csdlMapper.eIndexToCsdlNamespace(index),
                 nestedMappingStrategy.getComplexTypeName(type, field));
+    }
+
+    public NestedMappingStrategy getNestedMappingStrategy() {
+        return nestedMappingStrategy;
     }
 
 }
