@@ -58,6 +58,12 @@
 			<artifactId>lombok</artifactId>
 			<version>1.16.10</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160810</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

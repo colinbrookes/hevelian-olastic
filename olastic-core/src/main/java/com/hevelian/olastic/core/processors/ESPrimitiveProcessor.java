@@ -12,6 +12,8 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.elasticsearch.client.Client;
 
+import java.util.Locale;
+
 /**
  * Processes primitive value.
  */
@@ -24,11 +26,13 @@ public class ESPrimitiveProcessor implements PrimitiveProcessor {
     public ESPrimitiveProcessor(Client client) {
         this.client = client;
     }
+
     @Override
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
     }
+
     @Override
     public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo,
                               ContentType responseFormat) throws ODataApplicationException, SerializerException {
@@ -49,14 +53,16 @@ public class ESPrimitiveProcessor implements PrimitiveProcessor {
     public void updatePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo,
                                 ContentType requestFormat, ContentType responseFormat)
             throws ODataApplicationException, ODataLibraryException {
-        // TODO Auto-generated method stub
+        throw new ODataApplicationException("Not supported.",
+                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
 
     }
 
     @Override
     public void deletePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
-        // TODO Auto-generated method stub
+        throw new ODataApplicationException("Not supported.",
+                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
 
     }
 }

@@ -9,6 +9,9 @@ import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.elasticsearch.client.Client;
+
+import java.util.Locale;
+
 /**
  * Processes single entity.
  */
@@ -30,7 +33,7 @@ public class ESEntityProcessor implements EntityProcessor {
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-            ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+                           ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
 
         DataRetriever dataRetriever = new DataRetriever(uriInfo, odata, client, request.getRawBaseUri(),
                 serviceMetadata, responseFormat);
@@ -43,24 +46,27 @@ public class ESEntityProcessor implements EntityProcessor {
 
     @Override
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-            ContentType requestFormat, ContentType responseFormat)
+                             ContentType requestFormat, ContentType responseFormat)
             throws ODataApplicationException, ODataLibraryException {
-        // TODO Auto-generated method stub
+        throw new ODataApplicationException("Not supported.",
+                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
 
     }
 
     @Override
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-            ContentType requestFormat, ContentType responseFormat)
+                             ContentType requestFormat, ContentType responseFormat)
             throws ODataApplicationException, ODataLibraryException {
-        // TODO Auto-generated method stub
+        throw new ODataApplicationException("Not supported.",
+                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
 
     }
 
     @Override
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
-        // TODO Auto-generated method stub
+        throw new ODataApplicationException("Not supported.",
+                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
 
     }
 }

@@ -242,13 +242,17 @@ public class DataRetriever {
      * @param segment uri resource part
      * @return ids list
      */
-    protected List<String> collectIds(UriResource segment) {
+    protected List<String> collectIds(UriResource segment) throws ODataApplicationException {
         List<String> ids = new ArrayList<>();
         List<UriParameter> keyPredicates;
         if (segment instanceof UriResourceNavigation) {
             keyPredicates = ((UriResourceNavigation) segment).getKeyPredicates();
         } else {
             keyPredicates = ((UriResourceEntitySet) segment).getKeyPredicates();
+        }
+        if (keyPredicates.size() > 1) {
+            throw new ODataApplicationException("Composite Keys are not supported",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
         for (UriParameter param : keyPredicates) {
             ids.add(param.getText().replaceAll("\'", ""));

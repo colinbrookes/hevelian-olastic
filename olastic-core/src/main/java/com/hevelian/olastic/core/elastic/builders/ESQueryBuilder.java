@@ -46,7 +46,7 @@ public class ESQueryBuilder {
      * @param ids list of ids of parent documents we are looking for
      * @return builder's instance
      */
-    public ESQueryBuilder addParentQuery(String type, List ids){
+    public ESQueryBuilder addParentQuery(String type, List<String> ids){
         QueryBuilder parentQuery = ids == null || ids.isEmpty() ? QueryBuilders.matchAllQuery() : buildIdsQuery(ids, type);
         QueryBuilder resultQuery = getParentChildResultQuery(parentQuery);
         parentChildQuery = QueryBuilders.hasParentQuery(type, resultQuery);
@@ -58,7 +58,7 @@ public class ESQueryBuilder {
      * @param ids list of ids of child documents we are looking for
      * @return builder's instance
      */
-    public ESQueryBuilder addChildQuery(String type, List ids){
+    public ESQueryBuilder addChildQuery(String type, List<String> ids){
         QueryBuilder childQuery = ids == null || ids.isEmpty() ? QueryBuilders.matchAllQuery() : buildIdsQuery(ids, type);
         QueryBuilder resultQuery = getParentChildResultQuery(childQuery);
         parentChildQuery = QueryBuilders.hasChildQuery(type, resultQuery);
@@ -71,14 +71,14 @@ public class ESQueryBuilder {
      * @param ids list of ids
      * @return builder's instance
      */
-    public ESQueryBuilder addIdsQuery(String type, List ids){
+    public ESQueryBuilder addIdsQuery(String type, List<String> ids){
         if (!ids.isEmpty()) {
             query.must(buildIdsQuery(ids, type));
         }
         return this;
     }
 
-    private QueryBuilder buildIdsQuery(List ids, String... type) {
+    private QueryBuilder buildIdsQuery(List<String> ids, String... type) {
         return new IdsQueryBuilder(type).ids(ids);
     }
 
