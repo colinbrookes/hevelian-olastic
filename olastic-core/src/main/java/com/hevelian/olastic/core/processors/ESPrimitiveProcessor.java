@@ -55,7 +55,6 @@ public class ESPrimitiveProcessor implements PrimitiveProcessor {
             throws ODataApplicationException, ODataLibraryException {
         throw new ODataApplicationException("Not supported.",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-
     }
 
     @Override
@@ -63,6 +62,5 @@ public class ESPrimitiveProcessor implements PrimitiveProcessor {
             throws ODataApplicationException, ODataLibraryException {
         throw new ODataApplicationException("Not supported.",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-
     }
 }

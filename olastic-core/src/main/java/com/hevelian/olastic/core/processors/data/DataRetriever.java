@@ -10,10 +10,8 @@ import com.hevelian.olastic.core.util.Util;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.commons.api.data.*;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
-import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.OData;
@@ -35,12 +33,8 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.support.ValuesSource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class provides high-level methods for retrieving and converting the data.
@@ -98,6 +92,7 @@ public class DataRetriever {
 
     /**
      * Retrieves and serializes the data.
+     *
      * @return serialized data
      * @throws ODataApplicationException
      * @throws SerializerException
@@ -125,22 +120,23 @@ public class DataRetriever {
 
     /**
      * Serializes response from ES.
-     * @param response ES response
+     *
+     * @param response             ES response
      * @param responseEdmEntitySet entitySet
      * @return serialized data
      * @throws SerializerException
      * @throws ODataApplicationException
      */
-    protected SerializerResult serialize (SearchResponse response, EdmEntitySet responseEdmEntitySet) throws SerializerException, ODataApplicationException {
+    protected SerializerResult serialize(SearchResponse response, EdmEntitySet responseEdmEntitySet) throws SerializerException, ODataApplicationException {
         EntityCollection entities = new EntityCollection();
         List<Entity> productList = entities.getEntities();
         for (SearchHit hit : response.getHits()) {
             Entity e = new Entity();
             e.setId(Util.createId(responseEdmEntitySet.getName(), hit.getId()));
-            addProperty(e, ElasticConstants.ID_FIELD_NAME, hit.getId());
+            addProperty(e, ElasticConstants.ID_FIELD_NAME, hit.getId(), responseEdmEntitySet);
 
             for (Map.Entry<String, Object> s : hit.getSource().entrySet()) {
-                addProperty(e, s.getKey(), s.getValue());
+                addProperty(e, s.getKey(), s.getValue(), responseEdmEntitySet);
             }
             productList.add(e);
         }
@@ -162,6 +158,7 @@ public class DataRetriever {
 
     /**
      * Returns the list of fields for which the data should be retrieved.
+     *
      * @return fields
      */
     protected List<String> getSelectList() {
@@ -169,7 +166,7 @@ public class DataRetriever {
         SelectOption selectOption = uriInfo.getSelectOption();
         if (selectOption != null) {
             List<SelectItem> selectItems = selectOption.getSelectItems();
-            for (SelectItem selectItem: selectItems) {
+            for (SelectItem selectItem : selectItems) {
                 List<UriResource> selectParts = selectItem.getResourcePath().getUriResourceParts();
                 String fieldName = selectParts.get(selectParts.size() - 1).getSegmentValue();
                 result.add(fieldName);
@@ -177,59 +174,72 @@ public class DataRetriever {
         }
         return result;
     }
-    //TODO refactor
+
     /**
      * Builds the query builder for requesting the data and entity set for serializing.
+     *
      * @return Query builder and entity set
      * @throws ODataApplicationException
      */
     protected QueryWithEntitySet getQueryWithEntitySet() throws ODataApplicationException {
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-        UriResource firstUriSegment = resourceParts.get(0);
-        if (!(firstUriSegment instanceof UriResourceEntitySet)) {
+        UriResourceEntitySet firstUriResourceEntitySet;
+        try {
+            firstUriResourceEntitySet = (UriResourceEntitySet) resourceParts.get(0);
+        } catch (ClassCastException e) {
             throw new ODataApplicationException("Only EntitySet is supported",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
-        UriResourceEntitySet firstUriResourceEntitySet = (UriResourceEntitySet) firstUriSegment;
-        EdmEntitySet startEdmEntitySet = firstUriResourceEntitySet.getEntitySet();
-        EdmEntitySet responseEdmEntitySet = startEdmEntitySet; // for building ContextURL
 
-        int usefulPartsSize = getUsefulPartsSize();
+        EdmEntitySet responseEdmEntitySet = firstUriResourceEntitySet.getEntitySet();
         ESQueryBuilder parentChildQueryBuilder = new ESQueryBuilder();
-        for (int i = 0; i < usefulPartsSize; i++) {
-            boolean isLast = i == usefulPartsSize - 1;
+        for (int i = 0; i < getUsefulPartsSize(); i++) {
             UriResource segment = resourceParts.get(i);
             if (segment.getKind() == UriResourceKind.primitiveProperty) {
                 break;
             }
-            UriResource nextSegment = isLast ? null : resourceParts.get(i + 1);
-            String type = ((UriResourcePartTyped) segment).getType().getName();
-            List<String> ids = collectIds(segment);
             if (segment.getKind() == UriResourceKind.navigationProperty) {
                 UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) segment;
                 EdmNavigationProperty edmNavigationProperty = uriResourceNavigation.getProperty();
                 responseEdmEntitySet = Util.getNavigationTargetEntitySet(responseEdmEntitySet,
                         edmNavigationProperty);
-            } else if (segment.getKind()!= UriResourceKind.entitySet) {
+            } else if (segment.getKind() != UriResourceKind.entitySet) {
                 throw new ODataApplicationException("Not supported",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
             }
-            if (!isLast) {
-                if (((UriResourceNavigationPropertyImpl) nextSegment).getProperty().isCollection()) {
-                    parentChildQueryBuilder.addParentQuery(type, ids);
-                } else {
-                    parentChildQueryBuilder.addChildQuery(type, ids);
-                }
-            } else {
-                parentChildQueryBuilder.addIdsQuery(type, ids);
-            }
+            buildQuery(parentChildQueryBuilder, i);
         }
         parentChildQueryBuilder.setEsType(responseEdmEntitySet.getName());
         return new QueryWithEntitySet(responseEdmEntitySet, parentChildQueryBuilder);
     }
 
     /**
+     * Builds query to elasticsearch using given part of the url.
+     * @param query query builder that should be updated with a query for given part of the url
+     * @param urlPartIndex index of the part of url for which query should be added
+     * @throws ODataApplicationException
+     */
+    private void buildQuery(ESQueryBuilder query, int urlPartIndex) throws ODataApplicationException {
+        List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+        UriResource segment = resourceParts.get(urlPartIndex);
+        boolean isLast = urlPartIndex == getUsefulPartsSize() - 1;
+        String type = ((UriResourcePartTyped) segment).getType().getName();
+        List<String> ids = collectIds(segment);
+        if (!isLast) {
+            UriResource nextSegment = resourceParts.get(urlPartIndex + 1);
+            if (((UriResourceNavigationPropertyImpl) nextSegment).getProperty().isCollection()) {
+                query.addParentQuery(type, ids);
+            } else {
+                query.addChildQuery(type, ids);
+            }
+        } else {
+            query.addIdsQuery(type, ids);
+        }
+    }
+
+    /**
      * Returns the size of the url parts that are involved in the query building.
+     *
      * @return useful url parts size
      */
     protected int getUsefulPartsSize() {
@@ -239,6 +249,7 @@ public class DataRetriever {
 
     /**
      * Retrieves ids from uri resource part.
+     *
      * @param segment uri resource part
      * @return ids list
      */
@@ -262,7 +273,8 @@ public class DataRetriever {
 
     /**
      * Gets the data from ES.
-     * @param query query builder
+     *
+     * @param query  query builder
      * @param filter raw ES query with filter
      * @return ES response
      */
@@ -277,7 +289,8 @@ public class DataRetriever {
 
     /**
      * Checks if URI has count option.
-     * @return
+     *
+     * @return true if there is count option in the url
      */
     protected boolean isCount() {
         // handle $count: always return the original number of entities, without
@@ -292,6 +305,7 @@ public class DataRetriever {
 
     /**
      * Returns pagination data.
+     *
      * @return pagination
      */
     protected Pagination getPagination() {
@@ -300,13 +314,11 @@ public class DataRetriever {
         if (skipOption != null) {
             skipNumber = skipOption.getValue();
         }
-
         int topNumber = Pagination.TOP_DEFAULT;
         TopOption topOption = uriInfo.getTopOption();
         if (topOption != null) {
             topNumber = topOption.getValue();
         }
-
         OrderByOption orderByOption = uriInfo.getOrderByOption();
         List<Sort> orderBy = new ArrayList<>();
         if (orderByOption != null) {
@@ -327,9 +339,50 @@ public class DataRetriever {
         return new Pagination(topNumber, skipNumber, orderBy);
     }
 
-    private void addProperty(Entity e, String name, Object value) {
-        if (ValuesSource.Numeric.class.isInstance(name) || String.class.isInstance(name)) {
-            e.addProperty(new Property(null, name, ValueType.PRIMITIVE, value));
+    private void addProperty(Entity e, String name, Object value, EdmEntitySet entitySet) {
+        if (value instanceof List) {
+            e.addProperty(createPropertyList(name, (List<Object>)value, entitySet));
+        } else if (value instanceof Map) {
+            e.addProperty(createComplexProperty(name, (Map<String, Object>) value));
+        } else {
+            e.addProperty(createPrimitiveProperty(name, value));
         }
     }
+
+    private Property createPrimitiveProperty(String name, Object value) {
+        return new Property(null, name, ValueType.PRIMITIVE, value);
+    }
+
+    private Property createComplexProperty(String name, Map<String, Object> value) {
+        ComplexValue complexValue = createComplexValue(value);
+        return new Property(null, name, ValueType.COMPLEX, complexValue);
+    }
+
+    private Property createPropertyList(String name, List<Object> valueObject, EdmEntitySet entitySet) {
+        ValueType valueType;
+        EdmTypeKind propertyKind = entitySet.getEntityType().getProperty(name).getType().getKind();
+        if (propertyKind == EdmTypeKind.COMPLEX) {
+            valueType = ValueType.COLLECTION_COMPLEX;
+        } else {
+            valueType = ValueType.COLLECTION_PRIMITIVE;
+        }
+        List<Object> properties = new ArrayList<>();
+        for (Object value : valueObject) {
+            if (value instanceof Map) {
+                properties.add(createComplexValue((Map<String, Object>) value));
+            } else {
+                properties.add(createPrimitiveProperty(name, value));
+            }
+        }
+        return new Property(null, name, valueType, properties);
+    }
+
+    private ComplexValue createComplexValue(Map<String, Object> complexObject) {
+        ComplexValue complexValue = new ComplexValue();
+        for (Map.Entry<String, Object> entry : complexObject.entrySet()) {
+            complexValue.getValue().add(new Property(null, entry.getKey(), ValueType.PRIMITIVE, entry.getValue()));
+        }
+        return complexValue;
+    }
+
 }
