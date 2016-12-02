@@ -35,7 +35,6 @@ public class MappingMetaDataProvider implements IMappingMetaDataProvider {
 
     @Override
     public MappingMetaData getMappingForType(String index, String type) {
-        System.err.println("GGGGGGGGGG");
         GetMappingsResponse getMappingsResponse = getClient().admin().indices()
                 .prepareGetMappings(index).addTypes(type).execute().actionGet();
         return getMappingsResponse.getMappings().get(index).get(type);

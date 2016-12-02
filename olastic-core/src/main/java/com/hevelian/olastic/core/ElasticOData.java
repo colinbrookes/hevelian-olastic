@@ -1,10 +1,11 @@
 package com.hevelian.olastic.core;
 
+import static com.hevelian.olastic.core.utils.MetaDataUtils.castToType;
+
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
-import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.etag.ServiceMetadataETagSupport;
 import org.apache.olingo.server.core.ODataImpl;
@@ -38,13 +39,8 @@ public class ElasticOData extends ODataImpl {
     @Override
     public ElasticServiceMetadata createServiceMetadata(CsdlEdmProvider edmProvider,
             List<EdmxReference> references, ServiceMetadataETagSupport serviceMetadataETagSupport) {
-        if (!(edmProvider instanceof ElasticCsdlEdmProvider)) {
-            throw new ODataRuntimeException(String.format(
-                    "Invalid service metadata provider. Only %s instance is supported.",
-                    ElasticCsdlEdmProvider.class.getName()));
-        }
-        return new ElasticServiceMetadata((ElasticCsdlEdmProvider) edmProvider, references,
-                serviceMetadataETagSupport);
+        return new ElasticServiceMetadata(castToType(edmProvider, ElasticCsdlEdmProvider.class),
+                references, serviceMetadataETagSupport);
     }
 
 }
