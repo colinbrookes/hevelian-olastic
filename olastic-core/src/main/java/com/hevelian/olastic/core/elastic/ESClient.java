@@ -1,7 +1,8 @@
 package com.hevelian.olastic.core.elastic;
 
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import com.hevelian.olastic.core.elastic.pagination.Sort;
+import java.util.Collection;
+import java.util.List;
+
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -10,7 +11,8 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
-import java.util.List;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
 
 /**
  * Retrieves the data from Elasticsearch.
@@ -18,18 +20,23 @@ import java.util.List;
 public class ESClient {
     /**
      *
-     * @param index ES index
-     * @param type ES type
-     * @param client ES raw client
-     * @param query ES raw search query
-     * @param pagination pagination object
-     * @param fields fields to return
+     * @param index
+     *            ES index
+     * @param type
+     *            ES type
+     * @param client
+     *            ES raw client
+     * @param query
+     *            ES raw search query
+     * @param pagination
+     *            pagination object
+     * @param fields
+     *            fields to return
      * @return ES search response
      */
-    public static SearchResponse executeRequest(String index, String type, Client client, QueryBuilder query,
-                                                Pagination pagination, List<String> fields) {
-        SearchRequestBuilder request = client.prepareSearch(index)
-                .setTypes(type);
+    public static SearchResponse executeRequest(String index, String type, Client client,
+            QueryBuilder query, Pagination pagination, Collection<String> fields) {
+        SearchRequestBuilder request = client.prepareSearch(index).setTypes(type);
         List<Sort> orderBy = pagination.getOrderBy();
         for (Sort sort : orderBy) {
             FieldSortBuilder sortQuery = SortBuilders.fieldSort(sort.getProperty())

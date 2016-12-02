@@ -1,37 +1,58 @@
 package com.hevelian.olastic.core.stub;
 
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.*;
-import org.apache.olingo.commons.api.ex.ODataException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.ex.ODataException;
+
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
+import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+
 /**
  * Initializes stub provider for testing purposes.
  */
-public class TestProvider extends CsdlAbstractEdmProvider {
+public class TestProvider extends ElasticCsdlEdmProvider {
+
     public static final String NAMESPACE = "OData.Test";
     public static final String CONTAINER_NAME = "Container";
-    public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE, CONTAINER_NAME);
+    public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE,
+            CONTAINER_NAME);
 
     public static final String DIMENSION_TYPE = "_dimension";
 
+    public static final String AUTHORS_INDEX = "authors";
     public static final String AUTHOR_TYPE = "author";
     public static final String ADDRESS_TYPE = "address";
     public static final String BOOK_TYPE = "book";
     public static final String CHARACTER_TYPE = "character";
 
-    public static final FullQualifiedName DIMENSION_FQN = new FullQualifiedName(NAMESPACE, DIMENSION_TYPE);
+    public static final FullQualifiedName DIMENSION_FQN = new FullQualifiedName(NAMESPACE,
+            DIMENSION_TYPE);
 
-    public static final FullQualifiedName ADDRESS_FQN = new FullQualifiedName(NAMESPACE, ADDRESS_TYPE);
+    public static final FullQualifiedName ADDRESS_FQN = new FullQualifiedName(NAMESPACE,
+            ADDRESS_TYPE);
     public static final FullQualifiedName BOOK_FQN = new FullQualifiedName(NAMESPACE, BOOK_TYPE);
-    public static final FullQualifiedName CHARACTER_FQN = new FullQualifiedName(NAMESPACE, CHARACTER_TYPE);
-    public static final FullQualifiedName AUTHOR_FQN = new FullQualifiedName(NAMESPACE, AUTHOR_TYPE);
-
+    public static final FullQualifiedName CHARACTER_FQN = new FullQualifiedName(NAMESPACE,
+            CHARACTER_TYPE);
+    public static final FullQualifiedName AUTHOR_FQN = new FullQualifiedName(NAMESPACE,
+            AUTHOR_TYPE);
 
     public static final String ADDRESSES = "address";
     public static final String BOOKS = "book";
@@ -44,8 +65,8 @@ public class TestProvider extends CsdlAbstractEdmProvider {
     private CsdlNavigationProperty authorAddressesParent;
     private CsdlNavigationProperty bookParent;
 
-
-    public TestProvider() {
+    public TestProvider(IMappingMetaDataProvider metaDataProvider) {
+        super(metaDataProvider);
         booksCollection = new CsdlNavigationProperty();
         booksCollection.setCollection(true);
         booksCollection.setName(BOOKS);
@@ -96,8 +117,10 @@ public class TestProvider extends CsdlAbstractEdmProvider {
         List<CsdlComplexType> complexTypes = new ArrayList<>();
         CsdlComplexType complexType = new CsdlComplexType();
         List<CsdlProperty> complexTypeProperties = new ArrayList<>();
-        CsdlProperty name = new CsdlProperty().setName("name").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty state = new CsdlProperty().setName("state").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty name = new ElasticCsdlProperty().setName("name")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty state = new ElasticCsdlProperty().setName("state")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         complexTypeProperties.add(name);
         complexTypeProperties.add(state);
         complexType.setName(DIMENSION_TYPE);
@@ -128,7 +151,7 @@ public class TestProvider extends CsdlAbstractEdmProvider {
     }
 
     @Override
-    public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) throws ODataException {
+    public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) {
         if (entityContainerName == null || entityContainerName.equals(CONTAINER)) {
             CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
             entityContainerInfo.setContainerName(CONTAINER);
@@ -138,19 +161,26 @@ public class TestProvider extends CsdlAbstractEdmProvider {
     }
 
     @Override
-    public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) throws ODataException {
-        CsdlProperty id = new CsdlProperty().setName("_id").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty dimensionProperty = new CsdlProperty().setName(DIMENSION_TYPE).setType(DIMENSION_FQN).setCollection(true);
+    public ElasticCsdlEntityType getEntityType(FullQualifiedName entityTypeName)
+            throws ODataException {
+        CsdlProperty id = new ElasticCsdlProperty().setName("_id")
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty dimensionProperty = new CsdlProperty().setName(DIMENSION_TYPE)
+                .setType(DIMENSION_FQN).setCollection(true);
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
         propertyRef.setName("_id");
 
-        CsdlEntityType entityType = new CsdlEntityType();
+        ElasticCsdlEntityType entityType = new ElasticCsdlEntityType();
+        entityType.setEIndex(AUTHORS_INDEX);
         if (entityTypeName.equals(AUTHOR_FQN)) {
 
-            CsdlProperty age = new CsdlProperty().setName("age").setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
-            CsdlProperty name = new CsdlProperty().setName("name").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty age = new ElasticCsdlProperty().setName("age")
+                    .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
+            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(AUTHOR_TYPE);
+            entityType.setEType(AUTHOR_TYPE);
             entityType.setProperties(Arrays.asList(id, age, name, dimensionProperty));
             entityType.setKey(Collections.singletonList(propertyRef));
 
@@ -159,8 +189,10 @@ public class TestProvider extends CsdlAbstractEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(ADDRESS_FQN)) {
 
-            CsdlProperty address = new CsdlProperty().setName("address").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-            CsdlProperty city = new CsdlProperty().setName("_city").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty address = new ElasticCsdlProperty().setName("address")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty city = new ElasticCsdlProperty().setName("_city")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             CsdlPropertyRef cityPropertyRef = new CsdlPropertyRef();
             cityPropertyRef.setName("_city");
@@ -170,6 +202,7 @@ public class TestProvider extends CsdlAbstractEdmProvider {
             addressCompositeKey.add(cityPropertyRef);
 
             entityType.setName(ADDRESS_TYPE);
+            entityType.setEType(ADDRESS_TYPE);
             entityType.setProperties(Arrays.asList(id, address, city, dimensionProperty));
 
             entityType.setKey(addressCompositeKey);
@@ -179,20 +212,25 @@ public class TestProvider extends CsdlAbstractEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(BOOK_FQN)) {
 
-            CsdlProperty title = new CsdlProperty().setName("title").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty title = new ElasticCsdlProperty().setName("title")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(BOOK_TYPE);
+            entityType.setEType(BOOK_TYPE);
             entityType.setProperties(Arrays.asList(id, title, dimensionProperty));
             entityType.setKey(Collections.singletonList(propertyRef));
 
-            entityType.setNavigationProperties(Arrays.asList(authorBookParent, charactersCollection));
+            entityType
+                    .setNavigationProperties(Arrays.asList(authorBookParent, charactersCollection));
 
             return entityType;
         } else if (entityTypeName.equals(CHARACTER_FQN)) {
 
-            CsdlProperty name = new CsdlProperty().setName("name").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(CHARACTER_TYPE);
+            entityType.setEType(CHARACTER_TYPE);
             entityType.setProperties(Arrays.asList(id, name, dimensionProperty));
             entityType.setKey(Collections.singletonList(propertyRef));
 
@@ -205,41 +243,51 @@ public class TestProvider extends CsdlAbstractEdmProvider {
     }
 
     @Override
-    public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) throws ODataException {
-        CsdlEntitySet entitySet = new CsdlEntitySet();
+    public ElasticCsdlEntitySet getEntitySet(FullQualifiedName entityContainer,
+            String entitySetName) throws ODataException {
+        ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
+        entitySet.setEIndex(AUTHORS_INDEX);
         if (entityContainer.equals(CONTAINER)) {
             if (entitySetName.equals(AUTHOR_TYPE)) {
-                entitySet.setName(AUTHOR_TYPE);
-                entitySet.setType(AUTHOR_FQN);
+                entitySet.setEType(AUTHOR_TYPE).setName(AUTHOR_TYPE).setType(AUTHOR_FQN);
                 entitySet.setNavigationPropertyBindings(Arrays.asList(
-                        new CsdlNavigationPropertyBinding().setPath(ADDRESS_TYPE).setTarget(ADDRESS_TYPE),
-                        new CsdlNavigationPropertyBinding().setPath(BOOK_TYPE).setTarget(BOOK_TYPE)
-                ));
+                        new CsdlNavigationPropertyBinding().setPath(ADDRESS_TYPE)
+                                .setTarget(ADDRESS_TYPE),
+                        new CsdlNavigationPropertyBinding().setPath(BOOK_TYPE)
+                                .setTarget(BOOK_TYPE)));
                 return entitySet;
             } else if (entitySetName.equals(BOOK_TYPE)) {
-                entitySet.setName(BOOK_TYPE);
-                entitySet.setType(BOOK_FQN);
+                entitySet.setEType(BOOK_TYPE).setName(BOOK_TYPE).setType(BOOK_FQN);
                 entitySet.setNavigationPropertyBindings(Arrays.asList(
-                        new CsdlNavigationPropertyBinding().setPath(CHARACTER_TYPE).setTarget(CHARACTER_TYPE),
-                        new CsdlNavigationPropertyBinding().setPath(AUTHOR_TYPE).setTarget(AUTHOR_TYPE)
-                ));
+                        new CsdlNavigationPropertyBinding().setPath(CHARACTER_TYPE)
+                                .setTarget(CHARACTER_TYPE),
+                        new CsdlNavigationPropertyBinding().setPath(AUTHOR_TYPE)
+                                .setTarget(AUTHOR_TYPE)));
                 return entitySet;
             } else if (entitySetName.equals(ADDRESS_TYPE)) {
-                entitySet.setName(ADDRESS_TYPE);
-                entitySet.setType(ADDRESS_FQN);
-                entitySet.setNavigationPropertyBindings(Arrays.asList(
-                        new CsdlNavigationPropertyBinding().setPath(AUTHOR_TYPE).setTarget(AUTHOR_TYPE)
-                ));
+                entitySet.setEType(ADDRESS_TYPE).setName(ADDRESS_TYPE).setType(ADDRESS_FQN);
+                entitySet.setNavigationPropertyBindings(
+                        Arrays.asList(new CsdlNavigationPropertyBinding().setPath(AUTHOR_TYPE)
+                                .setTarget(AUTHOR_TYPE)));
                 return entitySet;
             } else if (entitySetName.equals(CHARACTER_TYPE)) {
-                entitySet.setName(CHARACTER_TYPE);
-                entitySet.setType(CHARACTER_FQN);
-                entitySet.setNavigationPropertyBindings(Arrays.asList(
-                        new CsdlNavigationPropertyBinding().setPath(BOOK_TYPE).setTarget(BOOK_TYPE)
-                ));
+                entitySet.setEType(CHARACTER_TYPE).setName(CHARACTER_TYPE).setType(CHARACTER_FQN);
+                entitySet.setNavigationPropertyBindings(
+                        Arrays.asList(new CsdlNavigationPropertyBinding().setPath(BOOK_TYPE)
+                                .setTarget(BOOK_TYPE)));
                 return entitySet;
             }
         }
+        return null;
+    }
+
+    @Override
+    protected List<String> getSchemaNamespaces() {
+        return null;
+    }
+
+    @Override
+    protected String namespaceToIndex(String namespace) {
         return null;
     }
 }

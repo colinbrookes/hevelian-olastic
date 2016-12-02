@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.util;
+package com.hevelian.olastic.core.utils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +14,10 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-//TODO refactor
+
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+
+//TODO refactor tkoh
 /**
  * Contains utility methods.
  */
@@ -49,10 +52,11 @@ public class Util {
      * we need the startEntitySet "Categories" in order to retrieve the target
      * EntitySet "Products"
      */
-    public static EdmEntitySet getNavigationTargetEntitySet(EdmEntitySet startEdmEntitySet,
-            EdmNavigationProperty edmNavigationProperty) throws ODataApplicationException {
+    public static ElasticEdmEntitySet getNavigationTargetEntitySet(
+            ElasticEdmEntitySet startEdmEntitySet, EdmNavigationProperty edmNavigationProperty)
+            throws ODataApplicationException {
 
-        EdmEntitySet navigationTargetEntitySet = null;
+        ElasticEdmEntitySet navigationTargetEntitySet = null;
 
         String navPropName = edmNavigationProperty.getName();
         EdmBindingTarget edmBindingTarget = startEdmEntitySet.getRelatedBindingTarget(navPropName);
@@ -61,8 +65,8 @@ public class Util {
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
 
-        if (edmBindingTarget instanceof EdmEntitySet) {
-            navigationTargetEntitySet = (EdmEntitySet) edmBindingTarget;
+        if (edmBindingTarget instanceof ElasticEdmEntitySet) {
+            navigationTargetEntitySet = (ElasticEdmEntitySet) edmBindingTarget;
         } else {
             throw new ODataApplicationException("Not supported.",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);

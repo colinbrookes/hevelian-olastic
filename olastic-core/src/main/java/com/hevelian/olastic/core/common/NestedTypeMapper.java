@@ -16,7 +16,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.index.mapper.object.ObjectMapper;
 
 import com.carrotsearch.hppc.cursors.ObjectCursor;
-import com.hevelian.olastic.core.edm.provider.ElasticCsdlProperty;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
@@ -71,8 +71,8 @@ public class NestedTypeMapper {
                         .equals(fieldMap.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY))) {
                     String complexTypeName = getNestedMappingStrategy()
                             .getComplexTypeName(key.value, eFieldName);
-                    Set<CsdlProperty> nestedProperties = getNestedProperties(index, eFieldName,
-                            fieldMap.mapValue(ElasticConstants.PROPERTIES_PROPERTY));
+                    Set<CsdlProperty> nestedProperties = getNestedProperties(index, key.value,
+                            eFieldName, fieldMap.mapValue(ElasticConstants.PROPERTIES_PROPERTY));
                     getAndPut(complexMappings, complexTypeName, nestedProperties);
                 }
             }
@@ -112,15 +112,14 @@ public class NestedTypeMapper {
      *            properties map
      * @return CSDL properties
      */
-    protected Set<CsdlProperty> getNestedProperties(String index, String nestedField,
+    protected Set<CsdlProperty> getNestedProperties(String index, String type, String nestedField,
             ParsedMapWrapper nestedProperties) {
         Set<CsdlProperty> complexTypeProperties = new HashSet<>();
         for (String nestedFieldName : nestedProperties.map.keySet()) {
             String eNestedFieldType = nestedProperties.mapValue(nestedFieldName)
                     .stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
             complexTypeProperties.add(new ElasticCsdlProperty().setEIndex(index)
-                    .setEType(nestedField)
-                    .setName(csdlMapper.eFieldToCsdlProperty(index, nestedField, nestedFieldName))
+                    .setEType(map(index, type, nestedField).getName()).setName(nestedFieldName)
                     .setType(primitiveTypeMapper.map(eNestedFieldType).getFullQualifiedName()));
         }
         return complexTypeProperties;

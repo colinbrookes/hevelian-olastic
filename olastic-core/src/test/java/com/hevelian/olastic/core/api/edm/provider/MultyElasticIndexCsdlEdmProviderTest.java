@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.edm.provider;
+package com.hevelian.olastic.core.api.edm.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,16 +42,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
+import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
 import com.hevelian.olastic.core.common.NestedMappingStrategy;
 import com.hevelian.olastic.core.common.NestedTypeMapper;
-import com.hevelian.olastic.core.edm.utils.MetaDataUtils;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.utils.MetaDataUtils;
 
 /**
  * JUnit tests for {@link MultyElasticIndexCsdlEdmProvider} class.
@@ -455,7 +459,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
     public void getEnityTypes_IndexWithMappings_ListEntityTypesRetrieved() throws ODataException {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
-        doReturn(mock(CsdlEntityType.class)).when(edmProvider)
+        doReturn(mock(ElasticCsdlEntityType.class)).when(edmProvider)
                 .getEntityType(any(FullQualifiedName.class));
         Builder<String, MappingMetaData> mappingsBuilder = ImmutableOpenMap.builder();
         mappingsBuilder.put(AUTHOR_TYPE, null);
@@ -470,7 +474,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
             throws ODataException {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
-        doReturn(mock(CsdlEntitySet.class)).when(edmProvider)
+        doReturn(mock(ElasticCsdlEntitySet.class)).when(edmProvider)
                 .getEntitySet(any(FullQualifiedName.class), anyString());
         Builder<String, MappingMetaData> mappingsBuilder = ImmutableOpenMap.builder();
         mappingsBuilder.put(AUTHOR_TYPE, null);
@@ -485,8 +489,8 @@ public class MultyElasticIndexCsdlEdmProviderTest {
     @Test
     public void getEntityContainerForSchema_NamespaceAndEmptyMetadata_EntityContainerWithEmptyEntitySetsRetrieved()
             throws ODataException {
-        MultyElasticIndexCsdlEdmProvider edmProvider =
-                new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices);
+        MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
+                metaDataProvider, indices);
         Builder<String, MappingMetaData> mappingsBuilder = ImmutableOpenMap.builder();
         when(metaDataProvider.getAllMappings(AUTHORS_INDEX)).thenReturn(mappingsBuilder.build());
         CsdlEntityContainer entityContainer = edmProvider

@@ -1,45 +1,30 @@
-package com.hevelian.olastic.core.edm.provider;
+package com.hevelian.olastic.core.api.edm.provider;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.carrotsearch.hppc.cursors.ObjectCursor;
+import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
+import com.hevelian.olastic.core.common.*;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.edm.provider.*;
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.index.mapper.object.ObjectMapper;
 
-import com.carrotsearch.hppc.cursors.ObjectCursor;
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-import com.hevelian.olastic.core.common.NestedMappingStrategy;
-import com.hevelian.olastic.core.common.NestedPerIndexMappingStrategy;
-import com.hevelian.olastic.core.common.NestedTypeMapper;
-import com.hevelian.olastic.core.common.ParsedMapWrapper;
-import com.hevelian.olastic.core.common.PrimitiveTypeMapper;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link CsdlEdmProvider} implementation that generates the service/metadata
  * documents based on the Elasticsearch mappings.
- * 
+ *
  * @author yuflyud
  * @contributor rdidyk
  */
@@ -58,7 +43,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     /**
      * Initializes mapping metadata provider with default
      * {@link IElasticToCsdlMapper} implementation.
-     * 
+     *
      * @param metaDataProvider
      *            mapping meta data provider
      */
@@ -69,7 +54,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     /**
      * Initializes mapping metadata provider with custom
      * {@link IElasticToCsdlMapper} implementation.
-     * 
+     *
      * @param metaDataProvider
      *            mapping meta data provider
      * @param csdlMapper
@@ -83,7 +68,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     /**
      * Initializes mapping metadata provider with custom
      * {@link NestedMappingStrategy} implementation.
-     * 
+     *
      * @param metaDataProvider
      *            mapping meta data provider
      * @param nestedMappingStrategy
@@ -98,7 +83,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * Initializes mapping metadata provider with custom
      * {@link IElasticToCsdlMapper} and {@link NestedMappingStrategy}
      * implementation.
-     * 
+     *
      * @param metaDataProvider
      *            mapping meta data provider
      * @param csdlMapper
@@ -118,12 +103,13 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     /**
      * Get entity type definition by fully qualified name. This method calls the
-     * {@link #getMappingForType(FullQualifiedName)} method to retrieve the
-     * corresponding Elastic type mappings. <br>
+     * mappingMetaDataProvider method to retrieve the corresponding Elastic type
+     * mappings. <br>
      * The _id field is added and used as the OData key property.
      */
     @Override
-    public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) throws ODataException {
+    public ElasticCsdlEntityType getEntityType(FullQualifiedName entityTypeName)
+            throws ODataException {
         String eIndex = namespaceToIndex(entityTypeName.getNamespace());
         // If there is no index mapping for provided namespace - return null, no
         // entity type is found.
@@ -134,7 +120,6 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         String eType = entityTypeName.getName();
         ElasticCsdlEntityType entityType = new ElasticCsdlEntityType();
         entityType.setEIndex(eIndex);
-        entityType.setEType(eType);
         entityType.setName(eType);
         // Retrieve type fields from Elasticsearch
         entityType.setProperties(getProperties(entityTypeName,
@@ -157,7 +142,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     /**
      * Retrieve properties for the entity type.
-     * 
+     *
      * @param entityTypeName
      *            name of the entity type.
      * @return list of properties
@@ -181,7 +166,8 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
                     type = primitiveTypeMapper.map(eFieldType).getFullQualifiedName();
                 }
                 properties.add(new ElasticCsdlProperty().setEIndex(eIndex).setEType(eType)
-                        .setEField(eFieldName).setName(name).setType(type));
+                        .setEField(eFieldName).setName(name).setType(type)
+                        .setCollection(csdlMapper.eFieldToCollection(eIndex, eType, eFieldName)));
             }
             return properties;
         } catch (IOException e) {
@@ -191,7 +177,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     /**
      * Retrieve navigation properties for the entity type.
-     * 
+     *
      * @param entityTypeName
      *            name of the entity type.
      * @return list of navigation properties.
@@ -238,13 +224,13 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     }
 
     @Override
-    public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName)
-            throws ODataException {
+    public ElasticCsdlEntitySet getEntitySet(FullQualifiedName entityContainer,
+            String entitySetName) throws ODataException {
         FullQualifiedName entityTypeName = entitySetToEntityType(entityContainer, entitySetName);
         if (entityTypeName == null) {
             return null;
         }
-        String eIndex = namespaceToIndex(entityContainer.getNamespace());
+        String eIndex = namespaceToIndex(entityTypeName.getNamespace());
         ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
         entitySet.setEIndex(eIndex);
         entitySet.setEType(entitySetName);
@@ -268,7 +254,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     /**
      * Get a type of the EntitySet.
-     * 
+     *
      * @param entityContainer
      *            name of the Entity Container.
      * @param entitySetName
@@ -328,7 +314,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     /**
      * Get a list of Entity Types for specific Elasticsearch index.
-     * 
+     *
      * @param index
      *            index name
      * @return list of Entity Types
@@ -347,7 +333,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     /**
      * Get a specific entity container for a schema.
-     * 
+     *
      * @param namespace
      *            csdl schema namespace.
      * @return Entity Container.
@@ -384,16 +370,26 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         return entityContainer;
     }
 
+    @Override
+    public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+        for (CsdlSchema schema : getSchemas()) {
+            if (schema.getNamespace().equals(complexTypeName.getNamespace())) {
+                return schema.getComplexType(complexTypeName.getName());
+            }
+        }
+        return null;
+    }
+
     /**
      * Return's list of Schema name spaces.
-     * 
+     *
      * @return list of name spaces
      */
     protected abstract List<String> getSchemaNamespaces();
 
     /**
      * Map CSDL namespace to Elasticsearch index.
-     * 
+     *
      * @param namespace
      *            CSDL namespace.
      * @return index that corresponds to the namespace or null if there is no

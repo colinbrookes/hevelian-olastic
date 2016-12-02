@@ -26,6 +26,20 @@ public interface IElasticToCsdlMapper {
     String eFieldToCsdlProperty(String index, String type, String field);
 
     /**
+     * Map Elasticsearch field to CSDL property isCollection value. By default
+     * returns false.
+     * 
+     * @param index
+     *            name of the index
+     * @param type
+     *            name of the type within the index
+     * @param field
+     *            name of the field
+     * @return name of the corresponding field
+     */
+    boolean eFieldToCollection(String index, String type, String field);
+
+    /**
      * Map Elasticsearch type name to CSDL entity type. By default returns the
      * name of the corresponding entity type.
      * 

@@ -1,28 +1,45 @@
 package com.hevelian.olastic.core.processors.data;
 
-import com.hevelian.olastic.core.elastic.ESClient;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import com.hevelian.olastic.core.elastic.pagination.Sort;
-import com.hevelian.olastic.core.processors.ElasticSearchExpressionVisitor;
-import com.hevelian.olastic.core.util.Util;
-import lombok.extern.log4j.Log4j2;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.olingo.commons.api.data.*;
-import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.api.data.ComplexValue;
+import org.apache.olingo.commons.api.data.ContextURL;
+import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
-import org.apache.olingo.server.api.uri.*;
-import org.apache.olingo.server.api.uri.queryoption.*;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriInfoResource;
+import org.apache.olingo.server.api.uri.UriParameter;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.apache.olingo.server.api.uri.UriResourceKind;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.UriResourcePartTyped;
+import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
+import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectItem;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.api.uri.queryoption.SkipOption;
+import org.apache.olingo.server.api.uri.queryoption.TopOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
@@ -34,54 +51,53 @@ import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 
-import java.util.*;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.ESClient;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
+import com.hevelian.olastic.core.utils.Util;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
- * This class provides high-level methods for retrieving and converting the data.
- * It contains all the metadata and request parameters needed for requesting and serializing the data.
+ * This class provides high-level methods for retrieving and converting the
+ * data. It contains all the metadata and request parameters needed for
+ * requesting and serializing the data.
  */
 @Log4j2
 public class DataRetriever {
     public final static String SELECT_ITEMS_SEPARATOR = ",";
-    protected UriInfo uriInfo;
-    protected OData odata;
-    protected Client client;
-    protected String rawBaseUri;
-    protected ServiceMetadata serviceMetadata;
-    protected ContentType responseFormat;
 
-    /**
-     * Encapsulates Query builder needed for getting the data from ES and last URI entity set, needed for serializing the response.
-     */
-    protected class QueryWithEntitySet {
-        private EdmEntitySet entitySet;
-        private ESQueryBuilder query;
-
-        public QueryWithEntitySet(EdmEntitySet entitySet, ESQueryBuilder query) {
-            this.entitySet = entitySet;
-            this.query = query;
-        }
-
-        public EdmEntitySet getEntitySet() {
-            return entitySet;
-        }
-
-        public ESQueryBuilder getQuery() {
-            return query;
-        }
-    }
+    private UriInfo uriInfo;
+    private OData odata;
+    private Client client;
+    private String rawBaseUri;
+    private ElasticServiceMetadata serviceMetadata;
+    private ContentType responseFormat;
 
     /**
      * Fully initializes {@link DataRetriever}.
-     * @param uriInfo uriInfo object
-     * @param odata odata instance
-     * @param client ES raw client
-     * @param rawBaseUri war base uri
-     * @param serviceMetadata service metadata
-     * @param responseFormat response format
+     *
+     * @param uriInfo
+     *            uriInfo object
+     * @param odata
+     *            odata instance
+     * @param client
+     *            ES raw client
+     * @param rawBaseUri
+     *            war base uri
+     * @param serviceMetadata
+     *            service metadata
+     * @param responseFormat
+     *            response format
      */
     public DataRetriever(UriInfo uriInfo, OData odata, Client client, String rawBaseUri,
-                         ServiceMetadata serviceMetadata, ContentType responseFormat) {
+            ElasticServiceMetadata serviceMetadata, ContentType responseFormat) {
         this.uriInfo = uriInfo;
         this.odata = odata;
         this.client = client;
@@ -95,71 +111,91 @@ public class DataRetriever {
      *
      * @return serialized data
      * @throws ODataApplicationException
-     * @throws SerializerException
+     *             if any error occurred during getting serialized data
      */
-    public SerializerResult getSerializedData() throws ODataApplicationException, SerializerException {
+    public SerializerResult getSerializedData() throws ODataApplicationException {
         FilterOption filterOption = uriInfo.getFilterOption();
-        QueryBuilder queryBuilder = null;
+        QueryBuilder filter = null;
         if (filterOption != null) {
             Expression expression = filterOption.getExpression();
             try {
-                queryBuilder = (QueryBuilder) expression.accept(new ElasticSearchExpressionVisitor());
+                filter = (QueryBuilder) expression.accept(new ElasticSearchExpressionVisitor());
             } catch (ExpressionVisitException e) {
                 log.debug(e);
             }
         }
-        QueryWithEntitySet queryWithEntitySet = getQueryWithEntitySet();
-        EdmEntitySet responseEdmEntitySet = queryWithEntitySet.getEntitySet();
-        responseEdmEntitySet.getEntityType().getNamespace();
-        ESQueryBuilder esQueryBuilder = queryWithEntitySet.getQuery();
-        SearchResponse response = getData(esQueryBuilder, queryBuilder);
+        QueryWithEntity queryWithEntity = getQueryWithEntity();
+        ElasticEdmEntitySet entitySet = queryWithEntity.getEntitySet();
+        ESQueryBuilder queryBuilder = queryWithEntity.getQuery();
+        SearchResponse searchResponse = retrieveData(queryBuilder, filter);
 
-        return serialize(response, responseEdmEntitySet);
-
+        return serialize(searchResponse, entitySet);
     }
 
     /**
      * Serializes response from ES.
      *
-     * @param response             ES response
-     * @param responseEdmEntitySet entitySet
+     * @param response
+     *            ES response
+     * @param entitySet
+     *            entitySet
      * @return serialized data
      * @throws SerializerException
      * @throws ODataApplicationException
      */
-    protected SerializerResult serialize(SearchResponse response, EdmEntitySet responseEdmEntitySet) throws SerializerException, ODataApplicationException {
+    protected SerializerResult serialize(SearchResponse response, ElasticEdmEntitySet entitySet)
+            throws ODataApplicationException {
+        ElasticEdmEntityType entityType = entitySet.getEntityType();
         EntityCollection entities = new EntityCollection();
-        List<Entity> productList = entities.getEntities();
         for (SearchHit hit : response.getHits()) {
-            Entity e = new Entity();
-            e.setId(Util.createId(responseEdmEntitySet.getName(), hit.getId()));
-            addProperty(e, ElasticConstants.ID_FIELD_NAME, hit.getId(), responseEdmEntitySet);
+            Entity entity = new Entity();
+            entity.setId(Util.createId(entityType.getName(), hit.getId()));
+            addProperty(entity, ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
 
-            for (Map.Entry<String, Object> s : hit.getSource().entrySet()) {
-                addProperty(e, s.getKey(), s.getValue(), responseEdmEntitySet);
+            for (Map.Entry<String, Object> entry : hit.getSource().entrySet()) {
+                addProperty(entity, entityType.findPropertyByEField(entry.getKey()).getName(),
+                        entry.getValue(), entityType);
             }
-            productList.add(e);
+            entities.getEntities().add(entity);
         }
 
         if (isCount()) {
             entities.setCount((int) response.getHits().getTotalHits());
         }
-        ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).selectList(StringUtils.join(getSelectList(), SELECT_ITEMS_SEPARATOR)).build();
-        final String id = rawBaseUri + "/" + responseEdmEntitySet.getName();
+        final String id = rawBaseUri + "/" + entityType.getName();
         SelectOption selectOption = uriInfo.getSelectOption();
-        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().contextURL(contextUrl).id(id)
-                .count(uriInfo.getCountOption()).select(selectOption).build();
-        EdmEntityType edmEntityType = responseEdmEntitySet.getEntityType();
-
-        ODataSerializer serializer = odata.createSerializer(responseFormat);
-        return serializer.entityCollection(serviceMetadata, edmEntityType,
-                entities, opts);
+        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
+                .contextURL(getContextUrl(entitySet)).id(id).count(uriInfo.getCountOption())
+                .select(selectOption).build();
+        try {
+            ODataSerializer serializer = odata.createSerializer(responseFormat);
+            return serializer.entityCollection(serviceMetadata, entityType, entities, opts);
+        } catch (SerializerException e) {
+            throw new ODataApplicationException("Failed to serialize data.",
+                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), Locale.ROOT, e);
+        }
     }
 
     /**
-     * Returns the list of fields for which the data should be retrieved.
+     * Creates context URL for entity set for response serializer.
+     * 
+     * @param edmEntitySet
+     *            entity set
+     * @return created context URL
+     */
+    protected ContextURL getContextUrl(ElasticEdmEntitySet edmEntitySet) {
+        List<String> fields = getSelectList();
+        ContextURL.Builder contextUrlBuilder = ContextURL.with().entitySet(edmEntitySet);
+        if (!fields.isEmpty()) {
+            contextUrlBuilder.selectList(StringUtils.join(fields, SELECT_ITEMS_SEPARATOR));
+        }
+        return contextUrlBuilder.build();
+    }
+
+    /**
+     * Returns the list of fields from URL.
      *
-     * @return fields
+     * @return fields fields from URL
      */
     protected List<String> getSelectList() {
         List<String> result = new ArrayList<>();
@@ -176,23 +212,19 @@ public class DataRetriever {
     }
 
     /**
-     * Builds the query builder for requesting the data and entity set for serializing.
+     * Builds the query builder for requesting the data and entity set for
+     * serializing.
      *
      * @return Query builder and entity set
      * @throws ODataApplicationException
      */
-    protected QueryWithEntitySet getQueryWithEntitySet() throws ODataApplicationException {
+    protected QueryWithEntity getQueryWithEntity() throws ODataApplicationException {
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-        UriResourceEntitySet firstUriResourceEntitySet;
-        try {
-            firstUriResourceEntitySet = (UriResourceEntitySet) resourceParts.get(0);
-        } catch (ClassCastException e) {
-            throw new ODataApplicationException("Only EntitySet is supported",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-        }
+        UriResourceEntitySet firstUriResourceEntitySet = getFirstResourceEntitySet();
 
-        EdmEntitySet responseEdmEntitySet = firstUriResourceEntitySet.getEntitySet();
-        ESQueryBuilder parentChildQueryBuilder = new ESQueryBuilder();
+        ElasticEdmEntitySet responseEntitySet = (ElasticEdmEntitySet) firstUriResourceEntitySet
+                .getEntitySet();
+        ESQueryBuilder queryBuilder = new ESQueryBuilder();
         for (int i = 0; i < getUsefulPartsSize(); i++) {
             UriResource segment = resourceParts.get(i);
             if (segment.getKind() == UriResourceKind.primitiveProperty) {
@@ -200,26 +232,35 @@ public class DataRetriever {
             }
             if (segment.getKind() == UriResourceKind.navigationProperty) {
                 UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) segment;
-                EdmNavigationProperty edmNavigationProperty = uriResourceNavigation.getProperty();
-                responseEdmEntitySet = Util.getNavigationTargetEntitySet(responseEdmEntitySet,
-                        edmNavigationProperty);
+                EdmNavigationProperty navigationProperty = uriResourceNavigation.getProperty();
+                responseEntitySet = Util.getNavigationTargetEntitySet(responseEntitySet,
+                        navigationProperty);
+                buildQuery(queryBuilder, i);
             } else if (segment.getKind() != UriResourceKind.entitySet) {
                 throw new ODataApplicationException("Not supported",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
             }
-            buildQuery(parentChildQueryBuilder, i);
         }
-        parentChildQueryBuilder.setEsType(responseEdmEntitySet.getName());
-        return new QueryWithEntitySet(responseEdmEntitySet, parentChildQueryBuilder);
+        ElasticEdmEntityType entityType = responseEntitySet.getEntityType();
+        queryBuilder.setType(entityType.getEType()).setIndex(entityType.getEIndex());
+        for (String fieldName : getSelectList()) {
+            queryBuilder.addField(entityType.getEProperties().get(fieldName).getEField());
+        }
+        return new QueryWithEntity(responseEntitySet, queryBuilder);
     }
 
     /**
      * Builds query to elasticsearch using given part of the url.
-     * @param query query builder that should be updated with a query for given part of the url
-     * @param urlPartIndex index of the part of url for which query should be added
+     *
+     * @param query
+     *            query builder that should be updated with a query for given
+     *            part of the url
+     * @param urlPartIndex
+     *            index of the part of url for which query should be added
      * @throws ODataApplicationException
      */
-    private void buildQuery(ESQueryBuilder query, int urlPartIndex) throws ODataApplicationException {
+    private void buildQuery(ESQueryBuilder query, int urlPartIndex)
+            throws ODataApplicationException {
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
         UriResource segment = resourceParts.get(urlPartIndex);
         boolean isLast = urlPartIndex == getUsefulPartsSize() - 1;
@@ -238,19 +279,20 @@ public class DataRetriever {
     }
 
     /**
-     * Returns the size of the url parts that are involved in the query building.
+     * Returns the size of the url parts that are involved in the query
+     * building.
      *
      * @return useful url parts size
      */
     protected int getUsefulPartsSize() {
-        List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-        return resourceParts.size();
+        return uriInfo.getUriResourceParts().size();
     }
 
     /**
      * Retrieves ids from uri resource part.
      *
-     * @param segment uri resource part
+     * @param segment
+     *            uri resource part
      * @return ids list
      */
     protected List<String> collectIds(UriResource segment) throws ODataApplicationException {
@@ -274,17 +316,19 @@ public class DataRetriever {
     /**
      * Gets the data from ES.
      *
-     * @param query  query builder
-     * @param filter raw ES query with filter
+     * @param query
+     *            query builder
+     * @param filter
+     *            raw ES query with filter
      * @return ES response
+     * @throws ODataApplicationException
      */
-    protected SearchResponse getData(ESQueryBuilder query, QueryBuilder filter) {
-        SearchResponse response = ESClient.executeRequest("authors", query.getEsType(), client, //TODO get index from metadata
+    protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter)
+            throws ODataApplicationException {
+        return ESClient.executeRequest(query.getIndex(), query.getType(), client,
                 new BoolQueryBuilder().filter(query.getQuery())
                         .filter(filter == null ? new MatchAllQueryBuilder() : filter),
-                getPagination(), getSelectList());
-
-        return response;
+                getPagination(), query.getFields());
     }
 
     /**
@@ -303,6 +347,16 @@ public class DataRetriever {
         return isCount;
     }
 
+    protected UriResourceEntitySet getFirstResourceEntitySet() throws ODataApplicationException {
+        List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+        UriResource uriResource = resourceParts.get(0);
+        if (!(uriResource instanceof UriResourceEntitySet)) {
+            throw new ODataApplicationException("Only EntitySet is supported",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+        }
+        return (UriResourceEntitySet) uriResource;
+    }
+
     /**
      * Returns pagination data.
      *
@@ -314,11 +368,13 @@ public class DataRetriever {
         if (skipOption != null) {
             skipNumber = skipOption.getValue();
         }
+
         int topNumber = Pagination.TOP_DEFAULT;
         TopOption topOption = uriInfo.getTopOption();
         if (topOption != null) {
             topNumber = topOption.getValue();
         }
+
         OrderByOption orderByOption = uriInfo.getOrderByOption();
         List<Sort> orderBy = new ArrayList<>();
         if (orderByOption != null) {
@@ -331,7 +387,8 @@ public class DataRetriever {
                     if (oUriResource instanceof UriResourcePrimitiveProperty) {
                         EdmProperty edmProperty = ((UriResourcePrimitiveProperty) oUriResource)
                                 .getProperty();
-                        orderBy.add(new Sort(edmProperty.getName(), orderByItem.isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC));
+                        orderBy.add(new Sort(edmProperty.getName(), orderByItem.isDescending()
+                                ? Sort.Direction.DESC : Sort.Direction.ASC));
                     }
                 }
             }
@@ -339,9 +396,10 @@ public class DataRetriever {
         return new Pagination(topNumber, skipNumber, orderBy);
     }
 
-    private void addProperty(Entity e, String name, Object value, EdmEntitySet entitySet) {
+    @SuppressWarnings("unchecked")
+    private void addProperty(Entity e, String name, Object value, ElasticEdmEntityType entityType) {
         if (value instanceof List) {
-            e.addProperty(createPropertyList(name, (List<Object>)value, entitySet));
+            e.addProperty(createPropertyList(name, (List<Object>) value, entityType));
         } else if (value instanceof Map) {
             e.addProperty(createComplexProperty(name, (Map<String, Object>) value));
         } else {
@@ -358,9 +416,11 @@ public class DataRetriever {
         return new Property(null, name, ValueType.COMPLEX, complexValue);
     }
 
-    private Property createPropertyList(String name, List<Object> valueObject, EdmEntitySet entitySet) {
+    @SuppressWarnings("unchecked")
+    private Property createPropertyList(String name, List<Object> valueObject,
+            ElasticEdmEntityType entityType) {
         ValueType valueType;
-        EdmTypeKind propertyKind = entitySet.getEntityType().getProperty(name).getType().getKind();
+        EdmTypeKind propertyKind = entityType.getProperty(name).getType().getKind();
         if (propertyKind == EdmTypeKind.COMPLEX) {
             valueType = ValueType.COLLECTION_COMPLEX;
         } else {
@@ -371,7 +431,7 @@ public class DataRetriever {
             if (value instanceof Map) {
                 properties.add(createComplexValue((Map<String, Object>) value));
             } else {
-                properties.add(createPrimitiveProperty(name, value));
+                properties.add(value);
             }
         }
         return new Property(null, name, valueType, properties);
@@ -380,9 +440,56 @@ public class DataRetriever {
     private ComplexValue createComplexValue(Map<String, Object> complexObject) {
         ComplexValue complexValue = new ComplexValue();
         for (Map.Entry<String, Object> entry : complexObject.entrySet()) {
-            complexValue.getValue().add(new Property(null, entry.getKey(), ValueType.PRIMITIVE, entry.getValue()));
+            complexValue.getValue()
+                    .add(new Property(null, entry.getKey(), ValueType.PRIMITIVE, entry.getValue()));
         }
         return complexValue;
+    }
+
+    public UriInfo getUriInfo() {
+        return uriInfo;
+    }
+
+    public OData getOdata() {
+        return odata;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public String getRawBaseUri() {
+        return rawBaseUri;
+    }
+
+    public ElasticServiceMetadata getServiceMetadata() {
+        return serviceMetadata;
+    }
+
+    public ContentType getResponseFormat() {
+        return responseFormat;
+    }
+
+    /**
+     * Encapsulates Query builder needed for getting the data from ES and last
+     * URI entity set, needed for serializing the response.
+     */
+    protected class QueryWithEntity {
+        private ElasticEdmEntitySet entitySet;
+        private ESQueryBuilder query;
+
+        public QueryWithEntity(ElasticEdmEntitySet entitySet, ESQueryBuilder query) {
+            this.entitySet = entitySet;
+            this.query = query;
+        }
+
+        public ElasticEdmEntitySet getEntitySet() {
+            return entitySet;
+        }
+
+        public ESQueryBuilder getQuery() {
+            return query;
+        }
     }
 
 }

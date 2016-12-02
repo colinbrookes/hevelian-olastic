@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.*;
 public class ESEntityProcessorTest extends BaseProcessorTest{
 
     private String defaultRawBaseUri = "http://localhost:8080/OData.svc";
-    private ESEntityProcessor defaultProcessor;
+    private ESEntityProcessorImpl defaultProcessor;
     private ContentType defaultContentType = ContentType.JSON;
     private ODataRequest defaultRequest;
     private ODataResponse defaultResponse;
@@ -36,7 +38,7 @@ public class ESEntityProcessorTest extends BaseProcessorTest{
     @Before
     public void setUp() throws UriParserException, UriValidationException {
         defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, defaultRawQueryPath);
-        defaultProcessor = new ESEntityProcessor(defaultClient);
+        defaultProcessor = new ESEntityProcessorImpl(defaultClient);
         defaultRequest = mock(ODataRequest.class);
         defaultResponse = mock(ODataResponse.class);
         when(defaultRequest.getRawBaseUri()).thenReturn(defaultRawBaseUri);
@@ -51,7 +53,7 @@ public class ESEntityProcessorTest extends BaseProcessorTest{
         hits.add(data);
 
         Client client = mockClient(hits);
-        defaultProcessor = new ESEntityProcessor(client);
+        defaultProcessor = new ESEntityProcessorImpl(client);
         defaultProcessor.init(defaultOData, defaultMetadata);
 
         ArgumentCaptor<InputStream> inputStreamCaptor = ArgumentCaptor.forClass(InputStream.class);

@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.edm.provider;
+package com.hevelian.olastic.core.api.edm.provider;
 
 /**
  * Interface to provide behavior for CSDL Entity model items with Elasticsearch

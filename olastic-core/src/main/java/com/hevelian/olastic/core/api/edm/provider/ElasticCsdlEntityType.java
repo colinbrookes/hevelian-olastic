@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.edm.provider;
+package com.hevelian.olastic.core.api.edm.provider;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 
@@ -33,6 +33,14 @@ public class ElasticCsdlEntityType extends CsdlEntityType
     public ElasticCsdlEntityType setEType(String eType) {
         this.eType = eType;
         return this;
+    }
+
+    @Override
+    public CsdlEntityType setName(String name) {
+        if (eType == null) {
+            setEType(name);
+        }
+        return super.setName(name);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.edm.provider;
+package com.hevelian.olastic.core.api.edm.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -13,11 +13,12 @@ import org.apache.olingo.commons.api.ex.ODataException;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.hevelian.olastic.core.api.edm.provider.SingleElasticIndexCsdlEdmProvider;
 import com.hevelian.olastic.core.common.NestedMappingStrategy;
-import com.hevelian.olastic.core.edm.utils.MetaDataUtils;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.utils.MetaDataUtils;
 
 /**
  * JUnit tests for {@link SingleElasticIndexCsdlEdmProvider} class.

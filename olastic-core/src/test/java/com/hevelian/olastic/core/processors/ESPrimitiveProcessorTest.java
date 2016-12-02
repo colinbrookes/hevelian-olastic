@@ -15,6 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.hevelian.olastic.core.processors.impl.ESPrimitiveProcessorImpl;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ import static org.mockito.Mockito.*;
  */
 public class ESPrimitiveProcessorTest extends BaseProcessorTest{
     private String defaultRawBaseUri = "http://localhost:8080/OData.svc";
-    private ESPrimitiveProcessor defaultProcessor;
+    private ESPrimitiveProcessorImpl defaultProcessor;
     private ContentType defaultContentType = ContentType.JSON;
     private ODataRequest defaultRequest;
     private ODataResponse defaultResponse;
@@ -39,7 +41,7 @@ public class ESPrimitiveProcessorTest extends BaseProcessorTest{
         defaultRawODataPath = "/book('13')/character('113')/book/author/name";
         defaultRawQueryPath = "$top=2&$skip=10";
         defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, defaultRawQueryPath);
-        defaultProcessor = new ESPrimitiveProcessor(defaultClient);
+        defaultProcessor = new ESPrimitiveProcessorImpl(defaultClient);
         defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, defaultRawQueryPath);
 
         defaultRequest = mock(ODataRequest.class);
@@ -56,7 +58,7 @@ public class ESPrimitiveProcessorTest extends BaseProcessorTest{
         hits.add(data);
 
         Client client = mockClient(hits);
-        defaultProcessor = new ESPrimitiveProcessor(client);
+        defaultProcessor = new ESPrimitiveProcessorImpl(client);
         defaultProcessor.init(defaultOData, defaultMetadata);
 
         ArgumentCaptor<InputStream> inputStreamCaptor = ArgumentCaptor.forClass(InputStream.class);
@@ -69,7 +71,7 @@ public class ESPrimitiveProcessorTest extends BaseProcessorTest{
     public void testReadPrimitiveNoEntity() throws ODataApplicationException, SerializerException, IOException {
         List<Map<String, Object>> hits = new ArrayList<>();
         Client client = mockClient(hits);
-        defaultProcessor = new ESPrimitiveProcessor(client);
+        defaultProcessor = new ESPrimitiveProcessorImpl(client);
         defaultProcessor.init(defaultOData, defaultMetadata);
 
         defaultProcessor.readPrimitive(defaultRequest, defaultResponse, defaultUriInfo, defaultContentType);
@@ -81,7 +83,7 @@ public class ESPrimitiveProcessorTest extends BaseProcessorTest{
         Map<String, Object> data = new HashMap<>();
         hits.add(data);
         Client client = mockClient(hits);
-        defaultProcessor = new ESPrimitiveProcessor(client);
+        defaultProcessor = new ESPrimitiveProcessorImpl(client);
         defaultProcessor.init(defaultOData, defaultMetadata);
 
         defaultProcessor.readPrimitive(defaultRequest, defaultResponse, defaultUriInfo, defaultContentType);

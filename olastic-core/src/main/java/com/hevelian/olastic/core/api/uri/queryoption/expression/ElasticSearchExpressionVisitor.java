@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.processors;
+package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,34 +24,35 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 
 public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Object> {
 
-    BoolQueryBuilder qb = new BoolQueryBuilder();
+    private BoolQueryBuilder queryBuilder;
+
+    public ElasticSearchExpressionVisitor() {
+        this.queryBuilder = new BoolQueryBuilder();
+    }
 
     @Override
     public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
             throws ExpressionVisitException, ODataApplicationException {
         MatchQueryBuilder mqb = new MatchQueryBuilder((String) left, right);
-        qb.filter(mqb);
-        return qb;
+        queryBuilder.filter(mqb);
+        return queryBuilder;
     }
 
     @Override
     public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand)
             throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object visitMethodCall(MethodKind methodCall, List<Object> parameters)
             throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object visitLambdaExpression(String lambdaFunction, String lambdaVariable,
             Expression expression) throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -83,13 +84,13 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Object>
     @Override
     public Object visitMember(Member member)
             throws ExpressionVisitException, ODataApplicationException {
-    	UriInfoResource resource = member.getResourcePath();
+        UriInfoResource resource = member.getResourcePath();
         if (resource.getUriResourceParts().size() == 1) {
             UriResourcePrimitiveProperty property = (UriResourcePrimitiveProperty) resource
                     .getUriResourceParts().get(0);
             return property.getProperty().getName();
         } else {
-            List<String> propertyNames = new ArrayList<String>();
+            List<String> propertyNames = new ArrayList<>();
             for (UriResource property : resource.getUriResourceParts()) {
                 UriResourceProperty primitiveProperty = (UriResourceProperty) property;
                 propertyNames.add(primitiveProperty.getProperty().getName());
@@ -101,28 +102,24 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Object>
     @Override
     public Object visitAlias(String aliasName)
             throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object visitTypeLiteral(EdmType type)
             throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object visitLambdaReference(String variableName)
             throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object visitEnum(EdmEnumType type, List<String> enumValues)
             throws ExpressionVisitException, ODataApplicationException {
-        // TODO Auto-generated method stub
         return null;
     }
 }

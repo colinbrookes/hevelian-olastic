@@ -21,11 +21,12 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
-import com.hevelian.olastic.core.edm.provider.MultyElasticIndexCsdlEdmProvider;
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-import com.hevelian.olastic.core.processors.ESEntityCollectionProcessor;
-import com.hevelian.olastic.core.processors.ESEntityProcessor;
-import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
+import com.hevelian.olastic.core.processors.impl.ESEntityCollectionProcessorImpl;
+import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
+import com.hevelian.olastic.core.processors.impl.ESPrimitiveProcessorImpl;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -46,7 +47,7 @@ public class ODataServlet extends HttpServlet {
 
     // TODO do no do the initialization in a static block.
     static {
-        Settings settings = Settings.settingsBuilder().build();
+        Settings settings = Settings.settingsBuilder().put("cluster.name", "opmc-local").build();
         try {
             CLIENT = TransportClient.builder().settings(settings).build().addTransportAddress(
                     new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
@@ -60,14 +61,14 @@ public class ODataServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        OData odata = OData.newInstance();
+        OData odata = ElasticOData.newInstance();
         ServiceMetadata edm = odata.createServiceMetadata(
                 new MultyElasticIndexCsdlEdmProvider(new MappingMetaDataProvider(CLIENT), INDICES),
                 new ArrayList<EdmxReference>());
         ODataHttpHandler handler = odata.createHandler(edm);
-        handler.register(new ESEntityProcessor(CLIENT));
-        handler.register(new ESEntityCollectionProcessor(CLIENT));
-        handler.register(new ESPrimitiveProcessor(CLIENT));
+        handler.register(new ESEntityProcessorImpl(CLIENT));
+        handler.register(new ESEntityCollectionProcessorImpl(CLIENT));
+        handler.register(new ESPrimitiveProcessorImpl(CLIENT));
         handler.process(req, resp);
     }
 }

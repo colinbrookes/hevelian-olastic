@@ -1,4 +1,4 @@
-package com.hevelian.olastic.core.edm.provider;
+package com.hevelian.olastic.core.api.edm.provider;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 

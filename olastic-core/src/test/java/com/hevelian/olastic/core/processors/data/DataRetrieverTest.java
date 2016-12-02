@@ -1,9 +1,19 @@
 package com.hevelian.olastic.core.processors.data;
 
-import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import com.hevelian.olastic.core.elastic.pagination.Sort;
-import com.hevelian.olastic.core.processors.BaseProcessorTest;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -20,16 +30,11 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
+import com.hevelian.olastic.core.processors.BaseProcessorTest;
 
 /**
  * Tests for #DataRetriever.
@@ -41,8 +46,10 @@ public class DataRetrieverTest extends BaseProcessorTest {
 
     @Before
     public void setUp() throws Exception {
-        defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, defaultRawQueryPath);
-        defaultRetriever = new DataRetriever(defaultUriInfo, defaultOData, defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
+                defaultRawQueryPath);
+        defaultRetriever = new DataRetriever(defaultUriInfo, defaultOData, defaultClient,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
     }
 
     @Test
@@ -50,12 +57,14 @@ public class DataRetrieverTest extends BaseProcessorTest {
         assertTrue(defaultRetriever.isCount());
 
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, null);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
         assertFalse(retriever.isCount());
 
         String rawQueryPath = "$count=false";
         uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, rawQueryPath);
-        retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri,
+                defaultMetadata, defaultContentType);
         assertFalse(retriever.isCount());
 
     }
@@ -64,7 +73,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
     public void testGetUsefulPartSize() throws Exception {
         assertEquals(4, defaultRetriever.getUsefulPartsSize());
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, null);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
         assertEquals(4, retriever.getUsefulPartsSize());
     }
 
@@ -84,7 +94,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
     }
 
     @Test
-    public void testGetSerializedData() throws ODataApplicationException, SerializerException, IOException {
+    public void testGetSerializedData()
+            throws ODataApplicationException, SerializerException, IOException {
         Map<String, Object> data1 = new HashMap<>();
         data1.put("age", 35);
         Map<String, Object> data2 = new HashMap<>();
@@ -94,7 +105,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
         hits.add(data2);
 
         Client client = mockClient(hits);
-        DataRetriever retriever = new DataRetriever(defaultUriInfo, defaultOData, client, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        DataRetriever retriever = new DataRetriever(defaultUriInfo, defaultOData, client,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
         SerializerResult result = retriever.getSerializedData();
 
         validateSerializerResult(result.getContent(), hits);
@@ -110,9 +122,10 @@ public class DataRetrieverTest extends BaseProcessorTest {
         hits.add(data1);
         hits.add(data2);
 
-        EdmEntitySet entitySet = defaultMetadata.getEdm().getEntityContainer().getEntitySet("author");
+        ElasticEdmEntitySet entitySet = (ElasticEdmEntitySet) defaultMetadata.getEdm()
+                .getEntityContainer().getEntitySet("author");
         Client client = mockClient(hits);
-        SearchResponse response =  client.prepareSearch("").execute().actionGet();
+        SearchResponse response = client.prepareSearch("").execute().actionGet();
         SerializerResult result = defaultRetriever.serialize(response, entitySet);
         validateSerializerResult(result.getContent(), hits);
     }
@@ -123,8 +136,10 @@ public class DataRetrieverTest extends BaseProcessorTest {
         assertTrue(selectList.isEmpty());
 
         String rawQueryPath = "$select=age,_id";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, rawQueryPath);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
+                rawQueryPath);
+        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
         selectList = retriever.getSelectList();
         assertEquals(2, selectList.size());
         assertEquals("age", selectList.get(0));
@@ -133,8 +148,9 @@ public class DataRetrieverTest extends BaseProcessorTest {
 
     @Test
     public void testGetQueryWithEntitySet() throws ODataApplicationException {
-        DataRetriever.QueryWithEntitySet queryWithEntitySet = defaultRetriever.getQueryWithEntitySet();
-        EdmEntitySet entitySet = defaultMetadata.getEdm().getEntityContainer().getEntitySet("author");
+        DataRetriever.QueryWithEntity queryWithEntitySet = defaultRetriever.getQueryWithEntity();
+        EdmEntitySet entitySet = defaultMetadata.getEdm().getEntityContainer()
+                .getEntitySet("author");
         assertEquals(entitySet, queryWithEntitySet.getEntitySet());
         assertTrue(queryWithEntitySet.getQuery().getQuery().hasClauses());
     }
@@ -147,48 +163,60 @@ public class DataRetrieverTest extends BaseProcessorTest {
         assertEquals(expected, ids);
     }
 
-    @Test(expected=ODataApplicationException.class)
-    public void testCollectCompositeIds() throws ODataApplicationException, UriParserException, UriValidationException {
+    @Test(expected = ODataApplicationException.class)
+    public void testCollectCompositeIds()
+            throws ODataApplicationException, UriParserException, UriValidationException {
         String rawODataPath = "/address(_city='lviv',_id='13')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, null);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
+        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
         retriever.collectIds(uriInfo.getUriResourceParts().get(0));
     }
 
     @Test
-    public void testGetData() throws UriParserException, UriValidationException {
+    public void testGetData()
+            throws UriParserException, UriValidationException, ODataApplicationException {
         ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> fromCaptor = ArgumentCaptor.forClass(Integer.class);
         ESQueryBuilder query = new ESQueryBuilder();
         SearchRequestBuilder builder = mockBuilder();
-        query.setEsType("sometype");
+        query.setIndex("sometype");
+        query.setType("sometype");
         Client client = mockClient(builder);
-        DataRetriever retriever =  new DataRetriever(defaultUriInfo, defaultOData, client, defaultRawBaseUri, defaultMetadata, defaultContentType);
-        retriever.getData(query, null);
+        DataRetriever retriever = new DataRetriever(defaultUriInfo, defaultOData, client,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        retriever.retrieveData(query, null);
 
         verify(client, times(1)).prepareSearch(anyString());
         verify(builder, times(1)).setSize(sizeCaptor.capture());
         verify(builder, times(1)).setFrom(fromCaptor.capture());
-        verify(builder, times(0)).setFetchSource(ArgumentMatchers.<String[]>any(), ArgumentMatchers.<String[]>any());
+        verify(builder, times(0)).setFetchSource(ArgumentMatchers.<String[]> any(),
+                ArgumentMatchers.<String[]> any());
 
         assertEquals(2, sizeCaptor.getValue().intValue());
         assertEquals(10, fromCaptor.getValue().intValue());
     }
 
     @Test
-    public void testGetDataWithSelect() throws UriParserException, UriValidationException {
+    public void testGetDataWithSelect()
+            throws UriParserException, UriValidationException, ODataApplicationException {
         String rawQueryPath = "$select=age,_id";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, rawQueryPath);
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
+                rawQueryPath);
         ArgumentCaptor<String[]> sourceCaptor = ArgumentCaptor.forClass(String[].class);
         ESQueryBuilder query = new ESQueryBuilder();
         SearchRequestBuilder builder = mockBuilder();
-        query.setEsType("sometype");
+        query.setIndex("sometype");
+        query.setType("sometype");
+        query.addField("age").addField("_id");
         Client client = mockClient(builder);
-        DataRetriever retriever =  new DataRetriever(uriInfo, defaultOData, client, defaultRawBaseUri, defaultMetadata, defaultContentType);
-        retriever.getData(query, null);
+        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, client,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        retriever.retrieveData(query, null);
         verify(client, times(1)).prepareSearch(anyString());
 
-        verify(builder, times(1)).setFetchSource(sourceCaptor.capture(), ArgumentMatchers.<String[]>any());
-        assertArrayEquals(new String[]{"age", "_id"}, sourceCaptor.getValue());
+        verify(builder, times(1)).setFetchSource(sourceCaptor.capture(),
+                ArgumentMatchers.<String[]> any());
+        assertArrayEquals(new String[] { "_id", "age" }, sourceCaptor.getValue());
     }
 }

@@ -1,6 +1,18 @@
 package com.hevelian.olastic.core.processors;
 
-import com.hevelian.olastic.core.stub.TestProvider;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
@@ -19,35 +31,27 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.stub.TestProvider;
 
 /**
  * Base class for processors tests.
  */
-public class BaseProcessorTest {
+public abstract class BaseProcessorTest {
     protected String defaultRawODataPath = "/book('13')/character('113')/book/author";
     protected String defaultRawQueryPath = "$count=true&$top=2&$skip=10&$orderby=age,_id desc&$filter=age gt 30";
     protected UriInfo defaultUriInfo;
-    protected ServiceMetadata defaultMetadata;
-    protected OData defaultOData;
+    protected ElasticServiceMetadata defaultMetadata;
+    protected ElasticOData defaultOData;
     protected Client defaultClient;
 
     @Before
     public void baseSetUp() throws UriParserException, UriValidationException {
-        defaultOData = OData.newInstance();
+        defaultOData = ElasticOData.newInstance();
         defaultMetadata = defaultOData.createServiceMetadata(
-                new TestProvider(),
+                new TestProvider(mock(IMappingMetaDataProvider.class)),
                 new ArrayList<EdmxReference>());
         defaultClient = mockClient();
     }
@@ -65,17 +69,20 @@ public class BaseProcessorTest {
         return mockClient(new ArrayList<Map<String, Object>>(), builder);
     }
 
-    public static Client mockClient(List<Map<String, Object>> dataToReturn, SearchRequestBuilder builder) {
+    @SuppressWarnings("unchecked")
+    public static Client mockClient(List<Map<String, Object>> dataToReturn,
+            SearchRequestBuilder builder) {
         Client client = mock(Client.class);
         InternalSearchHit[] internalHitsArr = new InternalSearchHit[dataToReturn.size()];
-        for(int i = 0; i< dataToReturn.size(); i++) {
+        for (int i = 0; i < dataToReturn.size(); i++) {
             Map<String, Object> data = dataToReturn.get(i);
             InternalSearchHit hit = mock(InternalSearchHit.class);
             internalHitsArr[i] = hit;
             when(hit.getSource()).thenReturn(data);
             when(hit.getId()).thenReturn(Integer.toString(i));
         }
-        InternalSearchHits hits = new InternalSearchHits(internalHitsArr, internalHitsArr.length, 0);
+        InternalSearchHits hits = new InternalSearchHits(internalHitsArr, internalHitsArr.length,
+                0);
 
         SearchResponse response = mock(SearchResponse.class);
         when(response.getHits()).thenReturn(hits);
@@ -96,22 +103,21 @@ public class BaseProcessorTest {
         return builder;
     }
 
-    public static UriInfo buildUriInfo(ServiceMetadata metadata, OData odata, String rawODataPath, String rawQueryPath)
-            throws UriParserException, UriValidationException {
-        UriInfo uriInfo = new Parser(metadata.getEdm(), odata)
-                .parseUri(rawODataPath, rawQueryPath, null);
-        return uriInfo;
+    public static UriInfo buildUriInfo(ServiceMetadata metadata, OData odata, String rawODataPath,
+            String rawQueryPath) throws UriParserException, UriValidationException {
+        return new Parser(metadata.getEdm(), odata).parseUri(rawODataPath, rawQueryPath, null);
     }
 
-    public static void validateSerializerResult(InputStream result, List<Map<String, Object>> hits) throws IOException {
+    public static void validateSerializerResult(InputStream result, List<Map<String, Object>> hits)
+            throws IOException {
         StringWriter writer = new StringWriter();
         IOUtils.copy(result, writer);
         String theString = writer.toString();
         JSONObject obj = new JSONObject(theString);
         JSONArray arr = obj.getJSONArray("value");
-        for (int i=0; i< hits.size(); i++) {
+        for (int i = 0; i < hits.size(); i++) {
             Map<String, Object> data = hits.get(i);
-            for (Map.Entry<String, Object> entry: data.entrySet()){
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
                 JSONObject jsonObj = (JSONObject) arr.get(i);
                 assertEquals(entry.getValue(), jsonObj.get(entry.getKey()));
             }
@@ -120,7 +126,8 @@ public class BaseProcessorTest {
         assertEquals(hits.size(), count);
     }
 
-    public static void validateOneFieldSerializerResult(InputStream result, Object value) throws IOException {
+    public static void validateOneFieldSerializerResult(InputStream result, Object value)
+            throws IOException {
         StringWriter writer = new StringWriter();
         IOUtils.copy(result, writer);
         String theString = writer.toString();

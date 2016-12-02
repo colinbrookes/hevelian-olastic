@@ -2,7 +2,7 @@ package com.hevelian.olastic.core.elastic.mappings;
 
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 
-import com.hevelian.olastic.core.edm.utils.MetaDataUtils;
+import com.hevelian.olastic.core.utils.MetaDataUtils;
 
 /**
  * Default implementation of {@link IElasticToCsdlMapper} interface.
@@ -36,6 +36,14 @@ public class ElasticToCsdlMapper implements IElasticToCsdlMapper {
     @Override
     public String eFieldToCsdlProperty(String index, String type, String field) {
         return field;
+    }
+
+    @Override
+    public boolean eFieldToCollection(String index, String type, String field) {
+        if(field.equals("_dimension")  || field.equals("streets")){
+            return true;
+        }
+        return false;
     }
 
     @Override
