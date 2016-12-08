@@ -126,6 +126,20 @@ public abstract class BaseProcessorTest {
         assertEquals(hits.size(), count);
     }
 
+    public static void validateOneEntitySerializerResult(InputStream result,
+            List<Map<String, Object>> hits) throws IOException {
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(result, writer);
+        String theString = writer.toString();
+        JSONObject obj = new JSONObject(theString);
+        for (int i = 0; i < hits.size(); i++) {
+            Map<String, Object> data = hits.get(i);
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                assertEquals(entry.getValue(), obj.get(entry.getKey()));
+            }
+        }
+    }
+
     public static void validateOneFieldSerializerResult(InputStream result, Object value)
             throws IOException {
         StringWriter writer = new StringWriter();

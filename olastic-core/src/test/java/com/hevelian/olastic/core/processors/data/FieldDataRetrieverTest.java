@@ -37,7 +37,7 @@ public class FieldDataRetrieverTest extends BaseProcessorTest {
         defaultRawQueryPath = "$top=2&$skip=10";
         defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
                 defaultRawQueryPath);
-        defaultRetriever = new FieldDataRetriever(defaultUriInfo, defaultOData, defaultClient,
+        defaultRetriever = new FieldRetriever(defaultUriInfo, defaultOData, defaultClient,
                 defaultRawBaseUri, defaultMetadata, defaultContentType);
     }
 
@@ -45,7 +45,7 @@ public class FieldDataRetrieverTest extends BaseProcessorTest {
     public void testGetUsefulPartsSize() throws UriParserException, UriValidationException {
         assertEquals(4, defaultRetriever.getUsefulPartsSize());
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, null);
-        DataRetriever retriever = new FieldDataRetriever(uriInfo, defaultOData, defaultClient,
+        DataRetriever retriever = new FieldRetriever(uriInfo, defaultOData, defaultClient,
                 defaultRawBaseUri, defaultMetadata, defaultContentType);
         assertEquals(4, retriever.getUsefulPartsSize());
     }
@@ -82,7 +82,7 @@ public class FieldDataRetrieverTest extends BaseProcessorTest {
         client = mockClient(hits);
         response = client.prepareSearch("").execute().actionGet();
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, null);
-        DataRetriever retriever = new FieldDataRetriever(uriInfo, defaultOData, defaultClient,
+        DataRetriever retriever = new FieldRetriever(uriInfo, defaultOData, defaultClient,
                 defaultRawBaseUri, defaultMetadata, defaultContentType);
 
         result = retriever.serialize(response, entitySet);

@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.ContextURL;
+import org.apache.olingo.commons.api.data.ContextURL.Suffix;
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
@@ -17,10 +16,7 @@ import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
-import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -33,6 +29,7 @@ import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourcePartTyped;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
@@ -49,14 +46,13 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.SearchHit;
 
+import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.elastic.ESClient;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.pagination.Sort;
@@ -70,11 +66,11 @@ import lombok.extern.log4j.Log4j2;
  * requesting and serializing the data.
  */
 @Log4j2
-public class DataRetriever {
+public abstract class DataRetriever {
     public final static String SELECT_ITEMS_SEPARATOR = ",";
 
     private UriInfo uriInfo;
-    private OData odata;
+    private ElasticOData odata;
     private Client client;
     private String rawBaseUri;
     private ElasticServiceMetadata serviceMetadata;
@@ -96,7 +92,7 @@ public class DataRetriever {
      * @param responseFormat
      *            response format
      */
-    public DataRetriever(UriInfo uriInfo, OData odata, Client client, String rawBaseUri,
+    public DataRetriever(UriInfo uriInfo, ElasticOData odata, Client client, String rawBaseUri,
             ElasticServiceMetadata serviceMetadata, ContentType responseFormat) {
         this.uriInfo = uriInfo;
         this.odata = odata;
@@ -114,22 +110,37 @@ public class DataRetriever {
      *             if any error occurred during getting serialized data
      */
     public SerializerResult getSerializedData() throws ODataApplicationException {
+        QueryWithEntity queryWithEntity = getQueryWithEntity();
+        ElasticEdmEntitySet entitySet = queryWithEntity.getEntitySet();
+        ESQueryBuilder queryBuilder = queryWithEntity.getQuery();
+        SearchResponse searchResponse = retrieveData(queryBuilder, getFilterQuery());
+
+        return serialize(searchResponse, entitySet);
+    }
+
+    /**
+     * Method get's filter query from URL.
+     * 
+     * @return filter query
+     * @throws ODataApplicationException
+     *             if any error occurred
+     */
+    protected QueryBuilder getFilterQuery() throws ODataApplicationException {
         FilterOption filterOption = uriInfo.getFilterOption();
-        QueryBuilder filter = null;
+        QueryBuilder filterQueryBuilder = null;
         if (filterOption != null) {
             Expression expression = filterOption.getExpression();
             try {
-                filter = (QueryBuilder) expression.accept(new ElasticSearchExpressionVisitor());
+                filterQueryBuilder = (QueryBuilder) expression
+                        .accept(new ElasticSearchExpressionVisitor());
             } catch (ExpressionVisitException e) {
                 log.debug(e);
             }
         }
-        QueryWithEntity queryWithEntity = getQueryWithEntity();
-        ElasticEdmEntitySet entitySet = queryWithEntity.getEntitySet();
-        ESQueryBuilder queryBuilder = queryWithEntity.getQuery();
-        SearchResponse searchResponse = retrieveData(queryBuilder, filter);
-
-        return serialize(searchResponse, entitySet);
+        if (filterQueryBuilder == null) {
+            filterQueryBuilder = new MatchAllQueryBuilder();
+        }
+        return filterQueryBuilder;
     }
 
     /**
@@ -140,56 +151,37 @@ public class DataRetriever {
      * @param entitySet
      *            entitySet
      * @return serialized data
-     * @throws SerializerException
      * @throws ODataApplicationException
+     *             if any error occurred during serialization
      */
-    protected SerializerResult serialize(SearchResponse response, ElasticEdmEntitySet entitySet)
-            throws ODataApplicationException {
-        ElasticEdmEntityType entityType = entitySet.getEntityType();
-        EntityCollection entities = new EntityCollection();
-        for (SearchHit hit : response.getHits()) {
-            Entity entity = new Entity();
-            entity.setId(Util.createId(entityType.getName(), hit.getId()));
-            addProperty(entity, ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
-
-            for (Map.Entry<String, Object> entry : hit.getSource().entrySet()) {
-                addProperty(entity, entityType.findPropertyByEField(entry.getKey()).getName(),
-                        entry.getValue(), entityType);
-            }
-            entities.getEntities().add(entity);
-        }
-
-        if (isCount()) {
-            entities.setCount((int) response.getHits().getTotalHits());
-        }
-        final String id = rawBaseUri + "/" + entityType.getName();
-        SelectOption selectOption = uriInfo.getSelectOption();
-        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
-                .contextURL(getContextUrl(entitySet)).id(id).count(uriInfo.getCountOption())
-                .select(selectOption).build();
-        try {
-            ODataSerializer serializer = odata.createSerializer(responseFormat);
-            return serializer.entityCollection(serviceMetadata, entityType, entities, opts);
-        } catch (SerializerException e) {
-            throw new ODataApplicationException("Failed to serialize data.",
-                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), Locale.ROOT, e);
-        }
-    }
+    protected abstract SerializerResult serialize(SearchResponse response,
+            ElasticEdmEntitySet entitySet) throws ODataApplicationException;
 
     /**
-     * Creates context URL for entity set for response serializer.
+     * Creates context URL for response serializer.
      * 
      * @param edmEntitySet
      *            entity set
+     * @param isSingleEntity
+     *            is single entity
+     * @param expand
+     *            expand option
+     * @param select
+     *            select option
+     * @param navOrPropertyPath
+     *            property path
      * @return created context URL
+     * @throws SerializerException
+     *             if any error occurred
      */
-    protected ContextURL getContextUrl(ElasticEdmEntitySet edmEntitySet) {
-        List<String> fields = getSelectList();
-        ContextURL.Builder contextUrlBuilder = ContextURL.with().entitySet(edmEntitySet);
-        if (!fields.isEmpty()) {
-            contextUrlBuilder.selectList(StringUtils.join(fields, SELECT_ITEMS_SEPARATOR));
-        }
-        return contextUrlBuilder.build();
+    protected ContextURL getContextUrl(ElasticEdmEntitySet entitySet, boolean isSingleEntity,
+            ExpandOption expand, SelectOption select, String navOrPropertyPath)
+            throws SerializerException {
+        return ContextURL.with().entitySet(entitySet)
+                .selectList(odata.createUriHelper()
+                        .buildContextURLSelectList(entitySet.getEntityType(), expand, select))
+                .suffix(isSingleEntity ? Suffix.ENTITY : null).navOrPropertyPath(navOrPropertyPath)
+                .build();
     }
 
     /**
@@ -235,11 +227,11 @@ public class DataRetriever {
                 EdmNavigationProperty navigationProperty = uriResourceNavigation.getProperty();
                 responseEntitySet = Util.getNavigationTargetEntitySet(responseEntitySet,
                         navigationProperty);
-                buildQuery(queryBuilder, i);
             } else if (segment.getKind() != UriResourceKind.entitySet) {
                 throw new ODataApplicationException("Not supported",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
             }
+            buildQuery(queryBuilder, i);
         }
         ElasticEdmEntityType entityType = responseEntitySet.getEntityType();
         queryBuilder.setType(entityType.getEType()).setIndex(entityType.getEIndex());
@@ -326,9 +318,8 @@ public class DataRetriever {
     protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter)
             throws ODataApplicationException {
         return ESClient.executeRequest(query.getIndex(), query.getType(), client,
-                new BoolQueryBuilder().filter(query.getQuery())
-                        .filter(filter == null ? new MatchAllQueryBuilder() : filter),
-                getPagination(), query.getFields());
+                new BoolQueryBuilder().filter(query.getQuery()).filter(filter), getPagination(),
+                query.getFields());
     }
 
     /**
@@ -397,7 +388,8 @@ public class DataRetriever {
     }
 
     @SuppressWarnings("unchecked")
-    private void addProperty(Entity e, String name, Object value, ElasticEdmEntityType entityType) {
+    protected void addProperty(Entity e, String name, Object value,
+            ElasticEdmEntityType entityType) {
         if (value instanceof List) {
             e.addProperty(createPropertyList(name, (List<Object>) value, entityType));
         } else if (value instanceof Map) {
@@ -450,7 +442,7 @@ public class DataRetriever {
         return uriInfo;
     }
 
-    public OData getOdata() {
+    public ElasticOData getOdata() {
         return odata;
     }
 

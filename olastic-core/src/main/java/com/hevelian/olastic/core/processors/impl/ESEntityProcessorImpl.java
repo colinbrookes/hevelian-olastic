@@ -17,6 +17,7 @@ import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
 import com.hevelian.olastic.core.processors.ESEntityProcessor;
 import com.hevelian.olastic.core.processors.data.DataRetriever;
+import com.hevelian.olastic.core.processors.data.EntityRetriever;
 
 /**
  * Processes single entity.
@@ -40,8 +41,7 @@ public class ESEntityProcessorImpl extends ESEntityProcessor {
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-
-        DataRetriever dataRetriever = new DataRetriever(uriInfo, odata, client,
+        DataRetriever dataRetriever = new EntityRetriever(uriInfo, odata, client,
                 request.getRawBaseUri(), serviceMetadata, responseFormat);
 
         SerializerResult serializerResult = dataRetriever.getSerializedData();
@@ -56,7 +56,6 @@ public class ESEntityProcessorImpl extends ESEntityProcessor {
             throws ODataApplicationException, ODataLibraryException {
         throw new ODataApplicationException("Not supported.",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-
     }
 
     @Override
@@ -65,7 +64,6 @@ public class ESEntityProcessorImpl extends ESEntityProcessor {
             throws ODataApplicationException, ODataLibraryException {
         throw new ODataApplicationException("Not supported.",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-
     }
 
     @Override
@@ -73,7 +71,6 @@ public class ESEntityProcessorImpl extends ESEntityProcessor {
             throws ODataApplicationException, ODataLibraryException {
         throw new ODataApplicationException("Not supported.",
                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-
     }
 
 }

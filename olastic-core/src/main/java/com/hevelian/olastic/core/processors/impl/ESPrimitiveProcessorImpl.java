@@ -18,7 +18,7 @@ import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
 import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
 import com.hevelian.olastic.core.processors.data.DataRetriever;
-import com.hevelian.olastic.core.processors.data.FieldDataRetriever;
+import com.hevelian.olastic.core.processors.data.FieldRetriever;
 
 /**
  * Processes primitive value.
@@ -42,7 +42,7 @@ public class ESPrimitiveProcessorImpl extends ESPrimitiveProcessor {
     @Override
     public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType responseFormat) throws ODataApplicationException, SerializerException {
-        DataRetriever dataRetriever = new FieldDataRetriever(uriInfo, odata, client,
+        DataRetriever dataRetriever = new FieldRetriever(uriInfo, odata, client,
                 request.getRawBaseUri(), serviceMetadata, responseFormat);
         SerializerResult serializerResult = dataRetriever.getSerializedData();
         if (serializerResult != null) {

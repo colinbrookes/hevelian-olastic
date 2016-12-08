@@ -37,19 +37,19 @@ import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.processors.BaseProcessorTest;
 
 /**
- * Tests for #DataRetriever.
+ * Tests for #EntityCollectionRetriever.
  */
-public class DataRetrieverTest extends BaseProcessorTest {
+public class EntityCollectionRetrieverTest extends BaseProcessorTest {
     private String defaultRawBaseUri = "http://localhost:8080/OData.svc";
-    private DataRetriever defaultRetriever;
+    private EntityCollectionRetriever defaultRetriever;
     private ContentType defaultContentType = ContentType.JSON;
 
     @Before
     public void setUp() throws Exception {
         defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
                 defaultRawQueryPath);
-        defaultRetriever = new DataRetriever(defaultUriInfo, defaultOData, defaultClient,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        defaultRetriever = new EntityCollectionRetriever(defaultUriInfo, defaultOData,
+                defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
     }
 
     @Test
@@ -57,14 +57,14 @@ public class DataRetrieverTest extends BaseProcessorTest {
         assertTrue(defaultRetriever.isCount());
 
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, null);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(uriInfo, defaultOData,
+                defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
         assertFalse(retriever.isCount());
 
         String rawQueryPath = "$count=false";
         uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, rawQueryPath);
-        retriever = new DataRetriever(uriInfo, defaultOData, defaultClient, defaultRawBaseUri,
-                defaultMetadata, defaultContentType);
+        retriever = new EntityCollectionRetriever(uriInfo, defaultOData, defaultClient,
+                defaultRawBaseUri, defaultMetadata, defaultContentType);
         assertFalse(retriever.isCount());
 
     }
@@ -73,8 +73,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
     public void testGetUsefulPartSize() throws Exception {
         assertEquals(4, defaultRetriever.getUsefulPartsSize());
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, null);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(uriInfo, defaultOData,
+                defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
         assertEquals(4, retriever.getUsefulPartsSize());
     }
 
@@ -105,8 +105,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
         hits.add(data2);
 
         Client client = mockClient(hits);
-        DataRetriever retriever = new DataRetriever(defaultUriInfo, defaultOData, client,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(defaultUriInfo,
+                defaultOData, client, defaultRawBaseUri, defaultMetadata, defaultContentType);
         SerializerResult result = retriever.getSerializedData();
 
         validateSerializerResult(result.getContent(), hits);
@@ -138,8 +138,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
         String rawQueryPath = "$select=age,_id";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
                 rawQueryPath);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(uriInfo, defaultOData,
+                defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
         selectList = retriever.getSelectList();
         assertEquals(2, selectList.size());
         assertEquals("age", selectList.get(0));
@@ -148,7 +148,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
 
     @Test
     public void testGetQueryWithEntitySet() throws ODataApplicationException {
-        DataRetriever.QueryWithEntity queryWithEntitySet = defaultRetriever.getQueryWithEntity();
+        EntityCollectionRetriever.QueryWithEntity queryWithEntitySet = defaultRetriever
+                .getQueryWithEntity();
         EdmEntitySet entitySet = defaultMetadata.getEdm().getEntityContainer()
                 .getEntitySet("author");
         assertEquals(entitySet, queryWithEntitySet.getEntitySet());
@@ -168,8 +169,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
             throws ODataApplicationException, UriParserException, UriValidationException {
         String rawODataPath = "/address(_city='lviv',_id='13')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, null);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, defaultClient,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(uriInfo, defaultOData,
+                defaultClient, defaultRawBaseUri, defaultMetadata, defaultContentType);
         retriever.collectIds(uriInfo.getUriResourceParts().get(0));
     }
 
@@ -183,8 +184,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
         query.setIndex("sometype");
         query.setType("sometype");
         Client client = mockClient(builder);
-        DataRetriever retriever = new DataRetriever(defaultUriInfo, defaultOData, client,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(defaultUriInfo,
+                defaultOData, client, defaultRawBaseUri, defaultMetadata, defaultContentType);
         retriever.retrieveData(query, null);
 
         verify(client, times(1)).prepareSearch(anyString());
@@ -210,8 +211,8 @@ public class DataRetrieverTest extends BaseProcessorTest {
         query.setType("sometype");
         query.addField("age").addField("_id");
         Client client = mockClient(builder);
-        DataRetriever retriever = new DataRetriever(uriInfo, defaultOData, client,
-                defaultRawBaseUri, defaultMetadata, defaultContentType);
+        EntityCollectionRetriever retriever = new EntityCollectionRetriever(uriInfo, defaultOData,
+                client, defaultRawBaseUri, defaultMetadata, defaultContentType);
         retriever.retrieveData(query, null);
         verify(client, times(1)).prepareSearch(anyString());
 

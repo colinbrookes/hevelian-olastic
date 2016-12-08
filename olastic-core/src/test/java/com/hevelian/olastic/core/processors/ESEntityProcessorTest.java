@@ -1,5 +1,17 @@
 package com.hevelian.olastic.core.processors;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
@@ -15,19 +27,10 @@ import org.mockito.ArgumentCaptor;
 
 import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.*;
-
 /**
  * Tests for #ESEntityProcessor
  */
-public class ESEntityProcessorTest extends BaseProcessorTest{
+public class ESEntityProcessorTest extends BaseProcessorTest {
 
     private String defaultRawBaseUri = "http://localhost:8080/OData.svc";
     private ESEntityProcessorImpl defaultProcessor;
@@ -37,7 +40,8 @@ public class ESEntityProcessorTest extends BaseProcessorTest{
 
     @Before
     public void setUp() throws UriParserException, UriValidationException {
-        defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath, defaultRawQueryPath);
+        defaultUriInfo = buildUriInfo(defaultMetadata, defaultOData, defaultRawODataPath,
+                defaultRawQueryPath);
         defaultProcessor = new ESEntityProcessorImpl(defaultClient);
         defaultRequest = mock(ODataRequest.class);
         defaultResponse = mock(ODataResponse.class);
@@ -45,11 +49,11 @@ public class ESEntityProcessorTest extends BaseProcessorTest{
     }
 
     @Test
-    public void testReadEntity() throws ODataApplicationException, ODataLibraryException, IOException {
+    public void testReadEntity()
+            throws ODataApplicationException, ODataLibraryException, IOException {
         Map<String, Object> data = new HashMap<>();
         data.put("age", 25);
         List<Map<String, Object>> hits = new ArrayList<>();
-        hits.add(data);
         hits.add(data);
 
         Client client = mockClient(hits);
@@ -57,10 +61,11 @@ public class ESEntityProcessorTest extends BaseProcessorTest{
         defaultProcessor.init(defaultOData, defaultMetadata);
 
         ArgumentCaptor<InputStream> inputStreamCaptor = ArgumentCaptor.forClass(InputStream.class);
-        defaultProcessor.readEntity(defaultRequest, defaultResponse, defaultUriInfo, defaultContentType);
+        defaultProcessor.readEntity(defaultRequest, defaultResponse, defaultUriInfo,
+                defaultContentType);
         verify(defaultResponse, times(1)).setContent(inputStreamCaptor.capture());
 
-        validateSerializerResult(inputStreamCaptor.getValue(), hits);
+        validateOneEntitySerializerResult(inputStreamCaptor.getValue(), hits);
     }
 
     @Test(expected = ODataApplicationException.class)
