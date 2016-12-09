@@ -40,9 +40,6 @@ public class ElasticToCsdlMapper implements IElasticToCsdlMapper {
 
     @Override
     public boolean eFieldToCollection(String index, String type, String field) {
-        if(field.equals("_dimension")  || field.equals("streets")){
-            return true;
-        }
         return false;
     }
 
