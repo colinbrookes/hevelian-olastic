@@ -33,25 +33,27 @@ public class MappingMetaDataProvider implements IMappingMetaDataProvider {
                 .mappings().get(index);
     }
 
+    @Override
     public MappingMetaData getMappingForType(String index, String type) {
         GetMappingsResponse getMappingsResponse = getClient().admin().indices()
                 .prepareGetMappings(index).addTypes(type).execute().actionGet();
         return getMappingsResponse.getMappings().get(index).get(type);
     }
 
+    @Override
     public ImmutableOpenMap<String, FieldMappingMetaData> getMappingsForField(String index,
             String field) {
-        GetFieldMappingsResponse getFieldMappingsResponse = getClient().admin().indices()
+        GetFieldMappingsResponse fieldMappingsResponse = getClient().admin().indices()
                 .prepareGetFieldMappings(index).setFields(field).execute().actionGet();
-        ImmutableOpenMap.Builder<String, FieldMappingMetaData> b = new ImmutableOpenMap.Builder<String, FieldMappingMetaData>();
-        for (Entry<String, ImmutableMap<String, FieldMappingMetaData>> e : getFieldMappingsResponse
+        ImmutableOpenMap.Builder<String, FieldMappingMetaData> b = new ImmutableOpenMap.Builder<>();
+        for (Entry<String, ImmutableMap<String, FieldMappingMetaData>> e : fieldMappingsResponse
                 .mappings().get(index).entrySet()) {
             b.put(e.getKey(), (FieldMappingMetaData) e.getValue().get(field));
         }
-
         return b.build();
     }
 
+    @Override
     public FieldMappingMetaData getMappingForField(String index, String type, String field) {
         GetFieldMappingsResponse getFieldMappingsResponse = getClient().admin().indices()
                 .prepareGetFieldMappings(index).setTypes(type).setFields(field).execute()

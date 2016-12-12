@@ -11,7 +11,7 @@
 	<!-- TODO use global parent pom for all hevelian products -->
 
 	<properties>
-		<olingo.version>4.2.0</olingo.version>
+		<olingo.version>4.3.0</olingo.version>
 		<elasticsearch.version>2.3.5</elasticsearch.version>
 	</properties>
 
@@ -30,6 +30,22 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+	<dependencies>
+		<!-- Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.2.22</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
