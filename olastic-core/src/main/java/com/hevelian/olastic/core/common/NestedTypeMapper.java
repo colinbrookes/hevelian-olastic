@@ -13,7 +13,7 @@ import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.ex.ODataException;
-import org.elasticsearch.index.mapper.object.ObjectMapper;
+import org.elasticsearch.index.mapper.ObjectMapper;
 
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;

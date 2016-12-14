@@ -1,5 +1,6 @@
 package com.hevelian.olastic.core.elastic.mappings;
 
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
@@ -10,8 +11,6 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Basic implementation of the mapping metadata provider that retrieves mappings
@@ -46,7 +45,7 @@ public class MappingMetaDataProvider implements IMappingMetaDataProvider {
         GetFieldMappingsResponse fieldMappingsResponse = getClient().admin().indices()
                 .prepareGetFieldMappings(index).setFields(field).execute().actionGet();
         ImmutableOpenMap.Builder<String, FieldMappingMetaData> b = new ImmutableOpenMap.Builder<>();
-        for (Entry<String, ImmutableMap<String, FieldMappingMetaData>> e : fieldMappingsResponse
+        for (Entry<String, Map<String, FieldMappingMetaData>> e : fieldMappingsResponse
                 .mappings().get(index).entrySet()) {
             b.put(e.getKey(), (FieldMappingMetaData) e.getValue().get(field));
         }

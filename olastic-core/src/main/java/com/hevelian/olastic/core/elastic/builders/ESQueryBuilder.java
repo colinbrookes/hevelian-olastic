@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -72,7 +73,7 @@ public class ESQueryBuilder {
         QueryBuilder parentQuery = ids == null || ids.isEmpty() ? QueryBuilders.matchAllQuery()
                 : buildIdsQuery(ids, type);
         QueryBuilder resultQuery = getParentChildResultQuery(parentQuery);
-        parentChildQuery = QueryBuilders.hasParentQuery(type, resultQuery);
+        parentChildQuery = QueryBuilders.hasParentQuery(type, resultQuery, false);
         return this;
     }
 
@@ -89,7 +90,7 @@ public class ESQueryBuilder {
         QueryBuilder childQuery = ids == null || ids.isEmpty() ? QueryBuilders.matchAllQuery()
                 : buildIdsQuery(ids, type);
         QueryBuilder resultQuery = getParentChildResultQuery(childQuery);
-        parentChildQuery = QueryBuilders.hasChildQuery(type, resultQuery);
+        parentChildQuery = QueryBuilders.hasChildQuery(type, resultQuery, ScoreMode.None);
         return this;
     }
 
@@ -110,7 +111,7 @@ public class ESQueryBuilder {
     }
 
     private QueryBuilder buildIdsQuery(List<String> ids, String... type) {
-        return new IdsQueryBuilder(type).ids(ids);
+        return new IdsQueryBuilder().types(type).addIds(ids.toArray(new String[1]));
     }
 
     /**

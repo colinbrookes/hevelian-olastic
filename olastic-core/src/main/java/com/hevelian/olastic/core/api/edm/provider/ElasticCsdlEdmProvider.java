@@ -14,7 +14,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.index.mapper.object.ObjectMapper;
+import org.elasticsearch.index.mapper.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;

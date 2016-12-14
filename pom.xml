@@ -12,7 +12,7 @@
 
 	<properties>
 		<olingo.version>4.3.0</olingo.version>
-		<elasticsearch.version>2.3.5</elasticsearch.version>
+		<elasticsearch.version>5.1.1</elasticsearch.version>
 	</properties>
 
 	<modules>
@@ -65,8 +65,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.5.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>
