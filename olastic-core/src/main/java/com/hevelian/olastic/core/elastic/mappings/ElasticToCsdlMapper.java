@@ -50,7 +50,7 @@ public class ElasticToCsdlMapper implements IElasticToCsdlMapper {
 
     @Override
     public String eIndexToCsdlNamespace(String index) {
-        return namespace + MetaDataUtils.NEMESPACE_SEPARATOR + index;
+        return namespace + MetaDataUtils.NAMESPACE_SEPARATOR + index;
     }
 
     @Override

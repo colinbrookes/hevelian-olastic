@@ -2,7 +2,9 @@ package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
@@ -19,29 +21,40 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.*;
+
+import static com.hevelian.olastic.core.utils.ElasticUtils.getKeywordField;
 
 public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Object> {
-
-    private BoolQueryBuilder queryBuilder;
-
-    public ElasticSearchExpressionVisitor() {
-        this.queryBuilder = new BoolQueryBuilder();
-    }
 
     @Override
     public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
             throws ExpressionVisitException, ODataApplicationException {
-        MatchQueryBuilder mqb = new MatchQueryBuilder((String) left, right);
-        queryBuilder.filter(mqb);
-        return queryBuilder;
+        switch (operator) {
+            case AND:
+                return boolQuery().must((QueryBuilder) left).must((QueryBuilder) right);
+            case OR:
+                return boolQuery().should((QueryBuilder) left).should((QueryBuilder) right);
+            case EQ:
+                return termQuery(getKeywordField((String) left), right);
+            case NE:
+                return boolQuery().mustNot(termQuery(getKeywordField((String)left), right));
+            case GE:
+                return rangeQuery((String) left).gte(right);
+            case GT:
+                return rangeQuery((String) left).gt(right);
+            case LE:
+                return rangeQuery((String) left).lte(right);
+            case LT:
+                return rangeQuery((String) left).lt(right);
+            default: throw new ExpressionVisitException("unsupported operator");
+        }
     }
 
     @Override
     public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand)
             throws ExpressionVisitException, ODataApplicationException {
-        return null;
+        return boolQuery().mustNot((QueryBuilder) operand);
     }
 
     @Override

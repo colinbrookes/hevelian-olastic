@@ -45,10 +45,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
-import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
 import com.hevelian.olastic.core.common.NestedMappingStrategy;
 import com.hevelian.olastic.core.common.NestedTypeMapper;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
@@ -97,7 +93,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         StringBuffer result = new StringBuffer(ElasticToCsdlMapper.DEFAULT_NAMESPACE);
         for (int i = 0; i < path.length; i++) {
             if (i == 0 || i != path.length - 1) {
-                result.append(MetaDataUtils.NEMESPACE_SEPARATOR);
+                result.append(MetaDataUtils.NAMESPACE_SEPARATOR);
             }
             result.append(path[i]);
         }
@@ -293,7 +289,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
                 metaDataProvider, indices);
         FullQualifiedName entityType = edmProvider.entitySetToEntityType(
-                new FullQualifiedName(AUTHORS_FQN_STRING + MetaDataUtils.NEMESPACE_SEPARATOR
+                new FullQualifiedName(AUTHORS_FQN_STRING + MetaDataUtils.NAMESPACE_SEPARATOR
                         + edmProvider.getContainerName().getName()),
                 AUTHOR_TYPE);
         assertEquals(AUTHOR_FQN, entityType);
@@ -383,7 +379,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
         FullQualifiedName containerName = new FullQualifiedName(AUTHORS_FQN_STRING
-                + MetaDataUtils.NEMESPACE_SEPARATOR + edmProvider.getContainerName().getName());
+                + MetaDataUtils.NAMESPACE_SEPARATOR + edmProvider.getContainerName().getName());
         doReturn(AUTHOR_FQN).when(edmProvider).entitySetToEntityType(containerName, AUTHOR_TYPE);
 
         List<CsdlNavigationProperty> navigationProperties = new ArrayList<>();

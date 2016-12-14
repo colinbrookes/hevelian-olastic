@@ -10,7 +10,7 @@ import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 public final class MetaDataUtils {
 
     /** Name space separator. */
-    public static final String NEMESPACE_SEPARATOR = ".";
+    public static final String NAMESPACE_SEPARATOR = ".";
 
     private MetaDataUtils() {
     }
