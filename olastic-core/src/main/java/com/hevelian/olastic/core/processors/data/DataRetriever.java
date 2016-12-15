@@ -60,7 +60,7 @@ import com.hevelian.olastic.core.elastic.ESClient;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.pagination.Sort;
-import com.hevelian.olastic.core.utils.Util;
+import com.hevelian.olastic.core.utils.ProcessorUtils;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -71,7 +71,6 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public abstract class DataRetriever {
-    public final static String SELECT_ITEMS_SEPARATOR = ",";
 
     private UriInfo uriInfo;
     private ElasticOData odata;
@@ -236,7 +235,7 @@ public abstract class DataRetriever {
             if (segment.getKind() == UriResourceKind.navigationProperty) {
                 UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) segment;
                 EdmNavigationProperty navigationProperty = uriResourceNavigation.getProperty();
-                responseEntitySet = Util.getNavigationTargetEntitySet(responseEntitySet,
+                responseEntitySet = ProcessorUtils.getNavigationTargetEntitySet(responseEntitySet,
                         navigationProperty);
             } else if (segment.getKind() != UriResourceKind.entitySet) {
                 throw new ODataApplicationException("Not supported",

@@ -17,7 +17,6 @@ import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
@@ -29,6 +28,7 @@ import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
 import com.hevelian.olastic.core.processors.impl.ESPrimitiveProcessorImpl;
 
 import lombok.extern.log4j.Log4j2;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 /**
  * OData servlet that currently connects to the local instance of the
@@ -47,9 +47,9 @@ public class ODataServlet extends HttpServlet {
 
     // TODO do no do the initialization in a static block.
     static {
-        Settings settings = Settings.settingsBuilder().put("cluster.name", "opmc-local").build();
+        Settings settings = Settings.builder().put("cluster.name", "opmc-local").build();
         try {
-            CLIENT = TransportClient.builder().settings(settings).build().addTransportAddress(
+            CLIENT = new PreBuiltTransportClient(settings).addTransportAddress(
                     new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
             INDICES = CLIENT.admin().indices().stats(new IndicesStatsRequest()).actionGet()
                     .getIndices().keySet();

@@ -25,7 +25,7 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
-import com.hevelian.olastic.core.utils.Util;
+import com.hevelian.olastic.core.utils.ProcessorUtils;
 
 /**
  * Provides high-level methods for retrieving and converting the data for
@@ -72,7 +72,7 @@ public class EntityCollectionRetriever extends DataRetriever {
         EntityCollection entities = new EntityCollection();
         for (SearchHit hit : response.getHits()) {
             Entity entity = new Entity();
-            entity.setId(Util.createId(entityType.getName(), hit.getId()));
+            entity.setId(ProcessorUtils.createId(entityType.getName(), hit.getId()));
             addProperty(entity, ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
 
             for (Map.Entry<String, Object> entry : hit.getSource().entrySet()) {

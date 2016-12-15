@@ -2,42 +2,20 @@ package com.hevelian.olastic.core.utils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.edm.EdmBindingTarget;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfoResource;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 
-//TODO refactor tkoh
 /**
  * Contains utility methods.
  */
-public class Util {
-
-    public static EdmEntitySet getEdmEntitySet(UriInfoResource uriInfo)
-            throws ODataApplicationException {
-
-        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        // To get the entity set we have to interpret all URI segments
-        if (!(resourcePaths.get(0) instanceof UriResourceEntitySet)) {
-            throw new ODataApplicationException("Invalid resource type for first segment.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
-        }
-
-        UriResourceEntitySet uriResource = (UriResourceEntitySet) resourcePaths.get(0);
-
-        return uriResource.getEntitySet();
-    }
-
+public class ProcessorUtils {
     /**
      * Example: For the following navigation:
      * DemoService.svc/Categories(1)/Products we need the EdmEntitySet for the
@@ -71,10 +49,15 @@ public class Util {
             throw new ODataApplicationException("Not supported.",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
-
         return navigationTargetEntitySet;
     }
 
+    /**
+     * Generates id string, for example: record(2)
+     * @param entitySetName name of entity set
+     * @param id odata id string
+     * @return
+     */
     public static URI createId(String entitySetName, Object id) {
         try {
             return new URI(entitySetName + "(" + String.valueOf(id) + ")");

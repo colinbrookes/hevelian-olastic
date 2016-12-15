@@ -25,6 +25,7 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -186,7 +187,7 @@ public class EntityCollectionRetrieverTest extends BaseProcessorTest {
         Client client = mockClient(builder);
         EntityCollectionRetriever retriever = new EntityCollectionRetriever(defaultUriInfo,
                 defaultOData, client, defaultRawBaseUri, defaultMetadata, defaultContentType);
-        retriever.retrieveData(query, null);
+        retriever.retrieveData(query, new BoolQueryBuilder());
 
         verify(client, times(1)).prepareSearch(anyString());
         verify(builder, times(1)).setSize(sizeCaptor.capture());
@@ -213,7 +214,7 @@ public class EntityCollectionRetrieverTest extends BaseProcessorTest {
         Client client = mockClient(builder);
         EntityCollectionRetriever retriever = new EntityCollectionRetriever(uriInfo, defaultOData,
                 client, defaultRawBaseUri, defaultMetadata, defaultContentType);
-        retriever.retrieveData(query, null);
+        retriever.retrieveData(query, new BoolQueryBuilder());
         verify(client, times(1)).prepareSearch(anyString());
 
         verify(builder, times(1)).setFetchSource(sourceCaptor.capture(),

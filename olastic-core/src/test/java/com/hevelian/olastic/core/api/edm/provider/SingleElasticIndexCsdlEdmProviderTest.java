@@ -13,7 +13,6 @@ import org.apache.olingo.commons.api.ex.ODataException;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.hevelian.olastic.core.api.edm.provider.SingleElasticIndexCsdlEdmProvider;
 import com.hevelian.olastic.core.common.NestedMappingStrategy;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
@@ -30,7 +29,7 @@ public class SingleElasticIndexCsdlEdmProviderTest {
     private static final String AUTHORS_INDEX = "authors";
 
     private static final String AUTHORS_NAMESPACE = ElasticToCsdlMapper.DEFAULT_NAMESPACE
-            + MetaDataUtils.NEMESPACE_SEPARATOR + AUTHORS_INDEX;
+            + MetaDataUtils.NAMESPACE_SEPARATOR + AUTHORS_INDEX;
 
     @Mock
     private IMappingMetaDataProvider metaDataProvider;
