@@ -1,6 +1,12 @@
 package com.hevelian.olastic.core.processors.data;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -61,8 +67,6 @@ import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.utils.ProcessorUtils;
 
 import lombok.extern.log4j.Log4j2;
-
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * This class provides high-level methods for retrieving and converting the
@@ -426,8 +430,7 @@ public abstract class DataRetriever {
         } else if (entityType.getProperty(name).getType() instanceof EdmDate) {
             Date date = DatatypeConverter.parseDateTime((String) value).getTime();
             e.addProperty(createPrimitiveProperty(name, date));
-        }
-        else {
+        } else {
             e.addProperty(createPrimitiveProperty(name, value));
         }
     }

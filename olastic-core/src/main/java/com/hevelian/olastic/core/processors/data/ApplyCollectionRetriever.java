@@ -81,8 +81,8 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      *            service metadata
      * @param responseFormat
      *            response format
-     * @param groupBy
-     *            group by instance
+     * @param applyOption
+     *            apply option
      * @throws ODataApplicationException
      */
     public ApplyCollectionRetriever(UriInfo uriInfo, ElasticOData odata, Client client,
@@ -144,7 +144,9 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @throws ODataApplicationException
      *             if any error occurred
      */
+    private List<AggregationBuilder> getSimpleAggQuery(Aggregate aggregate,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
+        List<AggregationBuilder> aggs = new ArrayList<>();
         for (AggregateExpression aggExpression : aggregate.getExpressions()) {
             try {
                 String alias = aggExpression.getAlias();
@@ -345,6 +347,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     private void addGroupByAggs(ApplyOption apply, AggregationBuilder groupByQuery,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
         for (Aggregate agg : getAggregations(apply)) {
+            for (AggregationBuilder aggQuery : getSimpleAggQuery(agg, entityType)) {
                 groupByQuery.subAggregation(aggQuery);
             }
         }
