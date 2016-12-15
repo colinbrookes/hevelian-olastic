@@ -28,6 +28,9 @@ import org.apache.olingo.server.api.uri.UriResourceKind;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourcePartTyped;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
+import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
+import org.apache.olingo.server.api.uri.queryoption.ApplyItem.Kind;
+import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
@@ -37,6 +40,7 @@ import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
+import org.apache.olingo.server.api.uri.queryoption.apply.Filter;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
@@ -44,8 +48,8 @@ import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
@@ -127,20 +131,27 @@ public abstract class DataRetriever {
      */
     protected QueryBuilder getFilterQuery() throws ODataApplicationException {
         FilterOption filterOption = uriInfo.getFilterOption();
-        QueryBuilder filterQueryBuilder = null;
-        if (filterOption != null) {
-            Expression expression = filterOption.getExpression();
-            try {
-                filterQueryBuilder = (QueryBuilder) expression
-                        .accept(new ElasticSearchExpressionVisitor());
-            } catch (ExpressionVisitException e) {
-                log.debug(e);
+        ApplyOption applyOption = uriInfo.getApplyOption();
+        BoolQueryBuilder filterQuery = new BoolQueryBuilder();
+        try {
+            if (filterOption != null) {
+                Expression expression = filterOption.getExpression();
+                filterQuery.filter(
+                        (QueryBuilder) expression.accept(new ElasticSearchExpressionVisitor()));
+            } else if (applyOption != null) {
+                for (ApplyItem applyItem : applyOption.getApplyItems()) {
+                    if (applyItem.getKind() == Kind.FILTER) {
+                        Filter filter = (Filter) applyItem;
+                        Expression expression = filter.getFilterOption().getExpression();
+                        filterQuery.filter((QueryBuilder) expression
+                                .accept(new ElasticSearchExpressionVisitor()));
+                    }
+                }
             }
+        } catch (ExpressionVisitException e) {
+            log.debug(e);
         }
-        if (filterQueryBuilder == null) {
-            filterQueryBuilder = new MatchAllQueryBuilder();
-        }
-        return filterQueryBuilder;
+        return filterQuery;
     }
 
     /**
@@ -320,6 +331,25 @@ public abstract class DataRetriever {
         return ESClient.executeRequest(query.getIndex(), query.getType(), client,
                 new BoolQueryBuilder().filter(query.getQuery()).filter(filter), getPagination(),
                 query.getFields());
+    }
+
+    /**
+     * Gets the data from ES.
+     *
+     * @param query
+     *            query builder
+     * @param filter
+     *            raw ES query with filter
+     * @param aggs
+     *            aggregations queries list
+     * @return ES response
+     * @throws ODataApplicationException
+     *             if any error occurred
+     */
+    protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter,
+            List<AbstractAggregationBuilder> aggs) throws ODataApplicationException {
+        return ESClient.executeRequest(query.getIndex(), query.getType(), getClient(),
+                new BoolQueryBuilder().filter(query.getQuery()).filter(filter), aggs);
     }
 
     /**

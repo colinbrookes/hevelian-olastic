@@ -65,13 +65,17 @@ public class ESClient {
      *            ES raw client
      * @param query
      *            ES raw search query
-     * @param aggregation
+     * @param aggs
      *            aggregation query
      * @return ES search response
      */
     public static SearchResponse executeRequest(String index, String type, Client client,
-            QueryBuilder query, AbstractAggregationBuilder aggregation) {
-        return client.prepareSearch(index).setTypes(type).setQuery(query)
-                .addAggregation(aggregation).setSize(0).execute().actionGet();
+            QueryBuilder query, List<AbstractAggregationBuilder> aggs) {
+        SearchRequestBuilder requestBuilder = client.prepareSearch(index).setTypes(type)
+                .setQuery(query);
+        for (AbstractAggregationBuilder agg : aggs) {
+            requestBuilder.addAggregation(agg);
+        }
+        return requestBuilder.setSize(0).execute().actionGet();
     }
 }
