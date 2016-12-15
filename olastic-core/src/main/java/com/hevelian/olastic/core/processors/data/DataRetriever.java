@@ -1,9 +1,6 @@
 package com.hevelian.olastic.core.processors.data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -16,6 +13,7 @@ import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
@@ -63,6 +61,8 @@ import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.utils.ProcessorUtils;
 
 import lombok.extern.log4j.Log4j2;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * This class provides high-level methods for retrieving and converting the
@@ -423,7 +423,11 @@ public abstract class DataRetriever {
             e.addProperty(createPropertyList(name, (List<Object>) value, entityType));
         } else if (value instanceof Map) {
             e.addProperty(createComplexProperty(name, (Map<String, Object>) value));
-        } else {
+        } else if (entityType.getProperty(name).getType() instanceof EdmDate) {
+            Date date = DatatypeConverter.parseDateTime((String) value).getTime();
+            e.addProperty(createPrimitiveProperty(name, date));
+        }
+        else {
             e.addProperty(createPrimitiveProperty(name, value));
         }
     }
