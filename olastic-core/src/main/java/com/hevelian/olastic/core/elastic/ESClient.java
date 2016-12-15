@@ -7,7 +7,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -70,10 +70,10 @@ public class ESClient {
      * @return ES search response
      */
     public static SearchResponse executeRequest(String index, String type, Client client,
-            QueryBuilder query, List<AbstractAggregationBuilder> aggs) {
+            QueryBuilder query, List<AggregationBuilder> aggs) {
         SearchRequestBuilder requestBuilder = client.prepareSearch(index).setTypes(type)
                 .setQuery(query);
-        for (AbstractAggregationBuilder agg : aggs) {
+        for (AggregationBuilder agg : aggs) {
             requestBuilder.addAggregation(agg);
         }
         return requestBuilder.setSize(0).execute().actionGet();

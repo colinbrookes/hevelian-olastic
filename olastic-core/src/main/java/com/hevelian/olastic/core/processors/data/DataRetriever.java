@@ -49,7 +49,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
@@ -346,7 +346,7 @@ public abstract class DataRetriever {
      *             if any error occurred
      */
     protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter,
-            List<AbstractAggregationBuilder> aggs) throws ODataApplicationException {
+            List<AggregationBuilder> aggs) throws ODataApplicationException {
         return ESClient.executeRequest(query.getIndex(), query.getType(), getClient(),
                 new BoolQueryBuilder().filter(query.getQuery()).filter(filter), aggs);
     }

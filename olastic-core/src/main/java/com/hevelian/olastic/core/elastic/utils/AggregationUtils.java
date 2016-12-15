@@ -14,7 +14,7 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
 import org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression.StandardMethod;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 /**
  * Utility class with helper methods to work with aggregations.
@@ -37,8 +37,7 @@ public final class AggregationUtils {
      *            agg field
      * @return created aggregation
      */
-    public static AbstractAggregationBuilder getAggQuery(StandardMethod method, String name,
-            String field) {
+    public static AggregationBuilder getAggQuery(StandardMethod method, String name, String field) {
         switch (method) {
         case SUM:
             return sum(name).field(field);

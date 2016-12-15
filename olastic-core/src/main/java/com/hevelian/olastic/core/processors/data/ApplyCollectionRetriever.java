@@ -41,7 +41,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation.SingleValue;
 
 import com.hevelian.olastic.core.ElasticOData;
@@ -144,9 +144,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @throws ODataApplicationException
      *             if any error occurred
      */
-    protected List<AbstractAggregationBuilder> getSimpleAggQuery(Aggregate aggregate,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
-        List<AbstractAggregationBuilder> aggs = new ArrayList<>();
         for (AggregateExpression aggExpression : aggregate.getExpressions()) {
             try {
                 String alias = aggExpression.getAlias();
@@ -289,13 +287,13 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @return list of fields
      * @throws ODataApplicationException
      */
-    private AbstractAggregationBuilder getGroupByQuery(GroupBy groupBy,
+    private AbstractAggregationBuilder<TermsAggregationBuilder> getGroupByQuery(GroupBy groupBy,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
         List<String> fields = getFields(entityType);
         Collections.reverse(fields);
         // Last because of reverse
         String lastField = fields.remove(0);
-        AggregationBuilder<TermsBuilder> groupByQuery = AggregationBuilders.terms(lastField)
+        TermsAggregationBuilder groupByQuery = AggregationBuilders.terms(lastField)
                 .field(lastField);
         addGroupByAggs(groupBy.getApplyOption(), groupByQuery, entityType);
         for (String field : fields) {
@@ -344,10 +342,9 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @throws ODataApplicationException
      *             if any error occurred
      */
-    private void addGroupByAggs(ApplyOption apply, AggregationBuilder<TermsBuilder> groupByQuery,
+    private void addGroupByAggs(ApplyOption apply, AggregationBuilder groupByQuery,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
         for (Aggregate agg : getAggregations(apply)) {
-            for (AbstractAggregationBuilder aggQuery : getSimpleAggQuery(agg, entityType)) {
                 groupByQuery.subAggregation(aggQuery);
             }
         }
