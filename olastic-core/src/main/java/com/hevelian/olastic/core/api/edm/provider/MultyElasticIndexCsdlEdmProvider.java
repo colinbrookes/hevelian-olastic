@@ -31,7 +31,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
             Set<String> indices) {
         super(metaDataProvider);
-        initalizeNamespaces(indices);
+        initializeNamespaces(indices);
     }
 
     /**
@@ -48,7 +48,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
             Set<String> indices, NestedMappingStrategy nestedMappingStrategy) {
         super(metaDataProvider, nestedMappingStrategy);
-        initalizeNamespaces(indices);
+        initializeNamespaces(indices);
     }
 
     /**
@@ -65,7 +65,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
             Set<String> indices, IElasticToCsdlMapper csdlMapper) {
         super(metaDataProvider, csdlMapper);
-        initalizeNamespaces(indices);
+        initializeNamespaces(indices);
     }
 
     /**
@@ -86,7 +86,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
             Set<String> indices, IElasticToCsdlMapper csdlMapper,
             NestedMappingStrategy nestedMappingStrategy) {
         super(metaDataProvider, csdlMapper, nestedMappingStrategy);
-        initalizeNamespaces(indices);
+        initializeNamespaces(indices);
     }
 
     /**
@@ -95,7 +95,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      * @param indices
      *            list of indices from Elasticsearch
      */
-    protected void initalizeNamespaces(Set<String> indices) {
+    protected void initializeNamespaces(Set<String> indices) {
         this.namespaces = new ArrayList<>(indices.size());
         for (String index : indices) {
             String namespace = csdlMapper.eIndexToCsdlNamespace(index);
