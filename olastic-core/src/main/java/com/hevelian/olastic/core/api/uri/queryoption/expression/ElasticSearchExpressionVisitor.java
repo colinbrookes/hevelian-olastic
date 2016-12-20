@@ -2,6 +2,8 @@ package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.getKeywordField;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
@@ -22,8 +24,6 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.elasticsearch.index.query.*;
-
-import static com.hevelian.olastic.core.utils.ElasticUtils.getKeywordField;
 
 public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Object> {
 

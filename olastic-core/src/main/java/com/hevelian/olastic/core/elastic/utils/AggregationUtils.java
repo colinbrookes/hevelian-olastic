@@ -4,10 +4,16 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.avg;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.max;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.min;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
+import static org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders.avgBucket;
+import static org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders.maxBucket;
+import static org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders.minBucket;
+import static org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders.sumBucket;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
@@ -15,6 +21,7 @@ import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
 import org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression.StandardMethod;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 
 /**
  * Utility class with helper methods to work with aggregations.
@@ -22,6 +29,9 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
  * @author rdidyk
  */
 public final class AggregationUtils {
+
+    /** Buckets path separator in Pipeline Aggregation. */
+    public static final String BUCKETS_PATH_SEPARATOR = ">";
 
     private AggregationUtils() {
     }
@@ -54,6 +64,35 @@ public final class AggregationUtils {
     }
 
     /**
+     * Create's pipeline aggregation query based on {@link StandardMethod}.
+     * 
+     * @param method
+     *            method
+     * @param name
+     *            agg name
+     * @param path
+     *            buckets path
+     * @return created aggregation
+     */
+    public static PipelineAggregationBuilder getPipelineAggQuery(StandardMethod method, String name,
+            String... path) {
+        String bucketsPath = StringUtils.join(path, BUCKETS_PATH_SEPARATOR);
+        switch (method) {
+        case SUM:
+            return sumBucket(name, bucketsPath);
+        case MAX:
+            return maxBucket(name, bucketsPath);
+        case MIN:
+            return minBucket(name, bucketsPath);
+        case AVERAGE:
+            return avgBucket(name, bucketsPath);
+        default:
+            throw new ODataRuntimeException(
+                    String.format("Aggregate method '%s' is not supported yet.", method));
+        }
+    }
+
+    /**
      * Get's {@link Aggregate} list from {@link ApplyOption} option.
      * 
      * @param applyOption
@@ -61,15 +100,7 @@ public final class AggregationUtils {
      * @return item list
      */
     public static List<Aggregate> getAggregations(ApplyOption applyOption) {
-        List<Aggregate> aggregations = new ArrayList<>();
-        if (applyOption != null) {
-            for (ApplyItem item : applyOption.getApplyItems()) {
-                if (item.getKind() == ApplyItem.Kind.AGGREGATE) {
-                    aggregations.add((Aggregate) item);
-                }
-            }
-        }
-        return aggregations;
+        return getItems(applyOption, e -> e.getKind() == ApplyItem.Kind.AGGREGATE, Aggregate.class);
     }
 
     /**
@@ -80,15 +111,17 @@ public final class AggregationUtils {
      * @return item list
      */
     public static List<GroupBy> getGroupByItems(ApplyOption applyOption) {
-        List<GroupBy> groupByList = new ArrayList<>();
+        return getItems(applyOption, e -> e.getKind() == ApplyItem.Kind.GROUP_BY, GroupBy.class);
+    }
+
+    private static <T> List<T> getItems(ApplyOption applyOption, Predicate<ApplyItem> predicate,
+            Class<T> clazz) {
+        List<T> itemsList = new ArrayList<>();
         if (applyOption != null) {
-            for (ApplyItem applyItem : applyOption.getApplyItems()) {
-                if (applyItem.getKind() == ApplyItem.Kind.GROUP_BY) {
-                    groupByList.add((GroupBy) applyItem);
-                }
-            }
+            applyOption.getApplyItems().stream().filter(predicate).map(clazz::cast)
+                    .forEach(itemsList::add);
         }
-        return groupByList;
+        return itemsList;
     }
 
 }

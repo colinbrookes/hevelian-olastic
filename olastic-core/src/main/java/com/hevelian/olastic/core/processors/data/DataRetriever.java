@@ -1,7 +1,6 @@
 package com.hevelian.olastic.core.processors.data;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,11 +13,13 @@ import org.apache.olingo.commons.api.data.ContextURL.Suffix;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -423,13 +424,19 @@ public abstract class DataRetriever {
     @SuppressWarnings("unchecked")
     protected void addProperty(Entity e, String name, Object value,
             ElasticEdmEntityType entityType) {
+        EdmElement property = entityType.getProperty(name);
         if (value instanceof List) {
             e.addProperty(createPropertyList(name, (List<Object>) value, entityType));
         } else if (value instanceof Map) {
             e.addProperty(createComplexProperty(name, (Map<String, Object>) value));
-        } else if (entityType.getProperty(name).getType() instanceof EdmDate) {
-            Date date = DatatypeConverter.parseDateTime((String) value).getTime();
-            e.addProperty(createPrimitiveProperty(name, date));
+        } else if (property != null) {
+            Object modifiedValue = value;
+            if (property.getType() instanceof EdmDate) {
+                modifiedValue = DatatypeConverter.parseDateTime((String) value).getTime();
+            } else if (property.getType() instanceof EdmBoolean) {
+                modifiedValue = (Long) value != 0;
+            }
+            e.addProperty(createPrimitiveProperty(name, modifiedValue));
         } else {
             e.addProperty(createPrimitiveProperty(name, value));
         }

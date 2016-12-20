@@ -3,22 +3,22 @@ package com.hevelian.olastic.core.processors.data;
 import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggQuery;
 import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggregations;
 import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getGroupByItems;
+import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -33,12 +33,13 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -49,6 +50,7 @@ import com.hevelian.olastic.core.ElasticServiceMetadata;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.ESClient;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 
 import lombok.extern.log4j.Log4j2;
@@ -62,9 +64,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ApplyCollectionRetriever extends EntityCollectionRetriever {
 
-    private GroupBy groupBy;
     private String countAlias;
-    private Aggregate aggregate;
+    private GroupBy groupBy;
+    private List<Aggregate> aggregations;
 
     /**
      * Fully initializes {@link ApplyCollectionRetriever}.
@@ -89,24 +91,24 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
             String rawBaseUri, ElasticServiceMetadata serviceMetadata, ContentType responseFormat,
             ApplyOption applyOption) throws ODataApplicationException {
         super(uriInfo, odata, client, rawBaseUri, serviceMetadata, responseFormat);
-        List<Aggregate> aggregations = getAggregations(applyOption);
+        initializeValues(applyOption);
+    }
+
+    private void initializeValues(ApplyOption applyOption) throws ODataApplicationException {
         List<GroupBy> groupByItems = getGroupByItems(applyOption);
         if (!groupByItems.isEmpty()) {
             if (groupByItems.size() > 1) {
-                throw new ODataApplicationException("Only one 'groupBy' is supported.",
-                        HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+                throwNotImplemented("Combining Transformations per Group is not supported.");
             }
-            groupBy = groupByItems.get(0);
-        } else if (!aggregations.isEmpty()) {
-            aggregate = aggregations.get(0);
+            this.groupBy = groupByItems.get(0);
         }
+        this.aggregations = getAggregations(applyOption);
     }
 
     @Override
     public SerializerResult getSerializedData() throws ODataApplicationException {
         if (isCount()) {
-            throw new ODataApplicationException("Count option for groupby is not implemented.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+            throwNotImplemented("Count option for groupby is not implemented.");
         }
         QueryWithEntity queryWithEntity = getQueryWithEntity();
         ElasticEdmEntitySet entitySet = queryWithEntity.getEntitySet();
@@ -118,23 +120,47 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
         SearchResponse searchResponse;
         if (isAggregateOnly()) {
             searchResponse = retrieveData(queryBuilder, filter,
-                    getSimpleAggQuery(aggregate, entityType));
+                    getSimpleAggQueries(aggregations, entityType));
             entities.getEntities().add(getAggregatedEntity(searchResponse, entityType));
         } else if (isGroupByOnly()) {
             searchResponse = retrieveData(queryBuilder, filter,
                     Arrays.asList(getGroupByQuery(groupBy, entitySet.getEntityType())));
             entities.getEntities().addAll(getAggregatedEntities(
                     searchResponse.getAggregations().asMap(), null, entityType));
-
         } else {
-            // TODO Implement
+            searchResponse = retrieveData(queryBuilder, filter,
+                    Arrays.asList(getGroupByQuery(groupBy, entitySet.getEntityType())),
+                    getPipelineAggQuery(aggregations, entityType));
+            entities.getEntities().add(getAggregatedEntity(searchResponse, entityType));
         }
         return serializeEntities(entities, entitySet);
 
     }
 
     /**
-     * Get's and creates aggregation queries from {@link Aggregate} in URL.1
+     * Gets the data from ES.
+     *
+     * @param query
+     *            query builder
+     * @param filter
+     *            raw ES query with filter
+     * @param aggs
+     *            aggregations queries list
+     * @param pipelineAggs
+     *            pipeline aggregation queries
+     * @return ES response
+     * @throws ODataApplicationException
+     *             if any error occurred
+     */
+    protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter,
+            List<AggregationBuilder> aggs, List<PipelineAggregationBuilder> pipelineAggs)
+            throws ODataApplicationException {
+        return ESClient.executeRequest(query.getIndex(), query.getType(), getClient(),
+                new BoolQueryBuilder().filter(query.getQuery()).filter(filter), aggs, pipelineAggs);
+    }
+
+    /**
+     * Get's and creates aggregation queries from {@link Aggregate} in URL.
      * 
      * @param aggregate
      *            aggregate from URL
@@ -144,11 +170,17 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @throws ODataApplicationException
      *             if any error occurred
      */
-    private List<AggregationBuilder> getSimpleAggQuery(Aggregate aggregate,
+    protected List<AggregationBuilder> getSimpleAggQueries(List<Aggregate> aggregations,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
+        List<AggregateExpression> expressions = aggregations.stream()
+                .flatMap(agg -> agg.getExpressions().stream()).collect(Collectors.toList());
         List<AggregationBuilder> aggs = new ArrayList<>();
-        for (AggregateExpression aggExpression : aggregate.getExpressions()) {
+        for (AggregateExpression aggExpression : expressions) {
             try {
+                if (aggExpression.getInlineAggregateExpression() != null) {
+                    throwNotImplemented(
+                            "Aggregate for navigation or complex type fields is not supported.");
+                }
                 String alias = aggExpression.getAlias();
                 Expression expr = aggExpression.getExpression();
                 if (expr != null) {
@@ -158,14 +190,12 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
                 } else {
                     List<UriResource> path = aggExpression.getPath();
                     if (path.size() > 1) {
-                        throw new ODataApplicationException(
-                                "Aggregate for navigation or complex type fields is not supported yet.",
-                                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+                        throwNotImplemented(
+                                "Aggregate for navigation or complex type fields is not supported.");
                     }
                     UriResource resource = path.get(0);
                     if (resource.getKind() == UriResourceKind.count) {
                         countAlias = alias;
-                        continue;
                     }
                 }
             } catch (ExpressionVisitException e) {
@@ -184,16 +214,13 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      *            entity type
      * @return created entity
      */
-    private Entity getAggregatedEntity(SearchResponse response, ElasticEdmEntityType entityType) {
+    protected Entity getAggregatedEntity(SearchResponse response, ElasticEdmEntityType entityType) {
         Entity entity = new Entity();
-        Aggregations aggregations = response.getAggregations();
-        if (aggregations != null) {
-            for (Entry<String, Aggregation> entry : aggregations.asMap().entrySet()) {
-                Aggregation value = entry.getValue();
-                if (value instanceof SingleValue) {
-                    addProperty(entity, value.getName(), ((SingleValue) value).value(), entityType);
-                }
-            }
+        Aggregations aggs = response.getAggregations();
+        if (aggs != null) {
+            aggs.asList().stream().filter(SingleValue.class::isInstance)
+                    .map(SingleValue.class::cast)
+                    .forEach(aggr -> addProperty(entity, aggr.getName(), aggr.value(), entityType));
         }
         addCountIfNeeded(entity, response.getHits().getTotalHits());
         return entity;
@@ -214,7 +241,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      *            entity type
      * @return list of entities
      */
-    private List<Entity> getAggregatedEntities(Map<String, Aggregation> aggs, Entity parent,
+    protected List<Entity> getAggregatedEntities(Map<String, Aggregation> aggs, Entity parent,
             ElasticEdmEntityType entityType) {
         List<Entity> entities = new ArrayList<>();
         for (Entry<String, Terms> entry : collectTerms(aggs).entrySet()) {
@@ -244,23 +271,15 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     }
 
     private static Map<String, Terms> collectTerms(Map<String, Aggregation> aggregations) {
-        Map<String, Terms> terms = new HashMap<>();
-        for (Entry<String, Aggregation> entry : aggregations.entrySet()) {
-            if (entry.getValue() instanceof Terms) {
-                terms.put(entry.getKey(), (Terms) entry.getValue());
-            }
-        }
-        return terms;
+        return aggregations.entrySet().stream().filter(e -> e.getValue() instanceof Terms)
+                .collect(Collectors.toMap(e -> e.getKey(), e -> (Terms) e.getValue()));
     }
 
     private void addAggsAndCountIfNeeded(Map<String, Aggregation> aggregations, long count,
             Entity entity, ElasticEdmEntityType entityType) {
-        for (Entry<String, Aggregation> entry : aggregations.entrySet()) {
-            Aggregation value = entry.getValue();
-            if (value instanceof SingleValue) {
-                addProperty(entity, entry.getKey(), ((SingleValue) value).value(), entityType);
-            }
-        }
+        aggregations.entrySet().stream().filter(e -> e.getValue() instanceof SingleValue)
+                .forEach(e -> addProperty(entity, e.getKey(), ((SingleValue) e.getValue()).value(),
+                        entityType));
         addCountIfNeeded(entity, count);
     }
 
@@ -289,18 +308,19 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @return list of fields
      * @throws ODataApplicationException
      */
-    private AbstractAggregationBuilder<TermsAggregationBuilder> getGroupByQuery(GroupBy groupBy,
-            ElasticEdmEntityType entityType) throws ODataApplicationException {
+    protected AggregationBuilder getGroupByQuery(GroupBy groupBy, ElasticEdmEntityType entityType)
+            throws ODataApplicationException {
         List<String> fields = getFields(entityType);
         Collections.reverse(fields);
         // Last because of reverse
         String lastField = fields.remove(0);
         TermsAggregationBuilder groupByQuery = AggregationBuilders.terms(lastField)
-                .field(lastField);
-        addGroupByAggs(groupBy.getApplyOption(), groupByQuery, entityType);
+                .field(addKeywordIfNeeded(lastField, entityType));
+        getSimpleAggQueries(getAggregations(groupBy.getApplyOption()), entityType)
+                .forEach(groupByQuery::subAggregation);
         for (String field : fields) {
-            groupByQuery = AggregationBuilders.terms(field).field(field)
-                    .subAggregation(groupByQuery);
+            groupByQuery = AggregationBuilders.terms(field)
+                    .field(addKeywordIfNeeded(field, entityType)).subAggregation(groupByQuery);
         }
         return groupByQuery;
     }
@@ -319,46 +339,43 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
         for (GroupByItem item : groupBy.getGroupByItems()) {
             List<UriResource> path = item.getPath();
             if (path.size() > 1) {
-                throw new ODataApplicationException(
-                        "Groupby navigation or complex type fields is not supported yet.",
-                        HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+                throwNotImplemented("Grouping by navigation property is not supported yet.");
             }
             UriResource resource = path.get(0);
             if (resource.getKind() == UriResourceKind.primitiveProperty) {
                 groupByFields.add(
                         entityType.getEProperties().get(resource.getSegmentValue()).getEField());
+            } else {
+                throwNotImplemented("Grouping by complex type is not supported yet.");
             }
         }
         return groupByFields;
     }
 
     /**
-     * Add's aggregations to groupby query.
+     * Get's and creates Pipeline Aggregation queries from {@link Aggregate} in
+     * URL.
      * 
-     * @param apply
-     *            groupby apply option
-     * @param groupByQuery
-     *            groupby query
+     * @param aggregations
+     *            aggregations from URL
      * @param entityType
      *            entity type
+     * @return list of queries
      * @throws ODataApplicationException
      *             if any error occurred
      */
-    private void addGroupByAggs(ApplyOption apply, AggregationBuilder groupByQuery,
+    protected List<PipelineAggregationBuilder> getPipelineAggQuery(List<Aggregate> aggregations,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
-        for (Aggregate agg : getAggregations(apply)) {
-            for (AggregationBuilder aggQuery : getSimpleAggQuery(agg, entityType)) {
-                groupByQuery.subAggregation(aggQuery);
-            }
-        }
+        throwNotImplemented("Aggregation for grouped and aggregated data is not implemented.");
+        return new ArrayList<>();
     }
 
     private boolean isAggregateOnly() {
-        return groupBy == null && aggregate != null;
+        return groupBy == null && !aggregations.isEmpty();
     }
 
     private boolean isGroupByOnly() {
-        return groupBy != null && aggregate == null;
+        return groupBy != null && aggregations.isEmpty();
     }
 
 }

@@ -15,7 +15,10 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 /**
  * Contains utility methods.
  */
-public class ProcessorUtils {
+public final class ProcessorUtils {
+    private ProcessorUtils() {
+    }
+
     /**
      * Example: For the following navigation:
      * DemoService.svc/Categories(1)/Products we need the EdmEntitySet for the
@@ -30,19 +33,15 @@ public class ProcessorUtils {
      * we need the startEntitySet "Categories" in order to retrieve the target
      * EntitySet "Products"
      */
-    public static ElasticEdmEntitySet getNavigationTargetEntitySet(
-            ElasticEdmEntitySet startEdmEntitySet, EdmNavigationProperty edmNavigationProperty)
-            throws ODataApplicationException {
-
-        ElasticEdmEntitySet navigationTargetEntitySet = null;
-
-        String navPropName = edmNavigationProperty.getName();
-        EdmBindingTarget edmBindingTarget = startEdmEntitySet.getRelatedBindingTarget(navPropName);
+    public static ElasticEdmEntitySet getNavigationTargetEntitySet(ElasticEdmEntitySet entitySet,
+            EdmNavigationProperty navProperty) throws ODataApplicationException {
+        ElasticEdmEntitySet navigationTargetEntitySet;
+        EdmBindingTarget edmBindingTarget = entitySet
+                .getRelatedBindingTarget(navProperty.getName());
         if (edmBindingTarget == null) {
             throw new ODataApplicationException("Not supported.",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
-
         if (edmBindingTarget instanceof ElasticEdmEntitySet) {
             navigationTargetEntitySet = (ElasticEdmEntitySet) edmBindingTarget;
         } else {
@@ -54,16 +53,33 @@ public class ProcessorUtils {
 
     /**
      * Generates id string, for example: record(2)
-     * @param entitySetName name of entity set
-     * @param id odata id string
+     * 
+     * @param entitySetName
+     *            name of entity set
+     * @param id
+     *            odata id string
      * @return
      */
     public static URI createId(String entitySetName, Object id) {
         try {
-            return new URI(entitySetName + "(" + String.valueOf(id) + ")");
+            return new URI(entitySetName + "(" + id + ")");
         } catch (URISyntaxException e) {
             throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
         }
+    }
+
+    /**
+     * Method throws exception with HTTP.501 status code and with appropriate
+     * message.
+     * 
+     * @param msg
+     *            message to show
+     * @throws ODataApplicationException
+     *             created exception
+     */
+    public static void throwNotImplemented(String msg) throws ODataApplicationException {
+        throw new ODataApplicationException(msg, HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
+                Locale.ROOT);
     }
 
 }

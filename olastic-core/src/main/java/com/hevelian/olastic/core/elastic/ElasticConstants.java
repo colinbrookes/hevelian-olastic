@@ -11,10 +11,10 @@ public final class ElasticConstants {
     public static final String PROPERTIES_PROPERTY = "properties";
     public static final String PARENT_PROPERTY = "_parent";
     public static final String ID_FIELD_NAME = "_id";
-    /**suffix for keyword (not-analyzed) field*/
-    public final static String KEYWORD_SUFFIX = "keyword";
-    /**field suffix delimiter*/
-    public final static String SUFFIX_DELIMITER = ".";
+    /** suffix for keyword (not-analyzed) field */
+    public static final String KEYWORD_SUFFIX = "keyword";
+    /** field suffix delimiter */
+    public static final String SUFFIX_DELIMITER = ".";
 
     private ElasticConstants() {
     }

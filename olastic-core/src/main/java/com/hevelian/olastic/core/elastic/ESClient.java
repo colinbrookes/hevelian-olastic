@@ -6,8 +6,10 @@ import java.util.List;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -55,7 +57,7 @@ public class ESClient {
     }
 
     /**
-     * Execute query request with filter and aggregation.
+     * Execute query request with filter and aggregations.
      * 
      * @param index
      *            ES index
@@ -73,9 +75,34 @@ public class ESClient {
             QueryBuilder query, List<AggregationBuilder> aggs) {
         SearchRequestBuilder requestBuilder = client.prepareSearch(index).setTypes(type)
                 .setQuery(query);
-        for (AggregationBuilder agg : aggs) {
-            requestBuilder.addAggregation(agg);
-        }
+        aggs.forEach(requestBuilder::addAggregation);
+        return requestBuilder.setSize(0).execute().actionGet();
+    }
+
+    /**
+     * Execute query request with filter and aggregations.
+     * 
+     * @param index
+     *            ES index
+     * @param type
+     *            ES type
+     * @param client
+     *            ES raw client
+     * @param query
+     *            ES raw search query
+     * @param aggs
+     *            aggregation queries
+     * @param pipelineAggs
+     *            pipeline aggregation queries
+     * @return ES search response
+     */
+    public static SearchResponse executeRequest(String index, String type, Client client,
+            BoolQueryBuilder query, List<AggregationBuilder> aggs,
+            List<PipelineAggregationBuilder> pipelineAggs) {
+        SearchRequestBuilder requestBuilder = client.prepareSearch(index).setTypes(type)
+                .setQuery(query);
+        aggs.forEach(requestBuilder::addAggregation);
+        pipelineAggs.forEach(requestBuilder::addAggregation);
         return requestBuilder.setSize(0).execute().actionGet();
     }
 }
