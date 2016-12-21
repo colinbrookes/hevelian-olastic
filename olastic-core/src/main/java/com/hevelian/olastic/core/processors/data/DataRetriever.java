@@ -33,21 +33,15 @@ import org.apache.olingo.server.api.uri.UriResourceKind;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourcePartTyped;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
-import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
-import org.apache.olingo.server.api.uri.queryoption.ApplyItem.Kind;
-import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
-import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
-import org.apache.olingo.server.api.uri.queryoption.apply.Filter;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
 import org.elasticsearch.action.search.SearchResponse;
@@ -58,7 +52,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.elastic.ESClient;
@@ -67,14 +60,11 @@ import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.utils.ProcessorUtils;
 
-import lombok.extern.log4j.Log4j2;
-
 /**
  * This class provides high-level methods for retrieving and converting the
  * data. It contains all the metadata and request parameters needed for
  * requesting and serializing the data.
  */
-@Log4j2
 public abstract class DataRetriever {
 
     private UriInfo uriInfo;
@@ -121,41 +111,9 @@ public abstract class DataRetriever {
         QueryWithEntity queryWithEntity = getQueryWithEntity();
         ElasticEdmEntitySet entitySet = queryWithEntity.getEntitySet();
         ESQueryBuilder queryBuilder = queryWithEntity.getQuery();
-        SearchResponse searchResponse = retrieveData(queryBuilder, getFilterQuery());
+        SearchResponse searchResponse = retrieveData(queryBuilder);
 
         return serialize(searchResponse, entitySet);
-    }
-
-    /**
-     * Method get's filter query from URL.
-     * 
-     * @return filter query
-     * @throws ODataApplicationException
-     *             if any error occurred
-     */
-    protected QueryBuilder getFilterQuery() throws ODataApplicationException {
-        FilterOption filterOption = uriInfo.getFilterOption();
-        ApplyOption applyOption = uriInfo.getApplyOption();
-        BoolQueryBuilder filterQuery = new BoolQueryBuilder();
-        try {
-            if (filterOption != null) {
-                Expression expression = filterOption.getExpression();
-                filterQuery.filter(
-                        (QueryBuilder) expression.accept(new ElasticSearchExpressionVisitor()));
-            } else if (applyOption != null) {
-                for (ApplyItem applyItem : applyOption.getApplyItems()) {
-                    if (applyItem.getKind() == Kind.FILTER) {
-                        Filter filter = (Filter) applyItem;
-                        Expression expression = filter.getFilterOption().getExpression();
-                        filterQuery.filter((QueryBuilder) expression
-                                .accept(new ElasticSearchExpressionVisitor()));
-                    }
-                }
-            }
-        } catch (ExpressionVisitException e) {
-            log.debug(e);
-        }
-        return filterQuery;
     }
 
     /**
@@ -325,15 +283,12 @@ public abstract class DataRetriever {
      *
      * @param query
      *            query builder
-     * @param filter
-     *            raw ES query with filter
      * @return ES response
      * @throws ODataApplicationException
      */
-    protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter)
-            throws ODataApplicationException {
+    protected SearchResponse retrieveData(ESQueryBuilder query) throws ODataApplicationException {
         return ESClient.executeRequest(query.getIndex(), query.getType(), client,
-                new BoolQueryBuilder().filter(query.getQuery()).filter(filter), getPagination(),
+                new BoolQueryBuilder().filter(query.getQuery()), getPagination(),
                 query.getFields());
     }
 
@@ -433,7 +388,10 @@ public abstract class DataRetriever {
             Object modifiedValue = value;
             if (property.getType() instanceof EdmDate) {
                 modifiedValue = DatatypeConverter.parseDateTime((String) value).getTime();
-            } else if (property.getType() instanceof EdmBoolean) {
+            } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
+                // When Elasticsearch aggregates data it return's boolean as
+                // number value (1,0), but when it searches then normal boolean
+                // value will be retrieved
                 modifiedValue = (Long) value != 0;
             }
             e.addProperty(createPrimitiveProperty(name, modifiedValue));

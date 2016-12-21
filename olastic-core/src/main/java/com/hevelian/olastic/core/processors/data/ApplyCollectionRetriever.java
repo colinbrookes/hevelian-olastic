@@ -1,9 +1,9 @@
 package com.hevelian.olastic.core.processors.data;
 
 import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggQuery;
-import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggregations;
-import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getGroupByItems;
 import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
+import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
+import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getGroupByItems;
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -115,23 +114,25 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
         ESQueryBuilder queryBuilder = queryWithEntity.getQuery();
 
         ElasticEdmEntityType entityType = entitySet.getEntityType();
-        QueryBuilder filter = getFilterQuery();
         EntityCollection entities = new EntityCollection();
         SearchResponse searchResponse;
         if (isAggregateOnly()) {
-            searchResponse = retrieveData(queryBuilder, filter,
+            searchResponse = retrieveData(queryBuilder,
                     getSimpleAggQueries(aggregations, entityType));
             entities.getEntities().add(getAggregatedEntity(searchResponse, entityType));
         } else if (isGroupByOnly()) {
-            searchResponse = retrieveData(queryBuilder, filter,
-                    Arrays.asList(getGroupByQuery(groupBy, entitySet.getEntityType())));
+            searchResponse = retrieveData(queryBuilder,
+                    getGroupByQueries(groupBy, entitySet.getEntityType()));
             entities.getEntities().addAll(getAggregatedEntities(
                     searchResponse.getAggregations().asMap(), null, entityType));
-        } else {
-            searchResponse = retrieveData(queryBuilder, filter,
-                    Arrays.asList(getGroupByQuery(groupBy, entitySet.getEntityType())),
+        } else if (isGroupByAndAggregate()) {
+            searchResponse = retrieveData(queryBuilder,
+                    getGroupByQueries(groupBy, entitySet.getEntityType()),
                     getPipelineAggQuery(aggregations, entityType));
             entities.getEntities().add(getAggregatedEntity(searchResponse, entityType));
+        } else {
+            // TODO Implement support of other apply system query options
+            return super.getSerializedData();
         }
         return serializeEntities(entities, entitySet);
 
@@ -142,8 +143,22 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      *
      * @param query
      *            query builder
-     * @param filter
-     *            raw ES query with filter
+     * @param aggs
+     *            aggregations queries list
+     * @return ES response
+     * @throws ODataApplicationException
+     *             if any error occurred
+     */
+    protected SearchResponse retrieveData(ESQueryBuilder query, List<AggregationBuilder> aggs)
+            throws ODataApplicationException {
+        return retrieveData(query, aggs, Collections.emptyList());
+    }
+
+    /**
+     * Gets the data from ES.
+     *
+     * @param query
+     *            query builder
      * @param aggs
      *            aggregations queries list
      * @param pipelineAggs
@@ -152,11 +167,12 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @throws ODataApplicationException
      *             if any error occurred
      */
-    protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter,
-            List<AggregationBuilder> aggs, List<PipelineAggregationBuilder> pipelineAggs)
-            throws ODataApplicationException {
-        return ESClient.executeRequest(query.getIndex(), query.getType(), getClient(),
-                new BoolQueryBuilder().filter(query.getQuery()).filter(filter), aggs, pipelineAggs);
+    protected SearchResponse retrieveData(ESQueryBuilder query, List<AggregationBuilder> aggs,
+            List<PipelineAggregationBuilder> pipelineAggs) throws ODataApplicationException {
+        return ESClient.executeRequest(
+                query.getIndex(), query.getType(), getClient(), new BoolQueryBuilder()
+                        .filter(query.getQuery()).filter(getFilterQuery()).filter(getSearchQuery()),
+                aggs, pipelineAggs);
     }
 
     /**
@@ -308,8 +324,8 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * @return list of fields
      * @throws ODataApplicationException
      */
-    protected AggregationBuilder getGroupByQuery(GroupBy groupBy, ElasticEdmEntityType entityType)
-            throws ODataApplicationException {
+    protected List<AggregationBuilder> getGroupByQueries(GroupBy groupBy,
+            ElasticEdmEntityType entityType) throws ODataApplicationException {
         List<String> fields = getFields(entityType);
         Collections.reverse(fields);
         // Last because of reverse
@@ -322,7 +338,8 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
             groupByQuery = AggregationBuilders.terms(field)
                     .field(addKeywordIfNeeded(field, entityType)).subAggregation(groupByQuery);
         }
-        return groupByQuery;
+        // For now only one 'groupby' is supported and returned in the list
+        return Arrays.asList(groupByQuery);
     }
 
     /**
@@ -378,4 +395,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
         return groupBy != null && aggregations.isEmpty();
     }
 
+    private boolean isGroupByAndAggregate() {
+        return groupBy != null && !aggregations.isEmpty();
+    }
 }
