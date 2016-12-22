@@ -4,6 +4,25 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	id="WebApp_ID" version="2.5">
 
+	<!-- Default Elasticsearch configuration -->
+	<context-param>
+		<param-name>elastic.host</param-name>
+		<param-value>localhost</param-value>
+	</context-param>
+	<context-param>
+		<param-name>elastic.port</param-name>
+		<param-value>9300</param-value>
+	</context-param>
+	<context-param>
+		<param-name>elastic.cluster</param-name>
+		<param-value>elasticsearch</param-value>
+	</context-param>
+
+	<!-- Register all listeners -->
+	<listener>
+		<listener-class>com.hevelian.olastic.listeners.AppContextListener</listener-class>
+	</listener>
+
 	<!-- Register the HttpServlet implementation -->
 	<servlet>
 		<servlet-name>ODataServlet</servlet-name>
