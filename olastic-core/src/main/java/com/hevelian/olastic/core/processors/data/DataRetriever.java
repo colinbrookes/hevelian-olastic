@@ -133,8 +133,6 @@ public abstract class DataRetriever {
     /**
      * Creates context URL for response serializer.
      * 
-     * @param edmEntitySet
-     *            entity set
      * @param isSingleEntity
      *            is single entity
      * @param expand

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -101,8 +102,9 @@ public class EntityCollectionRetriever extends DataRetriever {
         try {
             if (filterOption != null) {
                 Expression expression = filterOption.getExpression();
-                filterQuery.filter(
-                        (QueryBuilder) expression.accept(new ElasticSearchExpressionVisitor()));
+                QueryBuilder query = ((ExpressionResult) expression.accept(
+                        new ElasticSearchExpressionVisitor())).getQueryBuilder();
+                filterQuery.filter(query);
             } else if (applyOption != null) {
                 List<Expression> expressions = ApplyOptionUtils.getFilters(applyOption).stream()
                         .map(e -> e.getFilterOption().getExpression()).collect(Collectors.toList());

@@ -14,6 +14,7 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 
 /**
  * Contains utility methods.
+ * @author Taras Kohut
  */
 public final class ProcessorUtils {
     private ProcessorUtils() {
@@ -35,18 +36,16 @@ public final class ProcessorUtils {
      */
     public static ElasticEdmEntitySet getNavigationTargetEntitySet(ElasticEdmEntitySet entitySet,
             EdmNavigationProperty navProperty) throws ODataApplicationException {
-        ElasticEdmEntitySet navigationTargetEntitySet;
+        ElasticEdmEntitySet navigationTargetEntitySet = null;
         EdmBindingTarget edmBindingTarget = entitySet
                 .getRelatedBindingTarget(navProperty.getName());
         if (edmBindingTarget == null) {
-            throw new ODataApplicationException("Not supported.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+            throwNotImplemented("Not supported.");
         }
         if (edmBindingTarget instanceof ElasticEdmEntitySet) {
             navigationTargetEntitySet = (ElasticEdmEntitySet) edmBindingTarget;
         } else {
-            throw new ODataApplicationException("Not supported.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+            throwNotImplemented("Not supported.");
         }
         return navigationTargetEntitySet;
     }
@@ -77,7 +76,7 @@ public final class ProcessorUtils {
      * @throws ODataApplicationException
      *             created exception
      */
-    public static void throwNotImplemented(String msg) throws ODataApplicationException {
+    public static<T> T throwNotImplemented(String msg) throws ODataApplicationException {
         throw new ODataApplicationException(msg, HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                 Locale.ROOT);
     }

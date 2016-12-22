@@ -5,6 +5,7 @@ package com.hevelian.olastic.core.elastic;
  * 
  * @author yuflyud
  * @contributor rdidyk
+ * @contributor Taras Kohut
  */
 public final class ElasticConstants {
 
@@ -20,6 +21,7 @@ public final class ElasticConstants {
     public static final String KEYWORD_SUFFIX = "keyword";
     /** Field suffix delimiter. */
     public static final String SUFFIX_DELIMITER = ".";
+    public static final String NESTED_PATH_SEPARATOR = ".";
     /**
      * The _all field is a special catch-all field which concatenates the values
      * of all of the other fields into one big string.
