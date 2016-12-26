@@ -22,6 +22,7 @@ public final class ElasticConstants {
     /** Field suffix delimiter. */
     public static final String SUFFIX_DELIMITER = ".";
     public static final String NESTED_PATH_SEPARATOR = ".";
+    public static final String WILDCARD_CHAR = "*";
     /**
      * The _all field is a special catch-all field which concatenates the values
      * of all of the other fields into one big string.

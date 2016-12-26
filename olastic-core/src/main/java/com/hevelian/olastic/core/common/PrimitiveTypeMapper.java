@@ -30,7 +30,7 @@ public class PrimitiveTypeMapper {
         } else if (NumberFieldMapper.NumberType.FLOAT.typeName().equals(elasticType)) {
             result = EdmPrimitiveTypeKind.Decimal;
         } else if (DateFieldMapper.CONTENT_TYPE.equals(elasticType)) {
-            result = EdmPrimitiveTypeKind.Date;
+            result = EdmPrimitiveTypeKind.DateTimeOffset;
         } else if (BooleanFieldMapper.CONTENT_TYPE.equals(elasticType)) {
             result = EdmPrimitiveTypeKind.Boolean;
         } else if (BinaryFieldMapper.CONTENT_TYPE.equals(elasticType)) {

@@ -57,12 +57,24 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
     @Override
     public ExpressionMember visitMethodCall(MethodKind methodCall, List<ExpressionMember> parameters)
             throws ExpressionVisitException, ODataApplicationException {
-        return throwNotImplemented("Method calls are not implemented");
+        switch (methodCall) {
+            case CONTAINS:
+                return parameters.get(0).contains(parameters.get(1));
+            case STARTSWITH:
+                return parameters.get(0).startsWith(parameters.get(1));
+            case ENDSWITH:
+                return parameters.get(0).endsWith(parameters.get(1));
+            case DATE:
+                return parameters.get(0).date();
+            default:
+               return throwNotImplemented(String.format("Method call %s is not implemented", methodCall));
+        }
     }
 
     @Override
     public ExpressionMember visitLambdaExpression(String lambdaFunction, String lambdaVariable,
                                                   Expression expression) throws ExpressionVisitException, ODataApplicationException {
+        //this method isn't used, because lambdas are handled by visitMember method.
         return null;
     }
 

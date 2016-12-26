@@ -4,7 +4,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 
 
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
-
+//TODO think about separation - this class violates interface segregation principle
 /**
  * Olastic wrapper for expression member.
  */
@@ -112,6 +112,38 @@ public abstract class ExpressionMember{
      * @throws ODataApplicationException
      */
     public ExpressionMember all() throws ODataApplicationException {
+        return throwNotImplemented("Not implemented");
+    }
+
+    /**
+     * Checks if current member contains other
+     * @throws ODataApplicationException
+     */
+    public ExpressionMember contains(ExpressionMember expressionMember) throws ODataApplicationException {
+        return throwNotImplemented("Not implemented");
+    }
+
+    /**
+     * Checks if current member starts with other
+     * @throws ODataApplicationException
+     */
+    public ExpressionMember startsWith(ExpressionMember expressionMember) throws ODataApplicationException {
+        return throwNotImplemented("Not implemented");
+    }
+
+    /**
+     * Checks if current member ends with other
+     * @throws ODataApplicationException
+     */
+    public ExpressionMember endsWith(ExpressionMember expressionMember) throws ODataApplicationException {
+        return throwNotImplemented("Not implemented");
+    }
+
+    /**
+     * Converts date time offset to date
+     * @throws ODataApplicationException
+     */
+    public ExpressionMember date() throws ODataApplicationException {
         return throwNotImplemented("Not implemented");
     }
 }

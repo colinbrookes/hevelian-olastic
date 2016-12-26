@@ -21,6 +21,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
@@ -384,7 +385,7 @@ public abstract class DataRetriever {
             e.addProperty(createComplexProperty(name, (Map<String, Object>) value));
         } else if (property != null) {
             Object modifiedValue = value;
-            if (property.getType() instanceof EdmDate) {
+            if (property.getType() instanceof EdmDate || property.getType() instanceof EdmDateTimeOffset) {
                 modifiedValue = DatatypeConverter.parseDateTime((String) value).getTime();
             } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
                 // When Elasticsearch aggregates data it return's boolean as

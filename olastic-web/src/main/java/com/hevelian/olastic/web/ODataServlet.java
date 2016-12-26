@@ -47,8 +47,8 @@ public class ODataServlet extends HttpServlet {
             throws ServletException, IOException {
         OData odata = ElasticOData.newInstance();
         CsdlEdmProvider provider = createCsdlEdmProvider(config.getClient(), config.getIndices());
-        ServiceMetadata matadata = createServiceMetadata(odata, provider);
-        ODataHttpHandler handler = odata.createHandler(matadata);
+        ServiceMetadata metadata = createServiceMetadata(odata, provider);
+        ODataHttpHandler handler = odata.createHandler(metadata);
         registerProcessors(handler, config.getClient());
         handler.process(req, resp);
     }
