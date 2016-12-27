@@ -16,47 +16,47 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  *
  * @author Taras Kohut
  */
-public class Parent extends TypedExpressionMember {
+public class ParentMember extends TypedMember {
     private List<String> parentTypes;
 
-    public Parent(List<String> parentTypes, String field, EdmType type) {
+    public ParentMember(List<String> parentTypes, String field, EdmType type) {
         super(field, type);
         this.parentTypes = parentTypes;
     }
 
     @Override
     public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = termQuery(addKeywordIfNeeded(this), ((ExpressionLiteral) expressionMember).getValue());
+        QueryBuilder query = termQuery(addKeywordIfNeeded(this), ((LiteralMember) expressionMember).getValue());
         return buildParentQuery(query);
     }
 
     @Override
     public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = boolQuery().mustNot(termQuery(addKeywordIfNeeded(this), ((ExpressionLiteral) expressionMember).getValue()));
+        QueryBuilder query = boolQuery().mustNot(termQuery(addKeywordIfNeeded(this), ((LiteralMember) expressionMember).getValue()));
         return buildParentQuery(query);
     }
 
     @Override
     public ExpressionResult ge(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = rangeQuery(getField()).gte(((ExpressionLiteral) expressionMember).getValue());
+        QueryBuilder query = rangeQuery(getField()).gte(((LiteralMember) expressionMember).getValue());
         return buildParentQuery(query);
     }
 
     @Override
     public ExpressionResult gt(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = rangeQuery(getField()).gt(((ExpressionLiteral) expressionMember).getValue());
+        QueryBuilder query = rangeQuery(getField()).gt(((LiteralMember) expressionMember).getValue());
         return buildParentQuery(query);
     }
 
     @Override
     public ExpressionResult le(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = rangeQuery(getField()).lte(((ExpressionLiteral) expressionMember).getValue());
+        QueryBuilder query = rangeQuery(getField()).lte(((LiteralMember) expressionMember).getValue());
         return buildParentQuery(query);
     }
 
     @Override
     public ExpressionResult lt(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = rangeQuery(getField()).lt(((ExpressionLiteral) expressionMember).getValue());
+        QueryBuilder query = rangeQuery(getField()).lt(((LiteralMember) expressionMember).getValue());
         return buildParentQuery(query);
     }
 

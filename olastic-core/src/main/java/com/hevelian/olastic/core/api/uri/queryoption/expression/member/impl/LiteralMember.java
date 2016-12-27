@@ -15,11 +15,11 @@ import org.apache.olingo.server.api.ODataApplicationException;
  *
  * @author Taras Kohut
  */
-public class ExpressionLiteral extends ExpressionMember {
+public class LiteralMember extends BaseMember {
     private String value;
     private EdmType edmType;
 
-    public ExpressionLiteral(String value, EdmType edmType) {
+    public LiteralMember(String value, EdmType edmType) {
         this.edmType = edmType;
         this.value = value;
     }

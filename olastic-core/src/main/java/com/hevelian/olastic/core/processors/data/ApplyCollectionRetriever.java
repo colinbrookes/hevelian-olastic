@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.Primitive;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
@@ -199,7 +199,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
                 String alias = aggExpression.getAlias();
                 Expression expr = aggExpression.getExpression();
                 if (expr != null) {
-                    String field = ((Primitive)expr.accept(new ElasticSearchExpressionVisitor())).getField();
+                    String field = ((PrimitiveMember)expr.accept(new ElasticSearchExpressionVisitor())).getField();
                     String fieldName = entityType.getEProperties().get(field).getEField();
                     aggs.add(getAggQuery(aggExpression.getStandardMethod(), alias, fieldName));
                 } else {

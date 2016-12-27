@@ -10,7 +10,7 @@ import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
  * Represents the result of expression.
  * @author Taras Kohut
  */
-public class ExpressionResult extends ExpressionMember{
+public class ExpressionResult extends BaseMember {
     private QueryBuilder queryBuilder;
 
     public ExpressionResult(QueryBuilder queryBuilder) {

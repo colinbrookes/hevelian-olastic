@@ -3,7 +3,10 @@ package com.hevelian.olastic.core.api.uri.queryoption.expression;
 import java.util.List;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionLiteral;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MethodExpression;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MemberHandler;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.LiteralMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.MethodMember;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -57,15 +60,16 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
     @Override
     public ExpressionMember visitMethodCall(MethodKind methodCall, List<ExpressionMember> parameters)
             throws ExpressionVisitException, ODataApplicationException {
+        MethodExpression expressionMethod = new MethodMember();
         switch (methodCall) {
             case CONTAINS:
-                return parameters.get(0).contains(parameters.get(1));
+                return expressionMethod.contains(parameters.get(0), parameters.get(1));
             case STARTSWITH:
-                return parameters.get(0).startsWith(parameters.get(1));
+                return expressionMethod.startsWith(parameters.get(0), parameters.get(1));
             case ENDSWITH:
-                return parameters.get(0).endsWith(parameters.get(1));
+                return expressionMethod.endsWith(parameters.get(0), parameters.get(1));
             case DATE:
-                return parameters.get(0).date();
+                return expressionMethod.date(parameters.get(0));
             default:
                return throwNotImplemented(String.format("Method call %s is not implemented", methodCall));
         }
@@ -83,7 +87,7 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
             throws ExpressionVisitException, ODataApplicationException {
         String literalAsString = literal.getText();
         EdmType type = literal.getType();
-        return new ExpressionLiteral(literalAsString, type);
+        return new LiteralMember(literalAsString, type);
     }
 
     @Override

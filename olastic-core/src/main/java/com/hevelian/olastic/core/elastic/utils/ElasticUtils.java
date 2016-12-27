@@ -1,6 +1,6 @@
 package com.hevelian.olastic.core.elastic.utils;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.TypedExpressionMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.TypedMember;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 
@@ -24,7 +24,7 @@ public final class ElasticUtils {
      *            primitive expression property
      * @return property's keyword field name
      */
-    public static String addKeywordIfNeeded(TypedExpressionMember property) {
+    public static String addKeywordIfNeeded(TypedMember property) {
         String field = property.getField();
         if (property.getEdmType() instanceof EdmString) {
             field =  addKeyword(field);

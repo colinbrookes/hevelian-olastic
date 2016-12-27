@@ -1,6 +1,5 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -11,12 +10,12 @@ import org.elasticsearch.index.query.QueryBuilders;
  *
  * @author Taras Kohut
  */
-public class Nested extends ExpressionMember {
+public class NestedMember extends BaseMember {
 
     private String nestedType;
     private QueryBuilder query;
 
-    public Nested(String nestedType, QueryBuilder query) {
+    public NestedMember(String nestedType, QueryBuilder query) {
         this.nestedType = nestedType;
         this.query = query;
     }

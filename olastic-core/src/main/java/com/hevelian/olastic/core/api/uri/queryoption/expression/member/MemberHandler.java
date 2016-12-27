@@ -1,6 +1,6 @@
-package com.hevelian.olastic.core.api.uri.queryoption.expression;
+package com.hevelian.olastic.core.api.uri.queryoption.expression.member;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.*;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 import org.apache.olingo.commons.api.edm.EdmProperty;
@@ -62,6 +62,7 @@ public class MemberHandler {
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
     }
+
     private List<String> collectNavigationTypes(List<UriResource> resourceParts) {
         List<String> navigationTypes = new ArrayList<>();
         int idx = 0;
@@ -85,7 +86,7 @@ public class MemberHandler {
             ExpressionResult lambdaResult = (ExpressionResult) lambda
                     .getExpression()
                     .accept(new ElasticSearchExpressionVisitor());
-            return new Child(navigationResource.getProperty().getName(), lambdaResult.getQueryBuilder()).any();
+            return new ChildMember(navigationResource.getProperty().getName(), lambdaResult.getQueryBuilder()).any();
         }
         //complex type collection
         else {
@@ -93,7 +94,7 @@ public class MemberHandler {
             ExpressionResult lambdaResult = (ExpressionResult) lambda
                     .getExpression()
                     .accept(new ElasticSearchExpressionVisitor());
-            return new Nested(complex.getProperty().getName(), lambdaResult.getQueryBuilder()).any();
+            return new NestedMember(complex.getProperty().getName(), lambdaResult.getQueryBuilder()).any();
         }
 
     }
@@ -108,7 +109,7 @@ public class MemberHandler {
         //filter by parent's property
         // Books?$filter=Author/Name eq 'Dawkins'
         if (firstPart instanceof UriResourceNavigation) {
-            return new Parent(collectNavigationTypes(resourceParts), lastProperty.getName(), lastProperty.getType());
+            return new ParentMember(collectNavigationTypes(resourceParts), lastProperty.getName(), lastProperty.getType());
         }
         //filtering by complex type collection
         //Books?$filter=nested/any(n:n/state eq true)
@@ -116,11 +117,11 @@ public class MemberHandler {
                 ((UriResourcePartTyped) firstPart).getType().getKind() == EdmTypeKind.COMPLEX) {
             String nestedFieldName = ((UriResourceLambdaVariable) firstPart).getType().getName();
             String nestedPath = nestedFieldName + ElasticConstants.NESTED_PATH_SEPARATOR + lastProperty.getName();
-            return new Primitive(nestedPath, lastProperty.getType());
+            return new PrimitiveMember(nestedPath, lastProperty.getType());
         }
         //simple primitive expression or expression inside lambda
         else {
-            return new Primitive(lastProperty.getName(), lastProperty.getType());
+            return new PrimitiveMember(lastProperty.getName(), lastProperty.getType());
         }
     }
 }
