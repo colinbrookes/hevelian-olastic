@@ -2,74 +2,106 @@ package com.hevelian.olastic.core.elastic.mappings;
 
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 
-import com.hevelian.olastic.core.utils.MetaDataUtils;
-
 /**
- * Default implementation of {@link IElasticToCsdlMapper} interface.
+ * Mapper between Elasticsearch and CSDL. Interface has methods to map
+ * Elasticsearch types to entity type and set, navigation properties, and for
+ * entity properties.
  * 
  * @author rdidyk
  */
-public class ElasticToCsdlMapper implements IElasticToCsdlMapper {
-
-    /** Default sFchema name space. */
-    public static final String DEFAULT_NAMESPACE = "Olastic.OData";
-
-    private final String namespace;
+public interface ElasticToCsdlMapper {
 
     /**
-     * Default constructor.
-     */
-    public ElasticToCsdlMapper() {
-        this(DEFAULT_NAMESPACE);
-    }
-
-    /**
-     * Constructor to initialize namespace.
+     * Map Elasticsearch field to CSDL property name. By default returns the
+     * name of the corresponding field.
      * 
-     * @param namespace
-     *            namespace
+     * @param index
+     *            name of the index
+     * @param type
+     *            name of the type within the index
+     * @param field
+     *            name of the field
+     * @return name of the corresponding field
      */
-    public ElasticToCsdlMapper(String namespace) {
-        this.namespace = namespace;
-    }
+    String eFieldToCsdlProperty(String index, String type, String field);
 
-    @Override
-    public String eFieldToCsdlProperty(String index, String type, String field) {
-        return field;
-    }
+    /**
+     * Map Elasticsearch field to CSDL property isCollection value. By default
+     * returns false.
+     * 
+     * @param index
+     *            name of the index
+     * @param type
+     *            name of the type within the index
+     * @param field
+     *            name of the field
+     * @return name of the corresponding field
+     */
+    boolean eFieldIsCollection(String index, String type, String field);
 
-    @Override
-    public boolean eFieldToCollection(String index, String type, String field) {
-        return false;
-    }
+    /**
+     * Map Elasticsearch type name to CSDL entity type. By default returns the
+     * name of the corresponding entity type.
+     * 
+     * @param index
+     *            name of the index
+     * @param type
+     *            name of the type within the index
+     * @return the corresponding entity type
+     */
+    FullQualifiedName eTypeToEntityType(String index, String type);
 
-    @Override
-    public FullQualifiedName eTypeToEntityType(String index, String type) {
-        return new FullQualifiedName(eIndexToCsdlNamespace(index), type);
-    }
+    /**
+     * Map Elasticsearch index name to CSDL namespace. By default returns the
+     * name of the corresponding index.
+     * 
+     * @param index
+     *            name of the index
+     * @return the corresponding namespace
+     */
+    String eIndexToCsdlNamespace(String index);
 
-    @Override
-    public String eIndexToCsdlNamespace(String index) {
-        return namespace + MetaDataUtils.NAMESPACE_SEPARATOR + index;
-    }
+    /**
+     * Map Elasticsearch type name to CSDL entity set name. By default returns
+     * the name of the corresponding entity type.
+     * 
+     * @param index
+     *            name of the index
+     * @param type
+     *            name of the type within the index
+     * @return name of the corresponding entity set
+     */
+    String eTypeToEntitySet(String index, String type);
 
-    @Override
-    public String eTypeToEntitySet(String index, String type) {
-        return eTypeToEntityType(index, type).getName();
-    }
+    /**
+     * Convert a child relationship of Elasticsearch to a navigation property
+     * name.
+     * 
+     * @param index
+     *            name of the index
+     * @param child
+     *            name of the child type
+     * @param parent
+     *            name of the parent type
+     * @return Navigation property name for child relationship. Default
+     *         implementation returns the corresponding child entity type's name
+     */
+    String eChildRelationToNavPropName(String index, String child, String parent);
 
-    @Override
-    public String eChildRelationToNavPropName(String index, String child, String parent) {
-        return eTypeToEntityType(index, child).getName();
-    }
-
-    @Override
-    public String eParentRelationToNavPropName(String index, String parent, String child) {
-        return eTypeToEntityType(index, parent).getName();
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
+    /**
+     * Convert a parent relationship of Elasticsearch to a navigation property
+     * name.
+     * 
+     * @param index
+     *            name of the index
+     * @param parent
+     *            name of the parent type
+     * @param child
+     *            name of the child type
+     * @return Navigation property name for parent relationship. Default
+     *         implementation returns the corresponding parent entity type's
+     *         name
+     */
+    String eParentRelationToNavPropName(String index, String parent, String child);
 
 }

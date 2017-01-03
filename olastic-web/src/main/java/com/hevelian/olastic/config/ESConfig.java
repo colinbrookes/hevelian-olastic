@@ -1,7 +1,6 @@
 package com.hevelian.olastic.config;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 import org.elasticsearch.client.Client;
 
@@ -40,12 +39,4 @@ public interface ESConfig {
      */
     Set<String> getIndices();
 
-    /**
-     * Return's filtered indices from client.
-     * 
-     * @param filter
-     *            filter predicate
-     * @return indices set
-     */
-    Set<String> getIndices(Predicate<String> filter);
 }

@@ -1,13 +1,13 @@
 package com.hevelian.olastic.core.elastic.utils;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.TypedMember;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.TypedMember;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.edm.ElasticEdmProperty;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 
 /**
  * Elasticsearch utils.
@@ -18,7 +18,8 @@ public final class ElasticUtils {
     }
 
     /**
-     * Returns keyword field name if needed. Keyword field is non analyzed field.
+     * Returns keyword field name if needed. Keyword field is non analyzed
+     * field.
      * 
      * @param property
      *            primitive expression property
@@ -27,7 +28,7 @@ public final class ElasticUtils {
     public static String addKeywordIfNeeded(TypedMember property) {
         String field = property.getField();
         if (property.getEdmType() instanceof EdmString) {
-            field =  addKeyword(field);
+            field = addKeyword(field);
         }
         return field;
     }
@@ -46,8 +47,9 @@ public final class ElasticUtils {
         ElasticEdmProperty property = entityType.getEProperties().get(fieldName);
         FullQualifiedName typeFQN = property.getType().getFullQualifiedName();
         return typeFQN.equals(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                ? addKeyword(fieldName) : fieldName;
+                ? addKeyword(property.getEField()) : property.getEField();
     }
+
     /**
      * Returns keyword field name. Keyword field is non analyzed field.
      *
@@ -55,7 +57,7 @@ public final class ElasticUtils {
      *            name of the field
      * @return property's keyword field name
      */
-    public static String addKeyword (String fieldName) {
+    public static String addKeyword(String fieldName) {
         return fieldName + ElasticConstants.SUFFIX_DELIMITER + ElasticConstants.KEYWORD_SUFFIX;
     }
 

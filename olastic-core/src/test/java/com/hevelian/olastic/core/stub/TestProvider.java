@@ -23,7 +23,7 @@ import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * Initializes stub provider for testing purposes.
@@ -65,7 +65,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
     private CsdlNavigationProperty authorAddressesParent;
     private CsdlNavigationProperty bookParent;
 
-    public TestProvider(IMappingMetaDataProvider metaDataProvider) {
+    public TestProvider(MappingMetaDataProvider metaDataProvider) {
         super(metaDataProvider);
         booksCollection = new CsdlNavigationProperty();
         booksCollection.setCollection(true);

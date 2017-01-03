@@ -14,6 +14,7 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 
 /**
  * Contains utility methods.
+ * 
  * @author Taras Kohut
  */
 public final class ProcessorUtils {
@@ -76,7 +77,7 @@ public final class ProcessorUtils {
      * @throws ODataApplicationException
      *             created exception
      */
-    public static<T> T throwNotImplemented(String msg) throws ODataApplicationException {
+    public static <T> T throwNotImplemented(String msg) throws ODataApplicationException {
         throw new ODataApplicationException(msg, HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                 Locale.ROOT);
     }

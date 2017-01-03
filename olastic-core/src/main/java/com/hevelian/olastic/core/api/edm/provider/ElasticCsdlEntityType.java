@@ -8,7 +8,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
  * @author rdidyk
  */
 public class ElasticCsdlEntityType extends CsdlEntityType
-        implements IElasticCsdlEdmItem<ElasticCsdlEntityType> {
+        implements ElasticCsdlEdmItem<ElasticCsdlEntityType> {
 
     private String eIndex;
     private String eType;

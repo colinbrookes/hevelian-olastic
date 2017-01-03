@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.hevelian.olastic.core.common.NestedMappingStrategy;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.common.NestedTypeMapper;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * Implementation of {@link ElasticCsdlEdmProvider} to work with Elasticsearch
@@ -28,7 +28,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      * @param indices
      *            indices names
      */
-    public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
+    public MultyElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
             Set<String> indices) {
         super(metaDataProvider);
         initializeNamespaces(indices);
@@ -36,24 +36,24 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
     /**
      * Constructor to initialize mapping metadata provider, multiple indices to
-     * work with and custom {@link NestedMappingStrategy} implementation.
+     * work with and custom {@link NestedTypeMapper} implementation.
      * 
      * @param metaDataProvider
      *            mapping meta data provider
      * @param indices
      *            indices names
-     * @param nestedMappingStrategy
+     * @param nestedTypeMapper
      *            mapping strategy
      */
-    public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            Set<String> indices, NestedMappingStrategy nestedMappingStrategy) {
-        super(metaDataProvider, nestedMappingStrategy);
+    public MultyElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
+            Set<String> indices, NestedTypeMapper nestedTypeMapper) {
+        super(metaDataProvider, nestedTypeMapper);
         initializeNamespaces(indices);
     }
 
     /**
      * Constructor to initialize mapping metadata provider, multiple indices to
-     * work with and custom {@link IElasticToCsdlMapper} implementation.
+     * work with and custom {@link ElasticToCsdlMapper} implementation.
      * 
      * @param metaDataProvider
      *            mapping meta data provider
@@ -62,15 +62,15 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      * @param csdlMapper
      *            ES to CSDL mapper
      */
-    public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            Set<String> indices, IElasticToCsdlMapper csdlMapper) {
+    public MultyElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
+            Set<String> indices, ElasticToCsdlMapper csdlMapper) {
         super(metaDataProvider, csdlMapper);
         initializeNamespaces(indices);
     }
 
     /**
      * Constructor to initialize mapping metadata provider, multiple indices to
-     * work with, {@link IElasticToCsdlMapper} and {@link NestedMappingStrategy}
+     * work with, {@link IElasticToCsdlMapper} and {@link NestedTypeMapper}
      * implementations.
      * 
      * @param metaDataProvider
@@ -79,13 +79,13 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      *            indices names
      * @param csdlMapper
      *            ES to CSDL mapper
-     * @param nestedMappingStrategy
+     * @param nestedTypeMapper
      *            mapping strategy
      */
-    public MultyElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            Set<String> indices, IElasticToCsdlMapper csdlMapper,
-            NestedMappingStrategy nestedMappingStrategy) {
-        super(metaDataProvider, csdlMapper, nestedMappingStrategy);
+    public MultyElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
+            Set<String> indices, ElasticToCsdlMapper csdlMapper,
+            NestedTypeMapper nestedTypeMapper) {
+        super(metaDataProvider, csdlMapper, nestedTypeMapper);
         initializeNamespaces(indices);
     }
 

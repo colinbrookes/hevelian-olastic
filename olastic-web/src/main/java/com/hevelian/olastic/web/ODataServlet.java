@@ -18,8 +18,10 @@ import org.elasticsearch.client.Client;
 
 import com.hevelian.olastic.config.ESConfig;
 import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
 import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import com.hevelian.olastic.core.elastic.mappings.DefaultMetaDataProvider;
 import com.hevelian.olastic.core.processors.impl.ESEntityCollectionProcessorImpl;
 import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
 import com.hevelian.olastic.core.processors.impl.ESPrimitiveProcessorImpl;
@@ -35,26 +37,31 @@ public class ODataServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7048611704658443045L;
 
-    private ESConfig config;
+    private Client client;
+    private Set<String> indices;
 
     @Override
     public void init() throws ServletException {
-        config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
+        ESConfig config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
+        client = config.getClient();
+        indices = config.getIndices();
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         OData odata = ElasticOData.newInstance();
-        CsdlEdmProvider provider = createCsdlEdmProvider(config.getClient(), config.getIndices());
-        ServiceMetadata metadata = createServiceMetadata(odata, provider);
-        ODataHttpHandler handler = odata.createHandler(metadata);
-        registerProcessors(handler, config.getClient());
+        ServiceMetadata matadata = createServiceMetadata(req, odata, createEdmProvider());
+        ODataHttpHandler handler = odata.createHandler(matadata);
+        registerProcessors(handler);
         handler.process(req, resp);
     }
 
     /**
      * Create's {@link ServiceMetadata} metadata.
+     * 
+     * @param req
+     *            http request
      * 
      * @param odata
      *            OData instance
@@ -62,21 +69,27 @@ public class ODataServlet extends HttpServlet {
      *            CSDL provider
      * @return metadata
      */
-    protected ServiceMetadata createServiceMetadata(OData odata, CsdlEdmProvider provider) {
+    protected ServiceMetadata createServiceMetadata(HttpServletRequest req, OData odata,
+            ElasticCsdlEdmProvider provider) {
         return odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
     }
 
     /**
      * Create's {@link CsdlEdmProvider} provider.
      * 
-     * @param client
-     *            Elasticsearch client
-     * @param indices
-     *            indices from Elasticsearch
      * @return provider instance
      */
-    protected CsdlEdmProvider createCsdlEdmProvider(Client client, Set<String> indices) {
-        return new MultyElasticIndexCsdlEdmProvider(new MappingMetaDataProvider(client), indices);
+    protected ElasticCsdlEdmProvider createEdmProvider() {
+        return new MultyElasticIndexCsdlEdmProvider(createMetaDataProvider(), indices);
+    }
+
+    /**
+     * Create's {@link MappingMetaDataProvider} provider.
+     * 
+     * @return provider instance
+     */
+    protected MappingMetaDataProvider createMetaDataProvider() {
+        return new DefaultMetaDataProvider(client);
     }
 
     /**
@@ -88,13 +101,17 @@ public class ODataServlet extends HttpServlet {
      * @param client
      *            Elasticsearch client
      */
-    protected void registerProcessors(ODataHttpHandler handler, Client client) {
+    protected void registerProcessors(ODataHttpHandler handler) {
         handler.register(new ESEntityProcessorImpl(client));
         handler.register(new ESEntityCollectionProcessorImpl(client));
         handler.register(new ESPrimitiveProcessorImpl(client));
     }
 
-    protected ESConfig getConfig() {
-        return config;
+    public Client getClient() {
+        return client;
+    }
+
+    public Set<String> getIndices() {
+        return indices;
     }
 }

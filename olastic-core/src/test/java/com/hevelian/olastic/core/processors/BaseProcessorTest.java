@@ -33,7 +33,7 @@ import org.junit.Before;
 
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.stub.TestProvider;
 
 /**
@@ -51,7 +51,7 @@ public abstract class BaseProcessorTest {
     public void baseSetUp() throws UriParserException, UriValidationException {
         defaultOData = ElasticOData.newInstance();
         defaultMetadata = defaultOData.createServiceMetadata(
-                new TestProvider(mock(IMappingMetaDataProvider.class)),
+                new TestProvider(mock(MappingMetaDataProvider.class)),
                 new ArrayList<EdmxReference>());
         defaultClient = mockClient();
     }

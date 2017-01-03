@@ -5,8 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -45,12 +45,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.hevelian.olastic.core.common.NestedMappingStrategy;
 import com.hevelian.olastic.core.common.NestedTypeMapper;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.utils.MetaDataUtils;
 
 /**
@@ -78,9 +77,9 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     private static Set<String> indices;
     @Mock
-    private IMappingMetaDataProvider metaDataProvider;
+    private MappingMetaDataProvider metaDataProvider;
     @Mock
-    private NestedMappingStrategy nestedMappingStrategy;
+    private NestedTypeMapper nestedTypeMapper;
 
     @BeforeClass
     public static void setUpBeforeClass() {
@@ -90,7 +89,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
     }
 
     private static String addNamespace(String... path) {
-        StringBuffer result = new StringBuffer(ElasticToCsdlMapper.DEFAULT_NAMESPACE);
+        StringBuffer result = new StringBuffer(DefaultElasticToCsdlMapper.DEFAULT_NAMESPACE);
         for (int i = 0; i < path.length; i++) {
             if (i == 0 || i != path.length - 1) {
                 result.append(MetaDataUtils.NAMESPACE_SEPARATOR);
@@ -102,11 +101,12 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     @Before
     public void setUp() {
-        when(nestedMappingStrategy.getComplexTypeName(anyString(), anyString()))
-                .thenAnswer(new Answer<String>() {
+        when(nestedTypeMapper.getComplexType(anyString(), anyString(), anyString()))
+                .thenAnswer(new Answer<FullQualifiedName>() {
                     @Override
-                    public String answer(InvocationOnMock invocation) throws Throwable {
-                        return (String) invocation.getArguments()[1];
+                    public FullQualifiedName answer(InvocationOnMock invocation) throws Throwable {
+                        Object[] args = invocation.getArguments();
+                        return new FullQualifiedName((String) args[1], (String) args[2]);
                     }
                 });
     }
@@ -122,7 +122,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     @Test
     public void constructor_MappingMetadataProviderAndCsdlMapper_Setted() {
-        IElasticToCsdlMapper csdlMapper = mock(IElasticToCsdlMapper.class);
+        ElasticToCsdlMapper csdlMapper = mock(ElasticToCsdlMapper.class);
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
                 metaDataProvider, indices, csdlMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
@@ -132,14 +132,13 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     @Test
     public void constructor_MappingMetadataProviderAndCsdlMapperAndNestedMappingStrategy_Setted() {
-        IElasticToCsdlMapper csdlMapper = mock(IElasticToCsdlMapper.class);
+        ElasticToCsdlMapper csdlMapper = mock(ElasticToCsdlMapper.class);
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
-                metaDataProvider, indices, csdlMapper, nestedMappingStrategy);
+                metaDataProvider, indices, csdlMapper, nestedTypeMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
         assertEquals(csdlMapper, edmProvider.getCsdlMapper());
         assertNotNull(edmProvider.getNestedTypeMapper());
-        assertEquals(nestedMappingStrategy,
-                edmProvider.getNestedTypeMapper().getNestedMappingStrategy());
+        assertEquals(nestedTypeMapper, edmProvider.getNestedTypeMapper());
     }
 
     @Test
@@ -193,7 +192,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MappingMetaData mappingMetaData = mock(MappingMetaData.class);
         when(mappingMetaData.sourceAsMap()).thenReturn(metadata);
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
-                metaDataProvider, indices, nestedMappingStrategy);
+                metaDataProvider, indices, nestedTypeMapper);
         List<CsdlProperty> csdlProperties = edmProvider.getProperties(AUTHOR_FQN, mappingMetaData);
         assertEquals(3, csdlProperties.size());
         for (CsdlProperty property : csdlProperties) {

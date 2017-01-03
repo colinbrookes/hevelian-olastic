@@ -3,9 +3,9 @@ package com.hevelian.olastic.core.api.edm.provider;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hevelian.olastic.core.common.NestedMappingStrategy;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.common.NestedTypeMapper;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * Implementation of {@link ElasticCsdlEdmProvider} to work with Elasticsearch
@@ -24,7 +24,7 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      * @param index
      *            index name
      */
-    public SingleElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
+    public SingleElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
             String index) {
         super(metaDataProvider);
         this.index = index;
@@ -41,32 +41,32 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      * @param csdlMapper
      *            ES to CSDL mapper
      */
-    public SingleElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            String index, IElasticToCsdlMapper csdlMapper) {
+    public SingleElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider, String index,
+            ElasticToCsdlMapper csdlMapper) {
         super(metaDataProvider, csdlMapper);
         this.index = index;
     }
 
     /**
      * Constructor to initialize mapping metadata provider, single index to work
-     * with and custom {@link NestedMappingStrategy} implementation.
+     * with and custom {@link NestedTypeMapper} implementation.
      * 
      * @param metaDataProvider
      *            mapping meta data provider
      * @param indices
      *            indices names
-     * @param nestedMappingStrategy
-     *            mapping strategy
+     * @param nestedTypeMapper
+     *            nested type mapper
      */
-    public SingleElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            String index, NestedMappingStrategy nestedMappingStrategy) {
-        super(metaDataProvider, nestedMappingStrategy);
+    public SingleElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider, String index,
+            NestedTypeMapper NestedTypeMapper) {
+        super(metaDataProvider, NestedTypeMapper);
         this.index = index;
     }
 
     /**
      * Constructor to initialize mapping metadata provider, single index to work
-     * with, {@link IElasticToCsdlMapper} and {@link NestedMappingStrategy}
+     * with, {@link ElasticToCsdlMapper} and {@link NestedTypeMapper}
      * implementations.
      * 
      * @param metaDataProvider
@@ -75,13 +75,12 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      *            index name
      * @param csdlMapper
      *            ES to CSDL mapper
-     * @param nested
-     *            mapping strategy
+     * @param nestedTypeMapper
+     *            nested type mapper
      */
-    public SingleElasticIndexCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            String index, IElasticToCsdlMapper csdlMapper,
-            NestedMappingStrategy nestedMappingStrategy) {
-        super(metaDataProvider, csdlMapper, nestedMappingStrategy);
+    public SingleElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider, String index,
+            ElasticToCsdlMapper csdlMapper, NestedTypeMapper nestedTypeMapper) {
+        super(metaDataProvider, csdlMapper, nestedTypeMapper);
         this.index = index;
     }
 

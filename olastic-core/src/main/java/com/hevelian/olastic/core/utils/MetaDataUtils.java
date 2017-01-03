@@ -11,6 +11,8 @@ public final class MetaDataUtils {
 
     /** Name space separator. */
     public static final String NAMESPACE_SEPARATOR = ".";
+    /** Target path separator. */
+    public static final String TARGET_SEPARATOR = "/";
 
     private MetaDataUtils() {
     }

@@ -9,7 +9,7 @@ package com.hevelian.olastic.core.api.edm.provider;
  * @param <T>
  *            EDM Item type
  */
-public interface IElasticCsdlEdmItem<T extends IElasticCsdlEdmItem<T>> {
+public interface ElasticCsdlEdmItem<T extends ElasticCsdlEdmItem<T>> {
 
     /**
      * Return's Elasticsearch type name.

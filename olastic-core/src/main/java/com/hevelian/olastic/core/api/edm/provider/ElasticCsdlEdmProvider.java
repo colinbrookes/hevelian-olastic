@@ -1,25 +1,40 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import com.carrotsearch.hppc.cursors.ObjectCursor;
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-import com.hevelian.olastic.core.common.*;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.*;
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
+import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.index.mapper.ObjectMapper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
+import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
+import com.hevelian.olastic.core.common.NestedPerIndexMapper;
+import com.hevelian.olastic.core.common.NestedTypeMapper;
+import com.hevelian.olastic.core.common.ParsedMapWrapper;
+import com.hevelian.olastic.core.common.PrimitiveTypeMapper;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * {@link CsdlEdmProvider} implementation that generates the service/metadata
@@ -35,69 +50,67 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
     private final PrimitiveTypeMapper primitiveTypeMapper;
     private final NestedTypeMapper nestedTypeMapper;
-    private final IMappingMetaDataProvider mappingMetaDataProvider;
-    protected final IElasticToCsdlMapper csdlMapper;
+    private final MappingMetaDataProvider mappingMetaDataProvider;
+    protected final ElasticToCsdlMapper csdlMapper;
 
     private FullQualifiedName containerName;
 
     /**
      * Initializes mapping metadata provider with default
-     * {@link IElasticToCsdlMapper} implementation.
+     * {@link ElasticToCsdlMapper} implementation.
      *
      * @param metaDataProvider
      *            mapping meta data provider
      */
-    public ElasticCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider) {
-        this(metaDataProvider, new ElasticToCsdlMapper());
+    public ElasticCsdlEdmProvider(MappingMetaDataProvider metaDataProvider) {
+        this(metaDataProvider, new DefaultElasticToCsdlMapper());
     }
 
     /**
      * Initializes mapping metadata provider with custom
-     * {@link IElasticToCsdlMapper} implementation.
+     * {@link ElasticToCsdlMapper} implementation.
      *
      * @param metaDataProvider
      *            mapping meta data provider
      * @param csdlMapper
      *            ES to CSDL mapper
      */
-    public ElasticCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            IElasticToCsdlMapper csdlMapper) {
-        this(metaDataProvider, csdlMapper, new NestedPerIndexMappingStrategy());
+    public ElasticCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
+            ElasticToCsdlMapper csdlMapper) {
+        this(metaDataProvider, csdlMapper, new NestedPerIndexMapper(metaDataProvider, csdlMapper));
     }
 
     /**
      * Initializes mapping metadata provider with custom
-     * {@link NestedMappingStrategy} implementation.
+     * {@link NestedTypeMapper} implementation.
      *
      * @param metaDataProvider
      *            mapping meta data provider
-     * @param nestedMappingStrategy
-     *            nested mapping strategy
+     * @param nestedTypeMapper
+     *            nested type mapper
      */
-    public ElasticCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            NestedMappingStrategy nestedMappingStrategy) {
-        this(metaDataProvider, new ElasticToCsdlMapper(), nestedMappingStrategy);
+    public ElasticCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
+            NestedTypeMapper nestedTypeMapper) {
+        this(metaDataProvider, new DefaultElasticToCsdlMapper(), nestedTypeMapper);
     }
 
     /**
      * Initializes mapping metadata provider with custom
-     * {@link IElasticToCsdlMapper} and {@link NestedMappingStrategy}
-     * implementation.
+     * {@link ElasticToCsdlMapper} and {@link NestedTypeMapper} implementation.
      *
      * @param metaDataProvider
      *            mapping meta data provider
      * @param csdlMapper
      *            ES to CSDL mapper
-     * @param nestedMappingStrategy
-     *            nested mapping strategy
+     * @param nestedTypeMapper
+     *            nested type mapper
      */
-    public ElasticCsdlEdmProvider(IMappingMetaDataProvider metaDataProvider,
-            IElasticToCsdlMapper csdlMapper, NestedMappingStrategy nestedMappingStrategy) {
+    public ElasticCsdlEdmProvider(MappingMetaDataProvider metaDataProvider,
+            ElasticToCsdlMapper csdlMapper, NestedTypeMapper nestedTypeMapper) {
         this.mappingMetaDataProvider = metaDataProvider;
         this.csdlMapper = csdlMapper;
         this.primitiveTypeMapper = new PrimitiveTypeMapper();
-        this.nestedTypeMapper = new NestedTypeMapper(nestedMappingStrategy, metaDataProvider,
-                csdlMapper);
+        this.nestedTypeMapper = nestedTypeMapper;
         setContainerName(DEFAULT_CONTAINER_NAME);
     }
 
@@ -161,13 +174,13 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
                 String eFieldType = fieldMap.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
                 FullQualifiedName type;
                 if (ObjectMapper.NESTED_CONTENT_TYPE.equals(eFieldType)) {
-                    type = getNestedTypeMapper().map(eIndex, eType, eFieldName);
+                    type = getNestedTypeMapper().getComplexType(eIndex, eType, name);
                 } else {
                     type = primitiveTypeMapper.map(eFieldType).getFullQualifiedName();
                 }
                 properties.add(new ElasticCsdlProperty().setEIndex(eIndex).setEType(eType)
                         .setEField(eFieldName).setName(name).setType(type)
-                        .setCollection(csdlMapper.eFieldToCollection(eIndex, eType, eFieldName)));
+                        .setCollection(csdlMapper.eFieldIsCollection(eIndex, eType, eFieldName)));
             }
             return properties;
         } catch (IOException e) {
@@ -397,7 +410,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      */
     protected abstract String namespaceToIndex(String namespace);
 
-    public IElasticToCsdlMapper getCsdlMapper() {
+    public ElasticToCsdlMapper getCsdlMapper() {
         return csdlMapper;
     }
 
@@ -405,7 +418,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         return nestedTypeMapper;
     }
 
-    public IMappingMetaDataProvider getMappingMetaDataProvider() {
+    public MappingMetaDataProvider getMappingMetaDataProvider() {
         return mappingMetaDataProvider;
     }
 

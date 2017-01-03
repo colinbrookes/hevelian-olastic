@@ -3,8 +3,6 @@ package com.hevelian.olastic.config;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
@@ -81,11 +79,6 @@ public class ESConfigImpl implements ESConfig {
     @Override
     public Set<String> getIndices() {
         return indices;
-    }
-
-    @Override
-    public Set<String> getIndices(Predicate<String> filter) {
-        return indices.stream().filter(filter).collect(Collectors.toSet());
     }
 
 }

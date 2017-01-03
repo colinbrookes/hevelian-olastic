@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
@@ -48,6 +47,7 @@ import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation.S
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.elastic.ESClient;
@@ -136,7 +136,6 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
             return super.getSerializedData();
         }
         return serializeEntities(entities, entitySet);
-
     }
 
     /**
@@ -199,7 +198,8 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
                 String alias = aggExpression.getAlias();
                 Expression expr = aggExpression.getExpression();
                 if (expr != null) {
-                    String field = ((PrimitiveMember)expr.accept(new ElasticSearchExpressionVisitor())).getField();
+                    String field = ((PrimitiveMember) expr
+                            .accept(new ElasticSearchExpressionVisitor())).getField();
                     String fieldName = entityType.getEProperties().get(field).getEField();
                     aggs.add(getAggQuery(aggExpression.getStandardMethod(), alias, fieldName));
                 } else {
@@ -265,8 +265,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
                 if (parent != null) {
                     entity.getProperties().addAll(parent.getProperties());
                 }
-                addProperty(entity, entityType.findPropertyByEField(entry.getKey()).getName(),
-                        bucket.getKey(), entityType);
+                addProperty(entity, entry.getKey(), bucket.getKey(), entityType);
                 Map<String, Aggregation> subAggs = bucket.getAggregations().asMap();
                 if (subAggs.isEmpty()) {
                     addAggsAndCountIfNeeded(aggs, bucket.getDocCount(), entity, entityType);
@@ -325,12 +324,13 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      */
     protected List<AggregationBuilder> getGroupByQueries(GroupBy groupBy,
             ElasticEdmEntityType entityType) throws ODataApplicationException {
-        List<String> fields = getFields(entityType);
+        List<String> fields = getFields();
         Collections.reverse(fields);
         // Last because of reverse
         String lastField = fields.remove(0);
         TermsAggregationBuilder groupByQuery = AggregationBuilders.terms(lastField)
                 .field(addKeywordIfNeeded(lastField, entityType));
+        groupByQuery.size(getPagination().getTop() + getPagination().getSkip());
         getSimpleAggQueries(getAggregations(groupBy.getApplyOption()), entityType)
                 .forEach(groupByQuery::subAggregation);
         for (String field : fields) {
@@ -344,13 +344,10 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     /**
      * Get's fields from {@link #groupBy} for aggregation query.
      * 
-     * @param entityType
-     *            entity type
      * @return list of fields
      * @throws ODataApplicationException
      */
-    private List<String> getFields(ElasticEdmEntityType entityType)
-            throws ODataApplicationException {
+    private List<String> getFields() throws ODataApplicationException {
         List<String> groupByFields = new ArrayList<>();
         for (GroupByItem item : groupBy.getGroupByItems()) {
             List<UriResource> path = item.getPath();
@@ -359,8 +356,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
             }
             UriResource resource = path.get(0);
             if (resource.getKind() == UriResourceKind.primitiveProperty) {
-                groupByFields.add(
-                        entityType.getEProperties().get(resource.getSegmentValue()).getEField());
+                groupByFields.add(resource.getSegmentValue());
             } else {
                 throwNotImplemented("Grouping by complex type is not supported yet.");
             }
