@@ -15,7 +15,7 @@
 	</context-param>
 	<context-param>
 		<param-name>elastic.cluster</param-name>
-		<param-value>opmc-local</param-value>
+		<param-value>elasticsearch</param-value>
 	</context-param>
 
 	<!-- Register all listeners -->
