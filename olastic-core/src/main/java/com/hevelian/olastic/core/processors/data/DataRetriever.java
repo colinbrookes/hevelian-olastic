@@ -48,8 +48,6 @@ import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
@@ -292,25 +290,6 @@ public abstract class DataRetriever {
     }
 
     /**
-     * Gets the data from ES.
-     *
-     * @param query
-     *            query builder
-     * @param filter
-     *            raw ES query with filter
-     * @param aggs
-     *            aggregations queries list
-     * @return ES response
-     * @throws ODataApplicationException
-     *             if any error occurred
-     */
-    protected SearchResponse retrieveData(ESQueryBuilder query, QueryBuilder filter,
-            List<AggregationBuilder> aggs) throws ODataApplicationException {
-        return ESClient.executeRequest(query.getIndex(), query.getType(), getClient(),
-                new BoolQueryBuilder().filter(query.getQuery()).filter(filter), aggs);
-    }
-
-    /**
      * Checks if URI has count option.
      *
      * @return true if there is count option in the url
@@ -376,13 +355,13 @@ public abstract class DataRetriever {
     }
 
     @SuppressWarnings("unchecked")
-    protected void addProperty(Entity e, String name, Object value,
-            ElasticEdmEntityType entityType) {
+    protected Property createProperty(String name, Object value,
+                                  ElasticEdmEntityType entityType) {
         EdmElement property = entityType.getProperty(name);
         if (value instanceof List) {
-            e.addProperty(createPropertyList(name, (List<Object>) value, entityType));
+            return createPropertyList(name, (List<Object>) value, entityType);
         } else if (value instanceof Map) {
-            e.addProperty(createComplexProperty(name, (Map<String, Object>) value));
+            return createComplexProperty(name, (Map<String, Object>) value);
         } else if (property != null) {
             Object modifiedValue = value;
             if (property.getType() instanceof EdmDate || property.getType() instanceof EdmDateTimeOffset) {
@@ -393,9 +372,9 @@ public abstract class DataRetriever {
                 // value will be retrieved
                 modifiedValue = (Long) value != 0;
             }
-            e.addProperty(createPrimitiveProperty(name, modifiedValue));
+           return createPrimitiveProperty(name, modifiedValue);
         } else {
-            e.addProperty(createPrimitiveProperty(name, value));
+            return createPrimitiveProperty(name, value);
         }
     }
 

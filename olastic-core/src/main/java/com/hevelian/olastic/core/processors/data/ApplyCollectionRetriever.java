@@ -58,7 +58,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * Provides high-level methods for retrieving and converting the data for
  * collection of entities with groupby and aggregate query.
- * 
+ *
  * @author rdidyk
  */
 @Log4j2
@@ -71,25 +71,18 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     /**
      * Fully initializes {@link ApplyCollectionRetriever}.
      *
-     * @param uriInfo
-     *            uriInfo object
-     * @param odata
-     *            odata instance
-     * @param client
-     *            ES raw client
-     * @param rawBaseUri
-     *            war base uri
-     * @param serviceMetadata
-     *            service metadata
-     * @param responseFormat
-     *            response format
-     * @param applyOption
-     *            apply option
+     * @param uriInfo         uriInfo object
+     * @param odata           odata instance
+     * @param client          ES raw client
+     * @param rawBaseUri      war base uri
+     * @param serviceMetadata service metadata
+     * @param responseFormat  response format
+     * @param applyOption     apply option
      * @throws ODataApplicationException
      */
     public ApplyCollectionRetriever(UriInfo uriInfo, ElasticOData odata, Client client,
-            String rawBaseUri, ElasticServiceMetadata serviceMetadata, ContentType responseFormat,
-            ApplyOption applyOption) throws ODataApplicationException {
+                                    String rawBaseUri, ElasticServiceMetadata serviceMetadata, ContentType responseFormat,
+                                    ApplyOption applyOption) throws ODataApplicationException {
         super(uriInfo, odata, client, rawBaseUri, serviceMetadata, responseFormat);
         initializeValues(applyOption);
     }
@@ -141,13 +134,10 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     /**
      * Gets the data from ES.
      *
-     * @param query
-     *            query builder
-     * @param aggs
-     *            aggregations queries list
+     * @param query query builder
+     * @param aggs  aggregations queries list
      * @return ES response
-     * @throws ODataApplicationException
-     *             if any error occurred
+     * @throws ODataApplicationException if any error occurred
      */
     protected SearchResponse retrieveData(ESQueryBuilder query, List<AggregationBuilder> aggs)
             throws ODataApplicationException {
@@ -157,18 +147,14 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     /**
      * Gets the data from ES.
      *
-     * @param query
-     *            query builder
-     * @param aggs
-     *            aggregations queries list
-     * @param pipelineAggs
-     *            pipeline aggregation queries
+     * @param query        query builder
+     * @param aggs         aggregations queries list
+     * @param pipelineAggs pipeline aggregation queries
      * @return ES response
-     * @throws ODataApplicationException
-     *             if any error occurred
+     * @throws ODataApplicationException if any error occurred
      */
     protected SearchResponse retrieveData(ESQueryBuilder query, List<AggregationBuilder> aggs,
-            List<PipelineAggregationBuilder> pipelineAggs) throws ODataApplicationException {
+                                          List<PipelineAggregationBuilder> pipelineAggs) throws ODataApplicationException {
         return ESClient.executeRequest(
                 query.getIndex(), query.getType(), getClient(), new BoolQueryBuilder()
                         .filter(query.getQuery()).filter(getFilterQuery()).filter(getSearchQuery()),
@@ -177,15 +163,13 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
 
     /**
      * Get's and creates aggregation queries from {@link Aggregate} in URL.
-     * 
-     * @param entityType
-     *            entity type
+     *
+     * @param entityType entity type
      * @return list of queries
-     * @throws ODataApplicationException
-     *             if any error occurred
+     * @throws ODataApplicationException if any error occurred
      */
     protected List<AggregationBuilder> getSimpleAggQueries(List<Aggregate> aggregations,
-            ElasticEdmEntityType entityType) throws ODataApplicationException {
+                                                           ElasticEdmEntityType entityType) throws ODataApplicationException {
         List<AggregateExpression> expressions = aggregations.stream()
                 .flatMap(agg -> agg.getExpressions().stream()).collect(Collectors.toList());
         List<AggregationBuilder> aggs = new ArrayList<>();
@@ -222,11 +206,9 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
 
     /**
      * Created {@link Entity} from Elasticsearch search response.
-     * 
-     * @param response
-     *            search response
-     * @param entityType
-     *            entity type
+     *
+     * @param response   search response
+     * @param entityType entity type
      * @return created entity
      */
     protected Entity getAggregatedEntity(SearchResponse response, ElasticEdmEntityType entityType) {
@@ -235,7 +217,10 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
         if (aggs != null) {
             aggs.asList().stream().filter(SingleValue.class::isInstance)
                     .map(SingleValue.class::cast)
-                    .forEach(aggr -> addProperty(entity, aggr.getName(), aggr.value(), entityType));
+                    .forEach(aggr -> {
+                        Property property = createProperty(aggr.getName(), aggr.value(), entityType);
+                        entity.addProperty(property);
+                    });
         }
         addCountIfNeeded(entity, response.getHits().getTotalHits());
         return entity;
@@ -247,17 +232,14 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
      * entities list. If {@link #groupBy} has aggregation
      * {@link UriResourceKind}.count then property with {@link #countAlias} name
      * will be added to entity with doc count from response aggregations.
-     * 
-     * @param aggs
-     *            response aggregations
-     * @param parent
-     *            parent entity
-     * @param entityType
-     *            entity type
+     *
+     * @param aggs       response aggregations
+     * @param parent     parent entity
+     * @param entityType entity type
      * @return list of entities
      */
     protected List<Entity> getAggregatedEntities(Map<String, Aggregation> aggs, Entity parent,
-            ElasticEdmEntityType entityType) {
+                                                 ElasticEdmEntityType entityType) {
         List<Entity> entities = new ArrayList<>();
         for (Entry<String, Terms> entry : collectTerms(aggs).entrySet()) {
             for (Bucket bucket : entry.getValue().getBuckets()) {
@@ -265,7 +247,8 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
                 if (parent != null) {
                     entity.getProperties().addAll(parent.getProperties());
                 }
-                addProperty(entity, entry.getKey(), bucket.getKey(), entityType);
+                Property property = createProperty(entry.getKey(), bucket.getKey(), entityType);
+                entity.addProperty(property);
                 Map<String, Aggregation> subAggs = bucket.getAggregations().asMap();
                 if (subAggs.isEmpty()) {
                     addAggsAndCountIfNeeded(aggs, bucket.getDocCount(), entity, entityType);
@@ -292,19 +275,20 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     private void addAggsAndCountIfNeeded(Map<String, Aggregation> aggregations, long count,
             Entity entity, ElasticEdmEntityType entityType) {
         aggregations.entrySet().stream().filter(e -> e.getValue() instanceof SingleValue)
-                .forEach(e -> addProperty(entity, e.getKey(), ((SingleValue) e.getValue()).value(),
-                        entityType));
+                .forEach(e -> {
+                    Property property = createProperty(e.getKey(), ((SingleValue) e.getValue()).value(),
+                        entityType);
+                    entity.addProperty(property);
+                });
         addCountIfNeeded(entity, count);
     }
 
     /**
      * Creates {@link Property} with {@link #countAlias} name if $count was in
      * URL.
-     * 
-     * @param entity
-     *            parent entity
-     * @param count
-     *            count value
+     *
+     * @param entity parent entity
+     * @param count  count value
      */
     private void addCountIfNeeded(Entity entity, long count) {
         if (countAlias != null) {
@@ -314,11 +298,9 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
 
     /**
      * Get's fields from {@link #groupBy} for aggregation query.
-     * 
+     *
      * @param groupBy
-     * 
-     * @param entityType
-     *            entity type
+     * @param entityType entity type
      * @return list of fields
      * @throws ODataApplicationException
      */
@@ -343,7 +325,7 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
 
     /**
      * Get's fields from {@link #groupBy} for aggregation query.
-     * 
+     *
      * @return list of fields
      * @throws ODataApplicationException
      */
@@ -367,14 +349,11 @@ public class ApplyCollectionRetriever extends EntityCollectionRetriever {
     /**
      * Get's and creates Pipeline Aggregation queries from {@link Aggregate} in
      * URL.
-     * 
-     * @param aggregations
-     *            aggregations from URL
-     * @param entityType
-     *            entity type
+     *
+     * @param aggregations aggregations from URL
+     * @param entityType   entity type
      * @return list of queries
-     * @throws ODataApplicationException
-     *             if any error occurred
+     * @throws ODataApplicationException if any error occurred
      */
     protected List<PipelineAggregationBuilder> getPipelineAggQuery(List<Aggregate> aggregations,
             ElasticEdmEntityType entityType) throws ODataApplicationException {

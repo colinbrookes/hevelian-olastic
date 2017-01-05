@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -76,16 +76,17 @@ public class FieldRetriever extends DataRetriever {
                 .get(resourceParts.size() - 1);
         ElasticEdmProperty edmProperty = (ElasticEdmProperty) uriProperty.getProperty();
         String propertyName = edmProperty.getName();
+        ElasticEdmEntityType entityType = entitySet.getEntityType();
 
         if (response.getHits().getTotalHits() == 0) {
             throw new ODataApplicationException("Entity not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
         SearchHit hit = response.getHits().getAt(0);
-        // TODO take a lok to this
+        // TODO take a look to this
         Object value = propertyName == ElasticConstants.ID_FIELD_NAME ? hit.getId()
                 : hit.getSource().get(edmProperty.getEField());
-        Property property = new Property(null, propertyName, ValueType.PRIMITIVE, value);
+        Property property = createProperty(propertyName, value, entityType);
         SerializerResult serializerResult = null;
         if (value != null) {
             try {

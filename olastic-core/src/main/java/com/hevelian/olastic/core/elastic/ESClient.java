@@ -68,29 +68,6 @@ public class ESClient {
      * @param query
      *            ES raw search query
      * @param aggs
-     *            aggregation query
-     * @return ES search response
-     */
-    public static SearchResponse executeRequest(String index, String type, Client client,
-            QueryBuilder query, List<AggregationBuilder> aggs) {
-        SearchRequestBuilder requestBuilder = client.prepareSearch(index).setTypes(type)
-                .setQuery(query);
-        aggs.forEach(requestBuilder::addAggregation);
-        return requestBuilder.setSize(0).execute().actionGet();
-    }
-
-    /**
-     * Execute query request with filter and aggregations.
-     * 
-     * @param index
-     *            ES index
-     * @param type
-     *            ES type
-     * @param client
-     *            ES raw client
-     * @param query
-     *            ES raw search query
-     * @param aggs
      *            aggregation queries
      * @param pipelineAggs
      *            pipeline aggregation queries

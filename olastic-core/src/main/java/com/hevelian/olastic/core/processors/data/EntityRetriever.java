@@ -4,6 +4,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -61,10 +62,13 @@ public class EntityRetriever extends DataRetriever {
         SearchHit hit = response.getHits().getAt(0);
         Entity entity = new Entity();
         entity.setId(ProcessorUtils.createId(entityType.getName(), hit.getId()));
-        addProperty(entity, ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
+        Property idProperty = createProperty(ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
+        entity.addProperty(idProperty);
+
         for (Map.Entry<String, Object> entry : hit.getSource().entrySet()) {
-            addProperty(entity, entityType.findPropertyByEField(entry.getKey()).getName(),
+            Property property = createProperty(entityType.findPropertyByEField(entry.getKey()).getName(),
                     entry.getValue(), entityType);
+            entity.addProperty(property);
         }
         ExpandOption expand = getUriInfo().getExpandOption();
         SelectOption select = getUriInfo().getSelectOption();

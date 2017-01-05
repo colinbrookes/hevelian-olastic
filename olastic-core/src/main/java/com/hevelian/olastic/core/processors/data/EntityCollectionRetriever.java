@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -192,11 +193,14 @@ public class EntityCollectionRetriever extends DataRetriever {
         for (SearchHit hit : response.getHits()) {
             Entity entity = new Entity();
             entity.setId(ProcessorUtils.createId(entityType.getName(), hit.getId()));
-            addProperty(entity, ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
+            Property idProperty = createProperty(ElasticConstants.ID_FIELD_NAME, hit.getId(), entityType);
+            entity.addProperty(idProperty);
 
             for (Map.Entry<String, Object> entry : hit.getSource().entrySet()) {
-                addProperty(entity, entityType.findPropertyByEField(entry.getKey()).getName(),
+
+                Property property = createProperty(entityType.findPropertyByEField(entry.getKey()).getName(),
                         entry.getValue(), entityType);
+                entity.addProperty(property);
             }
             entities.getEntities().add(entity);
         }
