@@ -5,8 +5,8 @@ import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
 import static org.elasticsearch.index.query.QueryBuilders.*;
@@ -61,10 +61,10 @@ public class ParentMember extends TypedMember {
     }
 
     private ExpressionResult buildParentQuery(QueryBuilder query) {
-        Collections.reverse(parentTypes);
+        ListIterator<String> iterator = parentTypes.listIterator(parentTypes.size());
         QueryBuilder resultQuery = query;
-        for (String type : parentTypes) {
-            resultQuery = hasParentQuery(type, resultQuery, false);
+        while (iterator.hasPrevious()) {
+            resultQuery = hasParentQuery(iterator.previous(), resultQuery, false);
         }
         return new ExpressionResult(resultQuery);
     }

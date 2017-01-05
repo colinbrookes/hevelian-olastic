@@ -1,29 +1,19 @@
 package com.hevelian.olastic.core.stub;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
-import org.apache.olingo.commons.api.ex.ODataException;
-
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.*;
+import org.apache.olingo.commons.api.ex.ODataException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Initializes stub provider for testing purposes.
@@ -165,7 +155,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             throws ODataException {
         CsdlProperty id = new ElasticCsdlProperty().setName("_id")
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty dimensionProperty = new CsdlProperty().setName(DIMENSION_TYPE)
+        CsdlProperty dimensionProperty = new ElasticCsdlProperty().setName(DIMENSION_TYPE)
                 .setType(DIMENSION_FQN).setCollection(true);
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
         propertyRef.setName("_id");
@@ -176,12 +166,14 @@ public class TestProvider extends ElasticCsdlEdmProvider {
 
             CsdlProperty age = new ElasticCsdlProperty().setName("age")
                     .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
+            CsdlProperty birthDate = new ElasticCsdlProperty().setName("birthDate")
+                    .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName());
             CsdlProperty name = new ElasticCsdlProperty().setName("name")
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(AUTHOR_TYPE);
             entityType.setEType(AUTHOR_TYPE);
-            entityType.setProperties(Arrays.asList(id, age, name, dimensionProperty));
+            entityType.setProperties(Arrays.asList(id, birthDate, age, name, dimensionProperty));
             entityType.setKey(Collections.singletonList(propertyRef));
 
             entityType.setNavigationProperties(Arrays.asList(addressesCollection, booksCollection));
@@ -244,7 +236,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
 
     @Override
     public ElasticCsdlEntitySet getEntitySet(FullQualifiedName entityContainer,
-            String entitySetName) throws ODataException {
+                                             String entitySetName) throws ODataException {
         ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
         entitySet.setEIndex(AUTHORS_INDEX);
         if (entityContainer.equals(CONTAINER)) {
@@ -277,6 +269,24 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                                 .setTarget(BOOK_TYPE)));
                 return entitySet;
             }
+        }
+        return null;
+    }
+
+    @Override
+    public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+        if (complexTypeName.equals(DIMENSION_FQN)) {
+            CsdlComplexType complexType = new CsdlComplexType();
+            List<CsdlProperty> complexTypeProperties = new ArrayList<>();
+            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty state = new ElasticCsdlProperty().setName("state")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            complexTypeProperties.add(name);
+            complexTypeProperties.add(state);
+            complexType.setName(DIMENSION_TYPE);
+            complexType.setProperties(complexTypeProperties);
+            return complexType;
         }
         return null;
     }

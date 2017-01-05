@@ -98,8 +98,6 @@ public class ODataServlet extends HttpServlet {
      * 
      * @param handler
      *            OData handler
-     * @param client
-     *            Elasticsearch client
      */
     protected void registerProcessors(ODataHttpHandler handler) {
         handler.register(new ESEntityProcessorImpl(client));

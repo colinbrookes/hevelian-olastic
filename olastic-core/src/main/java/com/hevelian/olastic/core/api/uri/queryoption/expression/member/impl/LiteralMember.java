@@ -20,6 +20,9 @@ public class LiteralMember extends BaseMember {
     private EdmType edmType;
 
     public LiteralMember(String value, EdmType edmType) {
+        if (edmType instanceof EdmString && (!value.startsWith("'") || !value.endsWith("'"))) {
+            throw new IllegalArgumentException("String values should be enclosed in single quotation marks");
+        }
         this.edmType = edmType;
         this.value = value;
     }
@@ -31,9 +34,7 @@ public class LiteralMember extends BaseMember {
      */
     public Object getValue() {
         if (edmType instanceof EdmString) {
-            String stringLiteral;
-            stringLiteral = value.substring(1, value.length() - 1);
-            return stringLiteral;
+           return value.substring(1, value.length() - 1);
         } else {
             return value;
         }

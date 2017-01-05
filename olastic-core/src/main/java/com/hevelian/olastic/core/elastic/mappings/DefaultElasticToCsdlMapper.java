@@ -5,13 +5,13 @@ import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import com.hevelian.olastic.core.utils.MetaDataUtils;
 
 /**
- * Default implementation of {@link IElasticToCsdlMapper} interface.
+ * Default implementation of {@link ElasticToCsdlMapper} interface.
  * 
  * @author rdidyk
  */
 public class DefaultElasticToCsdlMapper implements ElasticToCsdlMapper {
 
-    /** Default sFchema name space. */
+    /** Default schema name space. */
     public static final String DEFAULT_NAMESPACE = "Olastic.OData";
 
     private final String namespace;
