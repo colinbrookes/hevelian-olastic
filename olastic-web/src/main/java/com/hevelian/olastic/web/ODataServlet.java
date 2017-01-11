@@ -20,11 +20,11 @@ import com.hevelian.olastic.config.ESConfig;
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
 import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
-import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.elastic.mappings.DefaultMetaDataProvider;
-import com.hevelian.olastic.core.processors.impl.ESEntityCollectionProcessorImpl;
-import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
-import com.hevelian.olastic.core.processors.impl.ESPrimitiveProcessorImpl;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import com.hevelian.olastic.core.processors.impl.CollectionProcessor;
+import com.hevelian.olastic.core.processors.impl.EntityProcessor;
+import com.hevelian.olastic.core.processors.impl.PrimitiveProcessor;
 
 /**
  * OData servlet that currently connects to the local instance of the
@@ -100,9 +100,9 @@ public class ODataServlet extends HttpServlet {
      *            OData handler
      */
     protected void registerProcessors(ODataHttpHandler handler) {
-        handler.register(new ESEntityProcessorImpl(client));
-        handler.register(new ESEntityCollectionProcessorImpl(client));
-        handler.register(new ESPrimitiveProcessorImpl(client));
+        handler.register(new PrimitiveProcessor());
+        handler.register(new EntityProcessor());
+        handler.register(new CollectionProcessor());
     }
 
     public Client getClient() {

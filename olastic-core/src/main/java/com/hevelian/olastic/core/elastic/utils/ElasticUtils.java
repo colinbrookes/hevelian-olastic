@@ -25,6 +25,7 @@ public final class ElasticUtils {
      *            primitive expression property
      * @return property's keyword field name
      */
+    // TODO Bad method argument. Change to String and EdmType, or else.
     public static String addKeywordIfNeeded(TypedMember property) {
         String field = property.getField();
         if (property.getEdmType() instanceof EdmString) {

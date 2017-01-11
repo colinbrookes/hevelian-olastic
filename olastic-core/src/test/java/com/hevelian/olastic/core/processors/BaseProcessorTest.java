@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +25,7 @@ import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.internal.InternalSearchHit;
 import org.elasticsearch.search.internal.InternalSearchHits;
 import org.json.JSONArray;
@@ -90,6 +91,7 @@ public abstract class BaseProcessorTest {
         ListenableActionFuture<SearchResponse> action = mock(ListenableActionFuture.class);
 
         when(builder.execute()).thenReturn(action);
+        when(builder.setQuery(any(QueryBuilder.class))).thenReturn(builder);
         when(action.actionGet()).thenReturn(response);
         when(client.prepareSearch(anyString())).thenReturn(builder);
         return client;

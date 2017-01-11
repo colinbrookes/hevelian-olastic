@@ -1,18 +1,21 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import org.apache.olingo.commons.api.edm.EdmType;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmInt32;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Test;
+import static com.hevelian.olastic.core.TestUtils.checkFilterEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterNotEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterParentEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterParentNotEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterRangeQuery;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hevelian.olastic.core.TestUtils.*;
-import static org.junit.Assert.*;
+import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmInt32;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.json.JSONObject;
+import org.junit.Test;
 
 /**
  * Tests for  {@link LiteralMember} class.

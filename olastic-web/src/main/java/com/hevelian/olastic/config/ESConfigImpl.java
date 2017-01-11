@@ -11,6 +11,8 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
+import com.hevelian.olastic.core.elastic.ESClient;
+
 /**
  * Elasticsearch client configuration class.
  * 
@@ -38,6 +40,7 @@ public class ESConfigImpl implements ESConfig {
         Settings settings = Settings.builder().put("cluster.name", cluster).build();
         this.client = initClient(settings,
                 new InetSocketTransportAddress(InetAddress.getByName(host), port));
+        initESClient();
         this.indices = loadIndices();
     }
 
@@ -54,6 +57,14 @@ public class ESConfigImpl implements ESConfig {
         PreBuiltTransportClient preBuildClient = new PreBuiltTransportClient(settings);
         preBuildClient.addTransportAddress(address);
         return preBuildClient;
+    }
+
+    /**
+     * Initializes {@link ESClient} instance to execute all queries in
+     * application.
+     */
+    protected void initESClient() {
+        ESClient.init(client);
     }
 
     /**
