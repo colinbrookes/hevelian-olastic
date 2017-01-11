@@ -58,8 +58,7 @@ public class MemberHandler {
         } else if (lastPart instanceof UriResourcePrimitiveProperty) {
             return handlePrimitive();
         } else {
-            throw new ODataApplicationException("Not implemented",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+            return throwNotImplemented();
         }
     }
 

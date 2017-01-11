@@ -54,7 +54,12 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
     @Override
     public ExpressionMember visitUnaryOperator(UnaryOperatorKind operator, ExpressionMember operand)
             throws ExpressionVisitException, ODataApplicationException {
-        return operand.not();
+        switch (operator) {
+            case NOT:
+                return operand.not();
+            default:
+                return throwNotImplemented("Unsupported unary operator");
+        }
     }
 
     @Override

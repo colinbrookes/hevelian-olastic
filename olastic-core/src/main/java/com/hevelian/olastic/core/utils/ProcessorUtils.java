@@ -105,4 +105,15 @@ public final class ProcessorUtils {
                 Locale.ROOT);
     }
 
+    /**
+     * Method throws exception with HTTP.501 status code and with default
+     * message.
+     *
+     * @throws ODataApplicationException
+     *             created exception
+     */
+    public static <T> T throwNotImplemented() throws ODataApplicationException {
+        return throwNotImplemented("Not implemented");
+    }
+
 }
