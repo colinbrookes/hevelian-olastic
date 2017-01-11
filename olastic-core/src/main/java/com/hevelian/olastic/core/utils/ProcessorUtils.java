@@ -5,16 +5,12 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.olingo.commons.api.edm.EdmBindingTarget;
-import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 
 /**
  * Contains utility methods.
@@ -24,36 +20,6 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
  */
 public final class ProcessorUtils {
     private ProcessorUtils() {
-    }
-
-    /**
-     * Example: For the following navigation:
-     * DemoService.svc/Categories(1)/Products we need the EdmEntitySet for the
-     * navigation property "Products"
-     *
-     * This is defined as follows in the metadata: <code>
-     * 
-     * <EntitySet Name="Categories" EntityType="OData.Demo.Category">
-     * <NavigationPropertyBinding Path="Products" Target="Products"/>
-     * </EntitySet>
-     * </code> The "Target" attribute specifies the target EntitySet Therefore
-     * we need the startEntitySet "Categories" in order to retrieve the target
-     * EntitySet "Products"
-     */
-    public static ElasticEdmEntitySet getNavigationTargetEntitySet(ElasticEdmEntitySet entitySet,
-            EdmNavigationProperty navProperty) throws ODataApplicationException {
-        ElasticEdmEntitySet navigationTargetEntitySet = null;
-        EdmBindingTarget edmBindingTarget = entitySet
-                .getRelatedBindingTarget(navProperty.getName());
-        if (edmBindingTarget == null) {
-            throwNotImplemented("Not supported.");
-        }
-        if (edmBindingTarget instanceof ElasticEdmEntitySet) {
-            navigationTargetEntitySet = (ElasticEdmEntitySet) edmBindingTarget;
-        } else {
-            throwNotImplemented("Not supported.");
-        }
-        return navigationTargetEntitySet;
     }
 
     /**
@@ -113,7 +79,7 @@ public final class ProcessorUtils {
      *             created exception
      */
     public static <T> T throwNotImplemented() throws ODataApplicationException {
-        return throwNotImplemented("Not implemented");
+        return throwNotImplemented("Not implemented.");
     }
 
 }

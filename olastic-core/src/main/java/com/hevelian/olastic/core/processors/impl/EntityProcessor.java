@@ -65,20 +65,20 @@ public class EntityProcessor extends ESEntityProcessor {
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType requestFormat, ContentType responseFormat)
             throws ODataApplicationException, ODataLibraryException {
-        throwNotImplemented("Not supported.");
+        throwNotImplemented();
     }
 
     @Override
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType requestFormat, ContentType responseFormat)
             throws ODataApplicationException, ODataLibraryException {
-        throwNotImplemented("Not supported.");
+        throwNotImplemented();
     }
 
     @Override
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
-        throwNotImplemented("Not supported.");
+        throwNotImplemented();
     }
 
 }

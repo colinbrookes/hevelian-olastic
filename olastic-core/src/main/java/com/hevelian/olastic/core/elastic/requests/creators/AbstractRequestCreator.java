@@ -90,7 +90,7 @@ public abstract class AbstractRequestCreator implements ESRequestCreator {
                 responseEntitySet = getNavigationTargetEntitySet(responseEntitySet,
                         navigationProperty);
             } else if (segment.getKind() != UriResourceKind.entitySet) {
-                throwNotImplemented("Not supported.");
+                throwNotImplemented();
             }
             // TODO Possibly extract method.
             String type = ((UriResourcePartTyped) segment).getType().getName();
@@ -138,12 +138,12 @@ public abstract class AbstractRequestCreator implements ESRequestCreator {
         EdmBindingTarget edmBindingTarget = entitySet
                 .getRelatedBindingTarget(navProperty.getName());
         if (edmBindingTarget == null) {
-            throwNotImplemented("Not supported.");
+            throwNotImplemented();
         }
         if (edmBindingTarget instanceof ElasticEdmEntitySet) {
             navigationTargetEntitySet = (ElasticEdmEntitySet) edmBindingTarget;
         } else {
-            throwNotImplemented("Not supported.");
+            throwNotImplemented();
         }
         return navigationTargetEntitySet;
     }

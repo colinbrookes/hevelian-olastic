@@ -74,13 +74,13 @@ public class PrimitiveProcessor extends ESPrimitiveProcessor {
     public void updatePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType requestFormat, ContentType responseFormat)
             throws ODataApplicationException, ODataLibraryException {
-        throwNotImplemented("Not supported.");
+        throwNotImplemented();
     }
 
     @Override
     public void deletePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
-        throwNotImplemented("Not supported.");
+        throwNotImplemented();
     }
 
 }
