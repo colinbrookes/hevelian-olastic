@@ -1,30 +1,5 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
-import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
-import org.apache.olingo.commons.api.ex.ODataException;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.index.mapper.ObjectMapper;
-
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import com.hevelian.olastic.core.common.NestedPerIndexMapper;
@@ -35,6 +10,19 @@ import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.*;
+import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.index.mapper.ObjectMapper;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link CsdlEdmProvider} implementation that generates the service/metadata
@@ -315,7 +303,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
             // add Entity Types
             String index = namespaceToIndex(namespace);
-            schema.setEntityTypes(getEnityTypes(index));
+            schema.setEntityTypes(getEntityTypes(index));
             // add Complex Types
             schema.setComplexTypes(getNestedTypeMapper().getComplexTypes(index));
 
@@ -334,7 +322,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @throws ODataException
      *             if any error occurred
      */
-    protected List<CsdlEntityType> getEnityTypes(String index) throws ODataException {
+    protected List<CsdlEntityType> getEntityTypes(String index) throws ODataException {
         List<CsdlEntityType> entityTypes = new ArrayList<>();
         for (ObjectCursor<String> key : mappingMetaDataProvider.getAllMappings(index).keys()) {
             CsdlEntityType entityType = getEntityType(

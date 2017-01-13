@@ -1,36 +1,13 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.hevelian.olastic.core.common.NestedTypeMapper;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import com.hevelian.olastic.core.utils.MetaDataUtils;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.edm.provider.*;
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -45,12 +22,13 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.hevelian.olastic.core.common.NestedTypeMapper;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-import com.hevelian.olastic.core.utils.MetaDataUtils;
+import java.io.IOException;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * JUnit tests for {@link MultyElasticIndexCsdlEdmProvider} class.
@@ -431,7 +409,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
         NestedTypeMapper nestedTypeMapper = mock(NestedTypeMapper.class);
-        doReturn(new ArrayList<CsdlEntityType>()).when(edmProvider).getEnityTypes(anyString());
+        doReturn(new ArrayList<CsdlEntityType>()).when(edmProvider).getEntityTypes(anyString());
         doReturn(new ArrayList<CsdlComplexType>()).when(nestedTypeMapper)
                 .getComplexTypes(anyString());
         doReturn(nestedTypeMapper).when(edmProvider).getNestedTypeMapper();
@@ -447,7 +425,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
                 metaDataProvider, indices);
         Builder<String, MappingMetaData> metadataBuilder = ImmutableOpenMap.builder();
         when(metaDataProvider.getAllMappings(WRITERS_INDEX)).thenReturn(metadataBuilder.build());
-        assertTrue(edmProvider.getEnityTypes(WRITERS_INDEX).isEmpty());
+        assertTrue(edmProvider.getEntityTypes(WRITERS_INDEX).isEmpty());
     }
 
     @Test
@@ -460,7 +438,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         mappingsBuilder.put(AUTHOR_TYPE, null);
         mappingsBuilder.put(BOOK_TYPE, null);
         when(metaDataProvider.getAllMappings(WRITERS_INDEX)).thenReturn(mappingsBuilder.build());
-        List<CsdlEntityType> enityTypes = edmProvider.getEnityTypes(WRITERS_INDEX);
+        List<CsdlEntityType> enityTypes = edmProvider.getEntityTypes(WRITERS_INDEX);
         assertEquals(2, enityTypes.size());
     }
 
