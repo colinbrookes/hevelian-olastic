@@ -8,7 +8,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
  * @author rdidyk
  */
 public class ElasticCsdlProperty extends CsdlProperty
-        implements IElasticCsdlEdmItem<ElasticCsdlProperty> {
+        implements ElasticCsdlEdmItem<ElasticCsdlProperty> {
 
     private String eIndex;
     private String eType;

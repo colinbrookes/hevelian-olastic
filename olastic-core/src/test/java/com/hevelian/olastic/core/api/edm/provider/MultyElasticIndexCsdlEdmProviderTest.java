@@ -1,36 +1,13 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.hevelian.olastic.core.common.NestedTypeMapper;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import com.hevelian.olastic.core.utils.MetaDataUtils;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.edm.provider.*;
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -45,17 +22,13 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
-import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
-import com.hevelian.olastic.core.common.NestedMappingStrategy;
-import com.hevelian.olastic.core.common.NestedTypeMapper;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
-import com.hevelian.olastic.core.utils.MetaDataUtils;
+import java.io.IOException;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * JUnit tests for {@link MultyElasticIndexCsdlEdmProvider} class.
@@ -82,9 +55,9 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     private static Set<String> indices;
     @Mock
-    private IMappingMetaDataProvider metaDataProvider;
+    private MappingMetaDataProvider metaDataProvider;
     @Mock
-    private NestedMappingStrategy nestedMappingStrategy;
+    private NestedTypeMapper nestedTypeMapper;
 
     @BeforeClass
     public static void setUpBeforeClass() {
@@ -94,10 +67,10 @@ public class MultyElasticIndexCsdlEdmProviderTest {
     }
 
     private static String addNamespace(String... path) {
-        StringBuffer result = new StringBuffer(ElasticToCsdlMapper.DEFAULT_NAMESPACE);
+        StringBuffer result = new StringBuffer(DefaultElasticToCsdlMapper.DEFAULT_NAMESPACE);
         for (int i = 0; i < path.length; i++) {
             if (i == 0 || i != path.length - 1) {
-                result.append(MetaDataUtils.NEMESPACE_SEPARATOR);
+                result.append(MetaDataUtils.NAMESPACE_SEPARATOR);
             }
             result.append(path[i]);
         }
@@ -106,11 +79,12 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     @Before
     public void setUp() {
-        when(nestedMappingStrategy.getComplexTypeName(anyString(), anyString()))
-                .thenAnswer(new Answer<String>() {
+        when(nestedTypeMapper.getComplexType(anyString(), anyString(), anyString()))
+                .thenAnswer(new Answer<FullQualifiedName>() {
                     @Override
-                    public String answer(InvocationOnMock invocation) throws Throwable {
-                        return (String) invocation.getArguments()[1];
+                    public FullQualifiedName answer(InvocationOnMock invocation) throws Throwable {
+                        Object[] args = invocation.getArguments();
+                        return new FullQualifiedName((String) args[1], (String) args[2]);
                     }
                 });
     }
@@ -126,7 +100,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     @Test
     public void constructor_MappingMetadataProviderAndCsdlMapper_Setted() {
-        IElasticToCsdlMapper csdlMapper = mock(IElasticToCsdlMapper.class);
+        ElasticToCsdlMapper csdlMapper = mock(ElasticToCsdlMapper.class);
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
                 metaDataProvider, indices, csdlMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
@@ -136,14 +110,13 @@ public class MultyElasticIndexCsdlEdmProviderTest {
 
     @Test
     public void constructor_MappingMetadataProviderAndCsdlMapperAndNestedMappingStrategy_Setted() {
-        IElasticToCsdlMapper csdlMapper = mock(IElasticToCsdlMapper.class);
+        ElasticToCsdlMapper csdlMapper = mock(ElasticToCsdlMapper.class);
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
-                metaDataProvider, indices, csdlMapper, nestedMappingStrategy);
+                metaDataProvider, indices, csdlMapper, nestedTypeMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
         assertEquals(csdlMapper, edmProvider.getCsdlMapper());
         assertNotNull(edmProvider.getNestedTypeMapper());
-        assertEquals(nestedMappingStrategy,
-                edmProvider.getNestedTypeMapper().getNestedMappingStrategy());
+        assertEquals(nestedTypeMapper, edmProvider.getNestedTypeMapper());
     }
 
     @Test
@@ -197,7 +170,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MappingMetaData mappingMetaData = mock(MappingMetaData.class);
         when(mappingMetaData.sourceAsMap()).thenReturn(metadata);
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
-                metaDataProvider, indices, nestedMappingStrategy);
+                metaDataProvider, indices, nestedTypeMapper);
         List<CsdlProperty> csdlProperties = edmProvider.getProperties(AUTHOR_FQN, mappingMetaData);
         assertEquals(3, csdlProperties.size());
         for (CsdlProperty property : csdlProperties) {
@@ -293,7 +266,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
                 metaDataProvider, indices);
         FullQualifiedName entityType = edmProvider.entitySetToEntityType(
-                new FullQualifiedName(AUTHORS_FQN_STRING + MetaDataUtils.NEMESPACE_SEPARATOR
+                new FullQualifiedName(AUTHORS_FQN_STRING + MetaDataUtils.NAMESPACE_SEPARATOR
                         + edmProvider.getContainerName().getName()),
                 AUTHOR_TYPE);
         assertEquals(AUTHOR_FQN, entityType);
@@ -383,7 +356,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
         FullQualifiedName containerName = new FullQualifiedName(AUTHORS_FQN_STRING
-                + MetaDataUtils.NEMESPACE_SEPARATOR + edmProvider.getContainerName().getName());
+                + MetaDataUtils.NAMESPACE_SEPARATOR + edmProvider.getContainerName().getName());
         doReturn(AUTHOR_FQN).when(edmProvider).entitySetToEntityType(containerName, AUTHOR_TYPE);
 
         List<CsdlNavigationProperty> navigationProperties = new ArrayList<>();
@@ -436,7 +409,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
         NestedTypeMapper nestedTypeMapper = mock(NestedTypeMapper.class);
-        doReturn(new ArrayList<CsdlEntityType>()).when(edmProvider).getEnityTypes(anyString());
+        doReturn(new ArrayList<CsdlEntityType>()).when(edmProvider).getEntityTypes(anyString());
         doReturn(new ArrayList<CsdlComplexType>()).when(nestedTypeMapper)
                 .getComplexTypes(anyString());
         doReturn(nestedTypeMapper).when(edmProvider).getNestedTypeMapper();
@@ -452,7 +425,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
                 metaDataProvider, indices);
         Builder<String, MappingMetaData> metadataBuilder = ImmutableOpenMap.builder();
         when(metaDataProvider.getAllMappings(WRITERS_INDEX)).thenReturn(metadataBuilder.build());
-        assertTrue(edmProvider.getEnityTypes(WRITERS_INDEX).isEmpty());
+        assertTrue(edmProvider.getEntityTypes(WRITERS_INDEX).isEmpty());
     }
 
     @Test
@@ -465,7 +438,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         mappingsBuilder.put(AUTHOR_TYPE, null);
         mappingsBuilder.put(BOOK_TYPE, null);
         when(metaDataProvider.getAllMappings(WRITERS_INDEX)).thenReturn(mappingsBuilder.build());
-        List<CsdlEntityType> enityTypes = edmProvider.getEnityTypes(WRITERS_INDEX);
+        List<CsdlEntityType> enityTypes = edmProvider.getEntityTypes(WRITERS_INDEX);
         assertEquals(2, enityTypes.size());
     }
 

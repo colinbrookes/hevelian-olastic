@@ -1,8 +1,6 @@
 package com.hevelian.olastic.web;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -11,64 +9,107 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
+import com.hevelian.olastic.config.ESConfig;
 import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
 import com.hevelian.olastic.core.api.edm.provider.MultyElasticIndexCsdlEdmProvider;
+import com.hevelian.olastic.core.elastic.mappings.DefaultMetaDataProvider;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-import com.hevelian.olastic.core.processors.impl.ESEntityCollectionProcessorImpl;
-import com.hevelian.olastic.core.processors.impl.ESEntityProcessorImpl;
-import com.hevelian.olastic.core.processors.impl.ESPrimitiveProcessorImpl;
-
-import lombok.extern.log4j.Log4j2;
+import com.hevelian.olastic.core.processors.impl.CollectionProcessor;
+import com.hevelian.olastic.core.processors.impl.EntityProcessor;
+import com.hevelian.olastic.core.processors.impl.PrimitiveProcessor;
 
 /**
  * OData servlet that currently connects to the local instance of the
  * Elasticsearch and exposes its mappings and data through OData interface.
  * 
  * @author yuflyud
- *
+ * @contributor rdidyk
  */
-// TODO implement data providers, specify client url through some config. Make
-// some abstraction for servlets to make them more flexible.
-@Log4j2
 public class ODataServlet extends HttpServlet {
-    private static final long serialVersionUID = -7048611704658443045L;
-    private static Client CLIENT;
-    private static Set<String> INDICES;
 
-    // TODO do no do the initialization in a static block.
-    static {
-        Settings settings = Settings.settingsBuilder().put("cluster.name", "opmc-local").build();
-        try {
-            CLIENT = TransportClient.builder().settings(settings).build().addTransportAddress(
-                    new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
-            INDICES = CLIENT.admin().indices().stats(new IndicesStatsRequest()).actionGet()
-                    .getIndices().keySet();
-        } catch (UnknownHostException e) {
-            log.debug(e);
-        }
+    private static final long serialVersionUID = -7048611704658443045L;
+
+    private Client client;
+    private Set<String> indices;
+
+    @Override
+    public void init() throws ServletException {
+        ESConfig config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
+        client = config.getClient();
+        indices = config.getIndices();
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         OData odata = ElasticOData.newInstance();
-        ServiceMetadata edm = odata.createServiceMetadata(
-                new MultyElasticIndexCsdlEdmProvider(new MappingMetaDataProvider(CLIENT), INDICES),
-                new ArrayList<EdmxReference>());
-        ODataHttpHandler handler = odata.createHandler(edm);
-        handler.register(new ESEntityProcessorImpl(CLIENT));
-        handler.register(new ESEntityCollectionProcessorImpl(CLIENT));
-        handler.register(new ESPrimitiveProcessorImpl(CLIENT));
+        ServiceMetadata matadata = createServiceMetadata(req, odata, createEdmProvider());
+        ODataHttpHandler handler = odata.createHandler(matadata);
+        registerProcessors(handler);
         handler.process(req, resp);
+    }
+
+    /**
+     * Create's {@link ServiceMetadata} metadata.
+     * 
+     * @param req
+     *            http request
+     * 
+     * @param odata
+     *            OData instance
+     * @param provider
+     *            CSDL provider
+     * @return metadata
+     */
+    protected ServiceMetadata createServiceMetadata(HttpServletRequest req, OData odata,
+            ElasticCsdlEdmProvider provider) {
+        return odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
+    }
+
+    /**
+     * Create's {@link CsdlEdmProvider} provider.
+     * 
+     * @return provider instance
+     */
+    protected ElasticCsdlEdmProvider createEdmProvider() {
+        return new MultyElasticIndexCsdlEdmProvider(createMetaDataProvider(), indices);
+    }
+
+    /**
+     * Create's {@link MappingMetaDataProvider} provider.
+     * 
+     * @return provider instance
+     */
+    protected MappingMetaDataProvider createMetaDataProvider() {
+        return new DefaultMetaDataProvider(client);
+    }
+
+    /**
+     * Registers additional custom processor implementations for handling OData
+     * requests
+     * 
+     * @param handler
+     *            OData handler
+     */
+    protected void registerProcessors(ODataHttpHandler handler) {
+        handler.register(new PrimitiveProcessor());
+        handler.register(new EntityProcessor());
+        handler.register(new CollectionProcessor());
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public Set<String> getIndices() {
+        return indices;
     }
 }

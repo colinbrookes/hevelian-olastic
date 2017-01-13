@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +25,7 @@ import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.internal.InternalSearchHit;
 import org.elasticsearch.search.internal.InternalSearchHits;
 import org.json.JSONArray;
@@ -33,7 +34,7 @@ import org.junit.Before;
 
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.stub.TestProvider;
 
 /**
@@ -51,7 +52,7 @@ public abstract class BaseProcessorTest {
     public void baseSetUp() throws UriParserException, UriValidationException {
         defaultOData = ElasticOData.newInstance();
         defaultMetadata = defaultOData.createServiceMetadata(
-                new TestProvider(mock(IMappingMetaDataProvider.class)),
+                new TestProvider(mock(MappingMetaDataProvider.class)),
                 new ArrayList<EdmxReference>());
         defaultClient = mockClient();
     }
@@ -90,6 +91,7 @@ public abstract class BaseProcessorTest {
         ListenableActionFuture<SearchResponse> action = mock(ListenableActionFuture.class);
 
         when(builder.execute()).thenReturn(action);
+        when(builder.setQuery(any(QueryBuilder.class))).thenReturn(builder);
         when(action.actionGet()).thenReturn(response);
         when(client.prepareSearch(anyString())).thenReturn(builder);
         return client;

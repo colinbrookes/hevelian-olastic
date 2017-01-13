@@ -13,11 +13,10 @@ import org.apache.olingo.commons.api.ex.ODataException;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.hevelian.olastic.core.api.edm.provider.SingleElasticIndexCsdlEdmProvider;
-import com.hevelian.olastic.core.common.NestedMappingStrategy;
+import com.hevelian.olastic.core.common.NestedTypeMapper;
+import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.IMappingMetaDataProvider;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.utils.MetaDataUtils;
 
 /**
@@ -29,11 +28,11 @@ public class SingleElasticIndexCsdlEdmProviderTest {
 
     private static final String AUTHORS_INDEX = "authors";
 
-    private static final String AUTHORS_NAMESPACE = ElasticToCsdlMapper.DEFAULT_NAMESPACE
-            + MetaDataUtils.NEMESPACE_SEPARATOR + AUTHORS_INDEX;
+    private static final String AUTHORS_NAMESPACE = DefaultElasticToCsdlMapper.DEFAULT_NAMESPACE
+            + MetaDataUtils.NAMESPACE_SEPARATOR + AUTHORS_INDEX;
 
     @Mock
-    private IMappingMetaDataProvider metaDataProvider;
+    private MappingMetaDataProvider metaDataProvider;
 
     @Test
     public void constructor_MappingMetadataProvider_Setted() {
@@ -46,7 +45,7 @@ public class SingleElasticIndexCsdlEdmProviderTest {
 
     @Test
     public void constructor_MappingMetadataProviderAndCsdlMapper_Setted() {
-        IElasticToCsdlMapper csdlMapper = mock(IElasticToCsdlMapper.class);
+        ElasticToCsdlMapper csdlMapper = mock(ElasticToCsdlMapper.class);
         SingleElasticIndexCsdlEdmProvider edmProvider = new SingleElasticIndexCsdlEdmProvider(
                 metaDataProvider, AUTHORS_INDEX, csdlMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
@@ -56,27 +55,25 @@ public class SingleElasticIndexCsdlEdmProviderTest {
 
     @Test
     public void constructor_MappingMetadataProviderAndNestedMappingStrategy_Setted() {
-        NestedMappingStrategy nestedMappingStrategy = mock(NestedMappingStrategy.class);
+        NestedTypeMapper nestedTypeMapper = mock(NestedTypeMapper.class);
         SingleElasticIndexCsdlEdmProvider edmProvider = new SingleElasticIndexCsdlEdmProvider(
-                metaDataProvider, AUTHORS_INDEX, nestedMappingStrategy);
+                metaDataProvider, AUTHORS_INDEX, nestedTypeMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
         assertNotNull(edmProvider.getCsdlMapper());
         assertNotNull(edmProvider.getNestedTypeMapper());
-        assertEquals(nestedMappingStrategy,
-                edmProvider.getNestedTypeMapper().getNestedMappingStrategy());
+        assertEquals(nestedTypeMapper, edmProvider.getNestedTypeMapper());
     }
 
     @Test
     public void constructor_MappingMetadataProviderAndCsdlMapperAndNestedMappingStrategy_Setted() {
-        IElasticToCsdlMapper csdlMapper = mock(IElasticToCsdlMapper.class);
-        NestedMappingStrategy nestedMappingStrategy = mock(NestedMappingStrategy.class);
+        ElasticToCsdlMapper csdlMapper = mock(ElasticToCsdlMapper.class);
+        NestedTypeMapper nestedTypeMapper = mock(NestedTypeMapper.class);
         SingleElasticIndexCsdlEdmProvider edmProvider = new SingleElasticIndexCsdlEdmProvider(
-                metaDataProvider, AUTHORS_INDEX, csdlMapper, nestedMappingStrategy);
+                metaDataProvider, AUTHORS_INDEX, csdlMapper, nestedTypeMapper);
         assertEquals(metaDataProvider, edmProvider.getMappingMetaDataProvider());
         assertEquals(csdlMapper, edmProvider.getCsdlMapper());
         assertNotNull(edmProvider.getNestedTypeMapper());
-        assertEquals(nestedMappingStrategy,
-                edmProvider.getNestedTypeMapper().getNestedMappingStrategy());
+        assertEquals(nestedTypeMapper, edmProvider.getNestedTypeMapper());
     }
 
     @Test
