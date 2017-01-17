@@ -330,7 +330,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
 
         // add Entity Types
         String index = namespaceToIndex(namespace);
-        schema.setEntityTypes(getEnityTypes(index));
+        schema.setEntityTypes(getEntityTypes(index));
         // add Complex Types
         schema.setComplexTypes(getNestedTypeMapper().getComplexTypes(index));
 
@@ -347,7 +347,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @throws ODataException
      *             if any error occurred
      */
-    protected List<CsdlEntityType> getEnityTypes(String index) throws ODataException {
+    protected List<CsdlEntityType> getEntityTypes(String index) throws ODataException {
         List<CsdlEntityType> entityTypes = new ArrayList<>();
         for (ObjectCursor<String> key : mappingMetaDataProvider.getAllMappings(index).keys()) {
             CsdlEntityType entityType = getEntityType(
