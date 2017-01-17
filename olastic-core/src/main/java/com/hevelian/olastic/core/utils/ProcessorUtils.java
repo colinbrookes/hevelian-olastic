@@ -2,15 +2,11 @@ package com.hevelian.olastic.core.utils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
 /**
  * Contains utility methods.
@@ -20,24 +16,6 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
  */
 public final class ProcessorUtils {
     private ProcessorUtils() {
-    }
-
-    /**
-     * Gets first resource entity set from URI info.
-     * 
-     * @param uriInfo
-     *            URI info
-     * @return first entity set
-     * @throws ODataApplicationException
-     */
-    public static UriResourceEntitySet getFirstResourceEntitySet(UriInfo uriInfo)
-            throws ODataApplicationException {
-        List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-        UriResource uriResource = resourceParts.get(0);
-        if (!(uriResource instanceof UriResourceEntitySet)) {
-            throwNotImplemented("Only EntitySet is supported");
-        }
-        return (UriResourceEntitySet) uriResource;
     }
 
     /**

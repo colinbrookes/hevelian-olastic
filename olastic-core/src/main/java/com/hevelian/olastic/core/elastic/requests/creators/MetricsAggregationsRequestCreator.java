@@ -12,10 +12,11 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 import com.hevelian.olastic.core.elastic.queries.Query;
 import com.hevelian.olastic.core.elastic.requests.AggregateRequest;
-import com.hevelian.olastic.core.elastic.requests.BaseRequest;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
 
 /**
  * Class responsible for creating {@link AggregateRequest} instance for metrics
@@ -25,16 +26,33 @@ import com.hevelian.olastic.core.elastic.requests.BaseRequest;
  */
 public class MetricsAggregationsRequestCreator extends AbstractAggregationsRequestCreator {
 
+    /**
+     * Default constructor.
+     */
+    public MetricsAggregationsRequestCreator() {
+        super();
+    }
+
+    /**
+     * Constructor to initialize ES query builder.
+     * 
+     * @param queryBuilder
+     *            ES query builder
+     */
+    public MetricsAggregationsRequestCreator(ESQueryBuilder<?> queryBuilder) {
+        super(queryBuilder);
+    }
+
     @Override
     public AggregateRequest create(UriInfo uriInfo) throws ODataApplicationException {
-        BaseRequest baseRequest = super.create(uriInfo);
-        ElasticEdmEntitySet entitySet = baseRequest.getEntitySet();
+        ESRequest baseRequestInfo = getBaseRequestInfo(uriInfo);
+        Query baseQuery = baseRequestInfo.getQuery();
+        ElasticEdmEntitySet entitySet = baseRequestInfo.getEntitySet();
         ElasticEdmEntityType entityType = entitySet.getEntityType();
 
         List<Aggregate> aggregations = getAggregations(uriInfo.getApplyOption());
         List<AggregationBuilder> metricsQueries = getMetricsAggQueries(aggregations, entityType);
 
-        Query baseQuery = baseRequest.getQuery();
         AggregateQuery aggregateQuery = new AggregateQuery(baseQuery.getIndex(),
                 baseQuery.getType(), baseQuery.getQueryBuilder(), metricsQueries,
                 Collections.emptyList());

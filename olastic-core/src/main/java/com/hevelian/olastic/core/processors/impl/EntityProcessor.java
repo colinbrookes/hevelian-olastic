@@ -20,7 +20,7 @@ import org.elasticsearch.action.search.SearchResponse;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.elastic.parsers.EntityParser;
-import com.hevelian.olastic.core.elastic.requests.SearchRequest;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
 import com.hevelian.olastic.core.elastic.requests.creators.SearchRequestCreator;
 import com.hevelian.olastic.core.processors.ESEntityProcessor;
 import com.hevelian.olastic.core.processors.data.InstanceData;
@@ -39,13 +39,13 @@ public class EntityProcessor extends ESEntityProcessor {
     }
 
     @Override
-    protected SearchRequest createRequest(UriInfo uriInfo) throws ODataApplicationException {
+    protected ESRequest createRequest(UriInfo uriInfo) throws ODataApplicationException {
         return new SearchRequestCreator().create(uriInfo);
     }
 
     @Override
     protected InstanceData<EdmEntityType, Entity> parseResponse(SearchResponse response,
-            ElasticEdmEntitySet entitySet) {
+            ElasticEdmEntitySet entitySet) throws ODataApplicationException {
         return new EntityParser().parse(response, entitySet);
     }
 

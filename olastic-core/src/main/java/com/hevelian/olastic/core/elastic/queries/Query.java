@@ -9,7 +9,7 @@ import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 /**
- * Query with base parameters for all querties to create request.
+ * Query with base parameters for all queries to create request.
  * 
  * @author rdidyk
  */

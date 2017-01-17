@@ -22,11 +22,12 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 import com.hevelian.olastic.core.elastic.queries.Query;
 import com.hevelian.olastic.core.elastic.requests.AggregateRequest;
-import com.hevelian.olastic.core.elastic.requests.BaseRequest;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
 
 /**
  * Class responsible for creating {@link AggregateRequest} instance for buckets
@@ -36,20 +37,37 @@ import com.hevelian.olastic.core.elastic.requests.BaseRequest;
  */
 public class BucketsAggregationsRequestCreator extends AbstractAggregationsRequestCreator {
 
+    /**
+     * Default constructor.
+     */
+    public BucketsAggregationsRequestCreator() {
+        super();
+    }
+
+    /**
+     * Constructor to initialize ES query builder.
+     * 
+     * @param queryBuilder
+     *            ES query builder
+     */
+    public BucketsAggregationsRequestCreator(ESQueryBuilder<?> queryBuilder) {
+        super(queryBuilder);
+    }
+
     @Override
     public AggregateRequest create(UriInfo uriInfo) throws ODataApplicationException {
-        BaseRequest baseRequest = super.create(uriInfo);
-        ElasticEdmEntitySet entitySet = baseRequest.getEntitySet();
+        ESRequest baseRequestInfo = getBaseRequestInfo(uriInfo);
+        Query baseQuery = baseRequestInfo.getQuery();
+        ElasticEdmEntitySet entitySet = baseRequestInfo.getEntitySet();
         ElasticEdmEntityType entityType = entitySet.getEntityType();
 
         List<GroupBy> groupByItems = getGroupByItems(uriInfo.getApplyOption());
         if (groupByItems.size() > 1) {
             throwNotImplemented("Combining Transformations per Group is not supported.");
         }
-        List<AggregationBuilder> bucketsQueries = getGroupByQueries(groupByItems.get(0), entityType,
+        List<AggregationBuilder> bucketsQueries = getBucketsQueries(groupByItems.get(0), entityType,
                 getPagination(uriInfo));
 
-        Query baseQuery = baseRequest.getQuery();
         AggregateQuery aggregateQuery = new AggregateQuery(baseQuery.getIndex(),
                 baseQuery.getType(), baseQuery.getQueryBuilder(), bucketsQueries,
                 Collections.emptyList());
@@ -57,7 +75,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
     }
 
     /**
-     * Get's fields from {@link #groupBy} for aggregation query.
+     * Get's buckets queries from {@link GroupBy} item in URL.
      *
      * @param groupBy
      *            groupBy instance
@@ -67,8 +85,9 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
      *            pagination
      * @return list of fields
      * @throws ODataApplicationException
+     *             if any error occurred
      */
-    protected List<AggregationBuilder> getGroupByQueries(GroupBy groupBy,
+    protected List<AggregationBuilder> getBucketsQueries(GroupBy groupBy,
             ElasticEdmEntityType entityType, Pagination pagination)
             throws ODataApplicationException {
         List<String> fields = getFields(groupBy);
@@ -96,7 +115,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
      * @return list of fields
      * @throws ODataApplicationException
      */
-    protected List<String> getFields(GroupBy groupBy) throws ODataApplicationException {
+    private List<String> getFields(GroupBy groupBy) throws ODataApplicationException {
         List<String> groupByFields = new ArrayList<>();
         for (GroupByItem item : groupBy.getGroupByItems()) {
             List<UriResource> path = item.getPath();

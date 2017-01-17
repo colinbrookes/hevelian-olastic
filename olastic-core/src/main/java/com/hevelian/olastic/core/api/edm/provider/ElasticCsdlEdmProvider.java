@@ -309,20 +309,33 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     public List<CsdlSchema> getSchemas() throws ODataException {
         List<CsdlSchema> schemas = new ArrayList<>();
         for (String namespace : getSchemaNamespaces()) {
-            // create Schema
-            CsdlSchema schema = new CsdlSchema();
-            schema.setNamespace(namespace);
-
-            // add Entity Types
-            String index = namespaceToIndex(namespace);
-            schema.setEntityTypes(getEnityTypes(index));
-            // add Complex Types
-            schema.setComplexTypes(getNestedTypeMapper().getComplexTypes(index));
-
-            schema.setEntityContainer(getEntityContainerForSchema(namespace));
-            schemas.add(schema);
+            schemas.add(createSchema(namespace));
         }
         return schemas;
+    }
+
+    /**
+     * Create's schema for namespace.
+     * 
+     * @param namespace
+     *            namespace
+     * @return created schema
+     * @throws ODataException
+     *             if any error occurred
+     */
+    protected CsdlSchema createSchema(String namespace) throws ODataException {
+        // create Schema
+        CsdlSchema schema = new CsdlSchema();
+        schema.setNamespace(namespace);
+
+        // add Entity Types
+        String index = namespaceToIndex(namespace);
+        schema.setEntityTypes(getEnityTypes(index));
+        // add Complex Types
+        schema.setComplexTypes(getNestedTypeMapper().getComplexTypes(index));
+
+        schema.setEntityContainer(getEntityContainerForSchema(namespace));
+        return schema;
     }
 
     /**

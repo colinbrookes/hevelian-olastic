@@ -20,16 +20,34 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 
 /**
  * Class with common logic for all request creators with aggregations queries.
  * 
  * @author rdidyk
  */
-public class AbstractAggregationsRequestCreator extends AbstractRequestCreator {
+public abstract class AbstractAggregationsRequestCreator extends AbstractRequestCreator {
 
     /** Name of count property. */
     private String countAlias;
+
+    /**
+     * Default constructor.
+     */
+    public AbstractAggregationsRequestCreator() {
+        super();
+    }
+
+    /**
+     * Constructor to initialize ES query builder.
+     * 
+     * @param queryBuilder
+     *            ES query builder
+     */
+    public AbstractAggregationsRequestCreator(ESQueryBuilder<?> queryBuilder) {
+        super(queryBuilder);
+    }
 
     /**
      * Get's and creates metrics aggregation queries from {@link Aggregate} in

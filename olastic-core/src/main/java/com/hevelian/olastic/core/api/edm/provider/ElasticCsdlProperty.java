@@ -54,4 +54,43 @@ public class ElasticCsdlProperty extends CsdlProperty
         return super.setName(name);
     }
 
+    //TODO Use guava hash code instead.
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((eField == null) ? 0 : eField.hashCode());
+        result = prime * result + ((eIndex == null) ? 0 : eIndex.hashCode());
+        result = prime * result + ((eType == null) ? 0 : eType.hashCode());
+        return result;
+    }
+
+    //TODO Use guava equals code instead.
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ElasticCsdlProperty other = (ElasticCsdlProperty) obj;
+        if (eField == null) {
+            if (other.eField != null)
+                return false;
+        } else if (!eField.equals(other.eField))
+            return false;
+        if (eIndex == null) {
+            if (other.eIndex != null)
+                return false;
+        } else if (!eIndex.equals(other.eIndex))
+            return false;
+        if (eType == null) {
+            if (other.eType != null)
+                return false;
+        } else if (!eType.equals(other.eType))
+            return false;
+        return true;
+    }
+
 }

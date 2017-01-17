@@ -15,6 +15,7 @@ import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.queries.Query;
 import com.hevelian.olastic.core.elastic.queries.SearchQuery;
 import com.hevelian.olastic.core.elastic.requests.ESRequest;
@@ -27,16 +28,33 @@ import com.hevelian.olastic.core.elastic.requests.SearchRequest;
  */
 public class SearchRequestCreator extends AbstractRequestCreator {
 
+    /**
+     * Constructor to initialize default ES query builder.
+     */
+    public SearchRequestCreator() {
+        this(new ESQueryBuilder<>());
+    }
+
+    /**
+     * Constructor to initialize ES query builder.
+     * 
+     * @param queryBuilder
+     *            ES query builder
+     */
+    public SearchRequestCreator(ESQueryBuilder<?> queryBuilder) {
+        super(queryBuilder);
+    }
+
     @Override
-    public SearchRequest create(UriInfo uriInfo) throws ODataApplicationException {
-        ESRequest baseRequest = super.create(uriInfo);
-        ElasticEdmEntitySet entitySet = baseRequest.getEntitySet();
+    public ESRequest create(UriInfo uriInfo) throws ODataApplicationException {
+        ESRequest baseRequestInfo = getBaseRequestInfo(uriInfo);
+        Query baseQuery = baseRequestInfo.getQuery();
+        ElasticEdmEntitySet entitySet = baseRequestInfo.getEntitySet();
         ElasticEdmEntityType entityType = entitySet.getEntityType();
 
         Set<String> fields = getSelectList(uriInfo).stream()
                 .map(field -> entityType.getEProperties().get(field).getEField())
                 .collect(Collectors.toSet());
-        Query baseQuery = baseRequest.getQuery();
         SearchQuery searchQuery = new SearchQuery(baseQuery.getIndex(), baseQuery.getType(),
                 baseQuery.getQueryBuilder(), fields);
         return new SearchRequest(searchQuery, entitySet, getPagination(uriInfo));

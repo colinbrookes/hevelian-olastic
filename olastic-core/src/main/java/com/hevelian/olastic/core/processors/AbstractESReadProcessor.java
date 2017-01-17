@@ -95,9 +95,11 @@ public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
      * @param entitySet
      *            the edm entity set
      * @return instance data with type and value
+     * @throws ODataApplicationException
+     *             if any error occurred during parsing response
      */
     protected abstract InstanceData<T, V> parseResponse(SearchResponse response,
-            ElasticEdmEntitySet entitySet);
+            ElasticEdmEntitySet entitySet) throws ODataApplicationException;
 
     /**
      * Serializes instance data.

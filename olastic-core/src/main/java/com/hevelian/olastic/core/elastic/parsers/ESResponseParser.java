@@ -1,5 +1,6 @@
 package com.hevelian.olastic.core.elastic.parsers;
 
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.action.search.SearchResponse;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
@@ -26,7 +27,10 @@ public interface ESResponseParser<T, V> {
      * @param entitySet
      *            the edm entity set
      * @return instance data with type and value
+     * @throws ODataApplicationException
+     *             if any error occurred during parsing response
      */
-    InstanceData<T, V> parse(SearchResponse response, ElasticEdmEntitySet entitySet);
+    InstanceData<T, V> parse(SearchResponse response, ElasticEdmEntitySet entitySet)
+            throws ODataApplicationException;
 
 }
