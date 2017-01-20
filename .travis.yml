@@ -7,5 +7,5 @@ before_install:
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
 after_success:
-  - echo "<settings><servers><server><id>snapshot-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server><server><id>release-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server></servers><profiles><profile><id>snapshot-repository</id><activation><activeByDefault>true</activeByDefault></activation><properties><gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable><gpg.passphrase>\${env.GPG_PASSPHRASE}</gpg.passphrase></properties></profile></profiles></settings>" > ~/travis-settings.xml
+  - echo "<settings><servers><server><id>snapshot-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server><server><id>release-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server></servers><profiles><profile><id>snapshot-repository</id><activation><activeByDefault>true</activeByDefault></activation><properties><gpg.executable>\${env.GPG_EXECUTABLE}</gpg.executable><gpg.passphrase>\${env.GPG_PASSPHRASE}</gpg.passphrase></properties></profile></profiles></settings>" > ~/travis-settings.xml
   - mvn deploy --settings ~/travis-settings.xml
