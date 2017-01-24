@@ -19,44 +19,31 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AggregateRequest extends BaseRequest {
 
-    String countAlias;
+	String countAlias;
 
-    /**
-     * Constructor to initialize query and entity.
-     *
-     * @param query
-     *            aggregate query
-     * @param entitySet
-     *            the edm entity set
-     */
-    public AggregateRequest(AggregateQuery query, ElasticEdmEntitySet entitySet) {
-        this(query, entitySet, null);
-    }
+	/**
+	 * Constructor to initialize query and entity.
+	 * 
+	 * @param query
+	 *            aggregate query
+	 * @param entitySet
+	 *            the edm entity set
+	 * @param countAlias
+	 *            name of count alias, or null if no count option applied
+	 */
+	public AggregateRequest(AggregateQuery query, ElasticEdmEntitySet entitySet, String countAlias) {
+		super(query, entitySet);
+		this.countAlias = countAlias;
+	}
 
-    /**
-     * Constructor to initialize query and entity.
-     * 
-     * @param query
-     *            aggregate query
-     * @param entitySet
-     *            the edm entity set
-     * @param countAlias
-     *            name of count alias, or null if no count option applied
-     */
-    public AggregateRequest(AggregateQuery query, ElasticEdmEntitySet entitySet,
-            String countAlias) {
-        super(query, entitySet);
-        this.countAlias = countAlias;
-    }
+	@Override
+	public SearchResponse execute() {
+		return ESClient.getInstance().executeRequest(getQuery());
+	}
 
-    @Override
-    public SearchResponse execute() {
-        return ESClient.getInstance().executeRequest(getQuery());
-    }
-
-    @Override
-    public AggregateQuery getQuery() {
-        return (AggregateQuery) super.getQuery();
-    }
+	@Override
+	public AggregateQuery getQuery() {
+		return (AggregateQuery) super.getQuery();
+	}
 
 }
