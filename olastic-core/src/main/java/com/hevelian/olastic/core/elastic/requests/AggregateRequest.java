@@ -23,6 +23,18 @@ public class AggregateRequest extends BaseRequest {
 
 	/**
 	 * Constructor to initialize query and entity.
+	 *
+	 * @param query
+	 *            aggregate query
+	 * @param entitySet
+	 *            the edm entity set
+	 */
+	public AggregateRequest(AggregateQuery query, ElasticEdmEntitySet entitySet) {
+		this(query, entitySet, null);
+	}
+
+	/**
+	 * Constructor to initialize query and entity.
 	 * 
 	 * @param query
 	 *            aggregate query
