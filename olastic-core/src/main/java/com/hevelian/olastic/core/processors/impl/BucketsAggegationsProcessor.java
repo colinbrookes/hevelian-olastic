@@ -7,6 +7,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.elasticsearch.action.search.SearchResponse;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.parsers.BucketsAggregationsParser;
 import com.hevelian.olastic.core.elastic.requests.AggregateRequest;
 import com.hevelian.olastic.core.elastic.requests.ESRequest;
@@ -21,19 +22,21 @@ import com.hevelian.olastic.core.processors.data.InstanceData;
  */
 public class BucketsAggegationsProcessor extends AbstractESCollectionProcessor {
 
-    private String countAlias;
+	private Pagination pagination;
+	private String countAlias;
 
-    @Override
-    protected ESRequest createRequest(UriInfo uriInfo) throws ODataApplicationException {
-        AggregateRequest request = new BucketsAggregationsRequestCreator().create(uriInfo);
-        countAlias = request.getCountAlias();
-        return request;
-    }
+	@Override
+	protected ESRequest createRequest(UriInfo uriInfo) throws ODataApplicationException {
+		AggregateRequest request = new BucketsAggregationsRequestCreator().create(uriInfo);
+		pagination = request.getPagination();
+		countAlias = request.getCountAlias();
+		return request;
+	}
 
-    @Override
-    protected InstanceData<EdmEntityType, AbstractEntityCollection> parseResponse(
-            SearchResponse response, ElasticEdmEntitySet entitySet) {
-        return new BucketsAggregationsParser(countAlias).parse(response, entitySet);
-    }
+	@Override
+	protected InstanceData<EdmEntityType, AbstractEntityCollection> parseResponse(SearchResponse response,
+			ElasticEdmEntitySet entitySet) {
+		return new BucketsAggregationsParser(pagination, countAlias).parse(response, entitySet);
+	}
 
 }
