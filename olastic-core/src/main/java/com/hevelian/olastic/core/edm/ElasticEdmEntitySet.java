@@ -45,4 +45,20 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
     public ElasticEdmEntityType getEntityType() {
         return (ElasticEdmEntityType) provider.getEntityType(csdlEntitySet.getTypeFQN());
     }
+
+    /**
+     * Sets index to entity set.
+     * @param eIndex
+     */
+    public void setEIndex(String eIndex) {
+        csdlEntitySet.setEIndex(eIndex);
+    }
+
+    /**
+     * Sets type to entity set.
+     * @param eType
+     */
+    public void setEType(String eType) {
+        csdlEntitySet.setEType(eType);
+    }
 }

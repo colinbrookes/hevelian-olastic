@@ -1,11 +1,6 @@
 package com.hevelian.olastic.core.elastic.parsers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
-
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -15,7 +10,10 @@ import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import javax.xml.bind.DatatypeConverter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract parser with common behavior for all parsers.
@@ -27,7 +25,7 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
  * @param <V>
  *            instance data value class
  */
-abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
+public abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
 
     @SuppressWarnings("unchecked")
     protected Property createProperty(String name, Object value, ElasticEdmEntityType entityType) {
@@ -40,7 +38,9 @@ abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
             Object modifiedValue = value;
             if (property.getType() instanceof EdmDate
                     || property.getType() instanceof EdmDateTimeOffset) {
-                modifiedValue = DatatypeConverter.parseDateTime((String) value).getTime();
+                if (value != null) {
+                    modifiedValue = DatatypeConverter.parseDateTime((String) value).getTime();
+                }
             } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
                 // When Elasticsearch aggregates data it return's boolean as
                 // number value (1,0), but when it searches then normal boolean
