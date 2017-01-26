@@ -22,22 +22,23 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class ExpressionResult extends BaseMember {
 
-	QueryBuilder queryBuilder;
+    QueryBuilder queryBuilder;
 
-	@Override
-	public ExpressionResult and(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(
-				boolQuery().must(queryBuilder).must(((ExpressionResult) expressionMember).getQueryBuilder()));
-	}
+    @Override
+    public ExpressionResult and(ExpressionMember expressionMember)
+            throws ODataApplicationException {
+        return new ExpressionResult(boolQuery().must(queryBuilder)
+                .must(((ExpressionResult) expressionMember).getQueryBuilder()));
+    }
 
-	@Override
-	public ExpressionResult or(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(
-				boolQuery().should(queryBuilder).should(((ExpressionResult) expressionMember).getQueryBuilder()));
-	}
+    @Override
+    public ExpressionResult or(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(boolQuery().should(queryBuilder)
+                .should(((ExpressionResult) expressionMember).getQueryBuilder()));
+    }
 
-	@Override
-	public ExpressionResult not() throws ODataApplicationException {
-		return new ExpressionResult(boolQuery().mustNot(queryBuilder));
-	}
+    @Override
+    public ExpressionResult not() throws ODataApplicationException {
+        return new ExpressionResult(boolQuery().mustNot(queryBuilder));
+    }
 }

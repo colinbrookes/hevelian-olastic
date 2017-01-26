@@ -19,7 +19,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 
 /**
@@ -52,15 +51,15 @@ public abstract class AbstractAggregationsRequestCreator extends AbstractRequest
     /**
      * Get's and creates metrics aggregation queries from {@link Aggregate} in
      * URL.
-     *
-     * @param entityType
-     *            entity type
+     * 
+     * @param aggregations
+     *            list of aggregations
      * @return list of queries
      * @throws ODataApplicationException
      *             if any error occurred
      */
-    protected List<AggregationBuilder> getMetricsAggQueries(List<Aggregate> aggregations,
-            ElasticEdmEntityType entityType) throws ODataApplicationException {
+    protected List<AggregationBuilder> getMetricsAggQueries(List<Aggregate> aggregations)
+            throws ODataApplicationException {
         List<AggregateExpression> expressions = aggregations.stream()
                 .flatMap(agg -> agg.getExpressions().stream()).collect(Collectors.toList());
         List<AggregationBuilder> aggs = new ArrayList<>();
@@ -75,8 +74,7 @@ public abstract class AbstractAggregationsRequestCreator extends AbstractRequest
                 if (expr != null) {
                     String field = ((PrimitiveMember) expr
                             .accept(new ElasticSearchExpressionVisitor())).getField();
-                    String fieldName = entityType.getEProperties().get(field).getEField();
-                    aggs.add(getAggQuery(aggExpression.getStandardMethod(), alias, fieldName));
+                    aggs.add(getAggQuery(aggExpression.getStandardMethod(), alias, field));
                 } else {
                     List<UriResource> path = aggExpression.getPath();
                     if (path.size() > 1) {

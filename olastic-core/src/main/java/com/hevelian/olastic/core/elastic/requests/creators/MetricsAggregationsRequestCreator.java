@@ -11,7 +11,6 @@ import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 import com.hevelian.olastic.core.elastic.queries.Query;
@@ -48,10 +47,9 @@ public class MetricsAggregationsRequestCreator extends AbstractAggregationsReque
         ESRequest baseRequestInfo = getBaseRequestInfo(uriInfo);
         Query baseQuery = baseRequestInfo.getQuery();
         ElasticEdmEntitySet entitySet = baseRequestInfo.getEntitySet();
-        ElasticEdmEntityType entityType = entitySet.getEntityType();
 
         List<Aggregate> aggregations = getAggregations(uriInfo.getApplyOption());
-        List<AggregationBuilder> metricsQueries = getMetricsAggQueries(aggregations, entityType);
+        List<AggregationBuilder> metricsQueries = getMetricsAggQueries(aggregations);
 
         AggregateQuery aggregateQuery = new AggregateQuery(baseQuery.getIndex(),
                 baseQuery.getType(), baseQuery.getQueryBuilder(), metricsQueries,
