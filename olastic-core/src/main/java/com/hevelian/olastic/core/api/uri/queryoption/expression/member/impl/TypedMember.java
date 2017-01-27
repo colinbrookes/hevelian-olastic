@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public abstract class TypedMember extends BaseMember {
 
-	String field;
-	EdmType edmType;
+    String field;
+    EdmType edmType;
 
 }

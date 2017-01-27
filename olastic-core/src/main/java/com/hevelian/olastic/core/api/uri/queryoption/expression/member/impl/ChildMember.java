@@ -19,16 +19,16 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ChildMember extends BaseMember {
 
-	String childType;
-	QueryBuilder query;
+    String childType;
+    QueryBuilder query;
 
-	@Override
-	public ExpressionResult any() throws ODataApplicationException {
-		return buildChildQuery();
-	}
+    @Override
+    public ExpressionResult any() throws ODataApplicationException {
+        return buildChildQuery();
+    }
 
-	private ExpressionResult buildChildQuery() {
-		return new ExpressionResult(hasChildQuery(childType, query, ScoreMode.None));
-	}
+    private ExpressionResult buildChildQuery() {
+        return new ExpressionResult(hasChildQuery(childType, query, ScoreMode.None));
+    }
 
 }

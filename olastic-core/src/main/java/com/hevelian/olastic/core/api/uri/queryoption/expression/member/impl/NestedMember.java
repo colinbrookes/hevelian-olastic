@@ -15,16 +15,16 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class NestedMember extends BaseMember {
 
-	private String nestedType;
-	private QueryBuilder query;
+    private String nestedType;
+    private QueryBuilder query;
 
-	@Override
-	public ExpressionResult any() throws ODataApplicationException {
-		return buildNestedQuery();
-	}
+    @Override
+    public ExpressionResult any() throws ODataApplicationException {
+        return buildNestedQuery();
+    }
 
-	private ExpressionResult buildNestedQuery() {
-		return new ExpressionResult(QueryBuilders.nestedQuery(nestedType, query, ScoreMode.None));
-	}
+    private ExpressionResult buildNestedQuery() {
+        return new ExpressionResult(QueryBuilders.nestedQuery(nestedType, query, ScoreMode.None));
+    }
 
 }

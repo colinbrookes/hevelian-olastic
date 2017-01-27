@@ -17,39 +17,44 @@ import com.hevelian.olastic.core.api.uri.queryoption.expression.member.Expressio
  */
 public class PrimitiveMember extends TypedMember {
 
-	public PrimitiveMember(String field, EdmType edmType) {
-		super(field, edmType);
-	}
+    public PrimitiveMember(String field, EdmType edmType) {
+        super(field, edmType);
+    }
 
-	@Override
-	public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(
-				termQuery(addKeywordIfNeeded(getField(), getEdmType()), ((LiteralMember) expressionMember).getValue()));
-	}
+    @Override
+    public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(termQuery(addKeywordIfNeeded(getField(), getEdmType()),
+                ((LiteralMember) expressionMember).getValue()));
+    }
 
-	@Override
-	public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(boolQuery().mustNot(termQuery(addKeywordIfNeeded(getField(), getEdmType()),
-				((LiteralMember) expressionMember).getValue())));
-	}
+    @Override
+    public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(
+                boolQuery().mustNot(termQuery(addKeywordIfNeeded(getField(), getEdmType()),
+                        ((LiteralMember) expressionMember).getValue())));
+    }
 
-	@Override
-	public ExpressionResult ge(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(rangeQuery(getField()).gte(((LiteralMember) expressionMember).getValue()));
-	}
+    @Override
+    public ExpressionResult ge(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(
+                rangeQuery(getField()).gte(((LiteralMember) expressionMember).getValue()));
+    }
 
-	@Override
-	public ExpressionResult gt(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(rangeQuery(getField()).gt(((LiteralMember) expressionMember).getValue()));
-	}
+    @Override
+    public ExpressionResult gt(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(
+                rangeQuery(getField()).gt(((LiteralMember) expressionMember).getValue()));
+    }
 
-	@Override
-	public ExpressionResult le(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(rangeQuery(getField()).lte(((LiteralMember) expressionMember).getValue()));
-	}
+    @Override
+    public ExpressionResult le(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(
+                rangeQuery(getField()).lte(((LiteralMember) expressionMember).getValue()));
+    }
 
-	@Override
-	public ExpressionResult lt(ExpressionMember expressionMember) throws ODataApplicationException {
-		return new ExpressionResult(rangeQuery(getField()).lt(((LiteralMember) expressionMember).getValue()));
-	}
+    @Override
+    public ExpressionResult lt(ExpressionMember expressionMember) throws ODataApplicationException {
+        return new ExpressionResult(
+                rangeQuery(getField()).lt(((LiteralMember) expressionMember).getValue()));
+    }
 }

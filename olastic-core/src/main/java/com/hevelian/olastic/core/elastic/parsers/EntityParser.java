@@ -14,6 +14,7 @@ import org.elasticsearch.search.SearchHit;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.edm.ElasticEdmProperty;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.processors.data.InstanceData;
 import com.hevelian.olastic.core.utils.ProcessorUtils;
@@ -33,16 +34,20 @@ public class EntityParser extends AbstractParser<EdmEntityType, Entity> {
         if (hits.hasNext()) {
             Entity entity = new Entity();
             SearchHit firstHit = hits.next();
-            entity.setId(ProcessorUtils.createId(entityType.getName(), firstHit.getId()));
-            Property idProperty = createProperty(ElasticConstants.ID_FIELD_NAME, firstHit.getId(),
-                    entityType);
-            entity.addProperty(idProperty);
+            Object idSource = firstHit.getSource().get(ElasticConstants.ID_FIELD_NAME);
+            if (idSource == null) {
+                entity.setId(ProcessorUtils.createId(entityType.getName(), firstHit.getId()));
+                Property idProperty = createProperty(ElasticConstants.ID_FIELD_NAME,
+                        firstHit.getId(), entityType);
+                entity.addProperty(idProperty);
+            } else {
+                entity.setId(ProcessorUtils.createId(entityType.getName(), idSource));
+            }
 
             for (Map.Entry<String, Object> entry : firstHit.getSource().entrySet()) {
-                Property property = createProperty(
-                        entityType.findPropertyByEField(entry.getKey()).getName(), entry.getValue(),
-                        entityType);
-                entity.addProperty(property);
+                ElasticEdmProperty edmProperty = entityType.findPropertyByEField(entry.getKey());
+                entity.addProperty(
+                        createProperty(edmProperty.getName(), entry.getValue(), entityType));
             }
             return new InstanceData<>(entityType, entity);
         } else {

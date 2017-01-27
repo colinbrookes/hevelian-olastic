@@ -16,7 +16,7 @@ public final class ElasticConstants {
     /** Parent property name. */
     public static final String PARENT_PROPERTY = "_parent";
     /** ID field name. */
-    public static final String ID_FIELD_NAME = "_id";
+    public static final String ID_FIELD_NAME = "id";
     /** Suffix for keyword (not-analyzed) field. */
     public static final String KEYWORD_SUFFIX = "keyword";
     /** Field suffix delimiter. */

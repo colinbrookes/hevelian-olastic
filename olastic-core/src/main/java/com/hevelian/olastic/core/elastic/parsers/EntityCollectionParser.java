@@ -12,6 +12,7 @@ import org.elasticsearch.search.SearchHit;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.edm.ElasticEdmProperty;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.processors.data.InstanceData;
 import com.hevelian.olastic.core.utils.ProcessorUtils;
@@ -43,16 +44,20 @@ public class EntityCollectionParser
         EntityCollection entities = new EntityCollection();
         for (SearchHit hit : response.getHits()) {
             Entity entity = new Entity();
-            entity.setId(ProcessorUtils.createId(entityType.getName(), hit.getId()));
-            Property idProperty = createProperty(ElasticConstants.ID_FIELD_NAME, hit.getId(),
-                    entityType);
-            entity.addProperty(idProperty);
+            Object idSource = hit.getSource().get(ElasticConstants.ID_FIELD_NAME);
+            if (idSource == null) {
+                entity.setId(ProcessorUtils.createId(entityType.getName(), hit.getId()));
+                Property idProperty = createProperty(ElasticConstants.ID_FIELD_NAME, hit.getId(),
+                        entityType);
+                entity.addProperty(idProperty);
+            } else {
+                entity.setId(ProcessorUtils.createId(entityType.getName(), idSource));
+            }
 
             for (Map.Entry<String, Object> entry : hit.getSource().entrySet()) {
-                Property property = createProperty(
-                        entityType.findPropertyByEField(entry.getKey()).getName(), entry.getValue(),
-                        entityType);
-                entity.addProperty(property);
+                ElasticEdmProperty edmProperty = entityType.findPropertyByEField(entry.getKey());
+                entity.addProperty(
+                        createProperty(edmProperty.getName(), entry.getValue(), entityType));
             }
             entities.getEntities().add(entity);
         }

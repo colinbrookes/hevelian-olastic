@@ -22,57 +22,62 @@ import com.hevelian.olastic.core.api.uri.queryoption.expression.member.Expressio
  */
 public class ParentMember extends TypedMember {
 
-	private List<String> parentTypes;
+    private List<String> parentTypes;
 
-	public ParentMember(List<String> parentTypes, String field, EdmType type) {
-		super(field, type);
-		this.parentTypes = parentTypes;
-	}
+    public ParentMember(List<String> parentTypes, String field, EdmType type) {
+        super(field, type);
+        this.parentTypes = parentTypes;
+    }
 
-	@Override
-	public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
-		QueryBuilder query = termQuery(addKeywordIfNeeded(getField(), getEdmType()),
-				((LiteralMember) expressionMember).getValue());
-		return buildParentQuery(query);
-	}
+    @Override
+    public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
+        QueryBuilder query = termQuery(addKeywordIfNeeded(getField(), getEdmType()),
+                ((LiteralMember) expressionMember).getValue());
+        return buildParentQuery(query);
+    }
 
-	@Override
-	public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
-		QueryBuilder query = boolQuery().mustNot(
-				termQuery(addKeywordIfNeeded(getField(), getEdmType()), ((LiteralMember) expressionMember).getValue()));
-		return buildParentQuery(query);
-	}
+    @Override
+    public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
+        QueryBuilder query = boolQuery()
+                .mustNot(termQuery(addKeywordIfNeeded(getField(), getEdmType()),
+                        ((LiteralMember) expressionMember).getValue()));
+        return buildParentQuery(query);
+    }
 
-	@Override
-	public ExpressionResult ge(ExpressionMember expressionMember) throws ODataApplicationException {
-		QueryBuilder query = rangeQuery(getField()).gte(((LiteralMember) expressionMember).getValue());
-		return buildParentQuery(query);
-	}
+    @Override
+    public ExpressionResult ge(ExpressionMember expressionMember) throws ODataApplicationException {
+        QueryBuilder query = rangeQuery(getField())
+                .gte(((LiteralMember) expressionMember).getValue());
+        return buildParentQuery(query);
+    }
 
-	@Override
-	public ExpressionResult gt(ExpressionMember expressionMember) throws ODataApplicationException {
-		QueryBuilder query = rangeQuery(getField()).gt(((LiteralMember) expressionMember).getValue());
-		return buildParentQuery(query);
-	}
+    @Override
+    public ExpressionResult gt(ExpressionMember expressionMember) throws ODataApplicationException {
+        QueryBuilder query = rangeQuery(getField())
+                .gt(((LiteralMember) expressionMember).getValue());
+        return buildParentQuery(query);
+    }
 
-	@Override
-	public ExpressionResult le(ExpressionMember expressionMember) throws ODataApplicationException {
-		QueryBuilder query = rangeQuery(getField()).lte(((LiteralMember) expressionMember).getValue());
-		return buildParentQuery(query);
-	}
+    @Override
+    public ExpressionResult le(ExpressionMember expressionMember) throws ODataApplicationException {
+        QueryBuilder query = rangeQuery(getField())
+                .lte(((LiteralMember) expressionMember).getValue());
+        return buildParentQuery(query);
+    }
 
-	@Override
-	public ExpressionResult lt(ExpressionMember expressionMember) throws ODataApplicationException {
-		QueryBuilder query = rangeQuery(getField()).lt(((LiteralMember) expressionMember).getValue());
-		return buildParentQuery(query);
-	}
+    @Override
+    public ExpressionResult lt(ExpressionMember expressionMember) throws ODataApplicationException {
+        QueryBuilder query = rangeQuery(getField())
+                .lt(((LiteralMember) expressionMember).getValue());
+        return buildParentQuery(query);
+    }
 
-	private ExpressionResult buildParentQuery(QueryBuilder query) {
-		ListIterator<String> iterator = parentTypes.listIterator(parentTypes.size());
-		QueryBuilder resultQuery = query;
-		while (iterator.hasPrevious()) {
-			resultQuery = hasParentQuery(iterator.previous(), resultQuery, false);
-		}
-		return new ExpressionResult(resultQuery);
-	}
+    private ExpressionResult buildParentQuery(QueryBuilder query) {
+        ListIterator<String> iterator = parentTypes.listIterator(parentTypes.size());
+        QueryBuilder resultQuery = query;
+        while (iterator.hasPrevious()) {
+            resultQuery = hasParentQuery(iterator.previous(), resultQuery, false);
+        }
+        return new ExpressionResult(resultQuery);
+    }
 }

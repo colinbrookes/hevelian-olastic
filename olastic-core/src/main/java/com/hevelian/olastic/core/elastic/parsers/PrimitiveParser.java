@@ -29,8 +29,8 @@ public class PrimitiveParser extends AbstractParser<EdmPrimitiveType, Property> 
 
         ElasticEdmProperty edmProperty = null;
         Property property = null;
+
         Map<String, Object> source = firstHit.getSource();
-        // TODO Take a look and fix retrieving reference value.
         if (source.isEmpty()) {
             edmProperty = entityType.findPropertyByEField(ElasticConstants.ID_FIELD_NAME);
             property = createProperty(edmProperty.getName(), firstHit.getId(), entityType);
