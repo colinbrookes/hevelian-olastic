@@ -2,6 +2,7 @@ package com.hevelian.olastic.core.edm;
 
 import org.apache.olingo.commons.api.edm.EdmEntityContainer;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.core.edm.EdmEntitySetImpl;
 
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
@@ -43,11 +44,15 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
 
     @Override
     public ElasticEdmEntityType getEntityType() {
-        return (ElasticEdmEntityType) provider.getEntityType(csdlEntitySet.getTypeFQN());
+        EdmEntityType entityType = provider.getEntityType(new FullQualifiedName(
+                csdlEntitySet.getTypeFQN().getNamespace(), csdlEntitySet.getEType()));
+        return entityType != null ? (ElasticEdmEntityType) entityType
+                : (ElasticEdmEntityType) provider.getEntityType(csdlEntitySet.getTypeFQN());
     }
 
     /**
      * Sets index to entity set.
+     * 
      * @param eIndex
      */
     public void setEIndex(String eIndex) {
@@ -56,9 +61,11 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
 
     /**
      * Sets type to entity set.
+     * 
      * @param eType
      */
     public void setEType(String eType) {
         csdlEntitySet.setEType(eType);
     }
+
 }

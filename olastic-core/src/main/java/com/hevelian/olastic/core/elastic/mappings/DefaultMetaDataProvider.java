@@ -42,7 +42,8 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
     public MappingMetaData getMappingForType(String index, String type) {
         GetMappingsResponse mappingsResponse = getClient().admin().indices()
                 .prepareGetMappings(index).addTypes(type).execute().actionGet();
-        return mappingsResponse.getMappings().get(index).get(type);
+        return mappingsResponse.getMappings().isEmpty() ? null
+                : mappingsResponse.getMappings().get(index).get(type);
     }
 
     @Override

@@ -19,51 +19,52 @@ import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
  */
 public class ElasticEdmProvider extends EdmProviderImpl {
 
-	private ElasticCsdlEdmProvider csdlProvider;
+    private ElasticCsdlEdmProvider csdlProvider;
 
-	/**
-	 * Constructor to initialize provider.
-	 * 
-	 * @param provider
-	 *            CSDL provider
-	 */
-	public ElasticEdmProvider(ElasticCsdlEdmProvider provider) {
-		super(provider);
-		this.csdlProvider = provider;
-	}
+    /**
+     * Constructor to initialize provider.
+     * 
+     * @param provider
+     *            CSDL provider
+     */
+    public ElasticEdmProvider(ElasticCsdlEdmProvider provider) {
+        super(provider);
+        this.csdlProvider = provider;
+    }
 
-	@Override
-	public ElasticEdmEntityType createEntityType(FullQualifiedName entityTypeName) {
-		try {
-			ElasticCsdlEntityType entityType = csdlProvider.getEntityType(entityTypeName);
-			if (entityType != null) {
-				return new ElasticEdmEntityType(this, entityTypeName, entityType);
-			}
-			return null;
-		} catch (ODataException e) {
-			throw new EdmException(e);
-		}
-	}
+    @Override
+    public ElasticEdmEntityType createEntityType(FullQualifiedName entityTypeName) {
+        try {
+            ElasticCsdlEntityType entityType = csdlProvider.getEntityType(entityTypeName);
+            if (entityType != null) {
+                return new ElasticEdmEntityType(this, entityTypeName, entityType);
+            }
+            return null;
+        } catch (ODataException e) {
+            throw new EdmException(e);
+        }
+    }
 
-	@Override
-	public EdmEntityContainer createEntityContainer(FullQualifiedName containerName) {
-		CsdlEntityContainerInfo entityContainerInfo = csdlProvider.getEntityContainerInfo(containerName);
-		if (entityContainerInfo != null) {
-			return new ElasticEdmEntityContainer(this, csdlProvider, entityContainerInfo);
-		}
-		return null;
-	}
+    @Override
+    public EdmEntityContainer createEntityContainer(FullQualifiedName containerName) {
+        CsdlEntityContainerInfo entityContainerInfo = csdlProvider
+                .getEntityContainerInfo(containerName);
+        if (entityContainerInfo != null) {
+            return new ElasticEdmEntityContainer(this, csdlProvider, entityContainerInfo);
+        }
+        return null;
+    }
 
-	@Override
-	public EdmComplexType createComplexType(FullQualifiedName complexTypeName) {
-		try {
-			ElasticCsdlComplexType complexType = csdlProvider.getComplexType(complexTypeName);
-			if (complexType != null) {
-				return new ElasticEdmComplexType(this, complexTypeName, complexType);
-			}
-			return null;
-		} catch (ODataException e) {
-			throw new EdmException(e);
-		}
-	}
+    @Override
+    public EdmComplexType createComplexType(FullQualifiedName complexTypeName) {
+        try {
+            ElasticCsdlComplexType complexType = csdlProvider.getComplexType(complexTypeName);
+            if (complexType != null) {
+                return new ElasticEdmComplexType(this, complexTypeName, complexType);
+            }
+            return null;
+        } catch (ODataException e) {
+            throw new EdmException(e);
+        }
+    }
 }

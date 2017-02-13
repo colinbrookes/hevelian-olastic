@@ -27,7 +27,7 @@ public interface NestedTypeMapper {
      * @throws ODataException
      *             if any error occurred
      */
-	public List<ElasticCsdlComplexType> getComplexTypes(String index) throws ODataException;
+    public List<ElasticCsdlComplexType> getComplexTypes(String index) throws ODataException;
 
     /**
      * Map Elasticsearch nested object name to CSDL complex type. By default
