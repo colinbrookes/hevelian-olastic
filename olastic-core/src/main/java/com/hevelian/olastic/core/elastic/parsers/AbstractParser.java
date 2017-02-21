@@ -98,7 +98,9 @@ public abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
             Object value = entry.getValue();
             if (value instanceof List) {
                 ElasticEdmComplexType complexType = (ElasticEdmComplexType) edmElement.getType();
-                EdmElement complexProperty = complexType.getPropertyByNestedName(entry.getKey());
+                EdmElement complexProperty = complexType.getProperty(entry.getKey());
+                complexProperty = complexProperty == null
+                        ? complexType.getPropertyByNestedName(entry.getKey()) : complexProperty;
                 complexValue.getValue().add(createPropertyList(complexProperty.getName(),
                         (List<Object>) value, complexType));
             } else {

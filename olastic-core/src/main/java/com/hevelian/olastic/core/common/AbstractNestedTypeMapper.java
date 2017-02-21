@@ -111,8 +111,7 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
                     .setEIndex(index).setEType(type);
             if (isNested(nestedFieldType)) {
                 complexProperty.setENestedType(nestedFieldName)
-                        .setType(getComplexType(index, type, mappedNestedName))
-                        .setCollection(csdlMapper.eFieldIsCollection(index, type, nestedFieldName));
+                        .setType(getComplexType(index, type, mappedNestedName));
                 createComplexTypes(index, type, nestedFieldName,
                         nestedFieldMap.mapValue(PROPERTIES_PROPERTY)).entrySet().stream()
                                 .forEach(entry -> getAndPut(complexMappings, entry.getKey(),
@@ -121,7 +120,8 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
                 complexProperty.setENestedType(nested)
                         .setType(primitiveTypeMapper.map(nestedFieldType).getFullQualifiedName());
             }
-            complexTypeProperties.add(complexProperty.setName(mappedNestedName));
+            complexTypeProperties.add(complexProperty.setName(mappedNestedName)
+                    .setCollection(csdlMapper.eFieldIsCollection(index, type, nestedFieldName)));
         }
         getAndPut(complexMappings, complexType, complexTypeProperties);
         return complexMappings;
