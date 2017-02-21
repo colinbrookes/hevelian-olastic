@@ -9,62 +9,64 @@ import com.google.common.base.Objects;
  * 
  * @author rdidyk
  */
-public class ElasticCsdlComplexProperty extends CsdlProperty implements ElasticCsdlEdmItem<ElasticCsdlComplexProperty> {
+public class ElasticCsdlComplexProperty extends CsdlProperty
+        implements ElasticCsdlEdmItem<ElasticCsdlComplexProperty> {
 
-	private String eIndex;
-	private String eType;
-	private String eNestedType;
+    private String eIndex;
+    private String eType;
+    private String eNestedType;
 
-	@Override
-	public String getEIndex() {
-		return eIndex;
-	}
+    @Override
+    public String getEIndex() {
+        return eIndex;
+    }
 
-	@Override
-	public String getEType() {
-		return eType;
-	}
+    @Override
+    public String getEType() {
+        return eType;
+    }
 
-	public String geteNestedType() {
-		return eNestedType;
-	}
+    public String getENestedType() {
+        return eNestedType;
+    }
 
-	@Override
-	public ElasticCsdlComplexProperty setEIndex(String eIndex) {
-		this.eIndex = eIndex;
-		return this;
-	}
+    @Override
+    public ElasticCsdlComplexProperty setEIndex(String eIndex) {
+        this.eIndex = eIndex;
+        return this;
+    }
 
-	@Override
-	public ElasticCsdlComplexProperty setEType(String eType) {
-		this.eType = eType;
-		return this;
-	}
+    @Override
+    public ElasticCsdlComplexProperty setEType(String eType) {
+        this.eType = eType;
+        return this;
+    }
 
-	public ElasticCsdlComplexProperty seteNestedType(String eNestedType) {
-		this.eNestedType = eNestedType;
-		return this;
-	}
+    public ElasticCsdlComplexProperty setENestedType(String eNestedType) {
+        this.eNestedType = eNestedType;
+        return this;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(eIndex, eType, eNestedType, getName());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(eIndex, eNestedType, getName());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		ElasticCsdlComplexProperty other = (ElasticCsdlComplexProperty) obj;
-		return Objects.equal(this.eIndex, other.eIndex) && Objects.equal(this.eType, other.eType)
-				&& Objects.equal(this.eNestedType, other.eNestedType) && Objects.equal(this.getName(), other.getName());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ElasticCsdlComplexProperty other = (ElasticCsdlComplexProperty) obj;
+        return Objects.equal(this.eIndex, other.eIndex)
+                && Objects.equal(this.eNestedType, other.eNestedType)
+                && Objects.equal(this.getName(), other.getName());
+    }
 
 }

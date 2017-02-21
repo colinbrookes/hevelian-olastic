@@ -2,6 +2,7 @@ package com.hevelian.olastic.core.edm;
 
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
+import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.core.edm.EdmComplexTypeImpl;
 
@@ -57,6 +58,20 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      */
     public String getENestedType() {
         return csdlComplexType.geteNestedType();
+    }
+
+    /**
+     * Get's property by nested property name.
+     * 
+     * @param nestedName
+     *            nested property name
+     * @return found property, or null
+     */
+    public EdmElement getPropertyByNestedName(String nestedName) {
+        return getProperties().entrySet().stream()
+                .filter(entry -> ((ElasticEdmComplexType) entry.getValue().getType())
+                        .getENestedType().equals(nestedName))
+                .findFirst().get().getValue();
     }
 
 }
