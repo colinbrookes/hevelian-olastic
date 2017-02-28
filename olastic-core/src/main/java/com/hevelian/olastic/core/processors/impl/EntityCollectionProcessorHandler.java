@@ -1,11 +1,9 @@
 package com.hevelian.olastic.core.processors.impl;
 
-import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
-import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getGroupByItems;
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
-
-import java.util.List;
-
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.processors.ESEntityCollectionProcessor;
+import com.hevelian.olastic.core.processors.ESReadProcessor;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
@@ -16,27 +14,28 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
 
-import com.hevelian.olastic.core.ElasticOData;
-import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.processors.AbstractESCollectionProcessor;
-import com.hevelian.olastic.core.processors.ESEntityCollectionProcessor;
+import java.util.List;
+
+import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
+import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getGroupByItems;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
  * Custom Elastic processor for handling all request to retrieve data from
  * collection of entities.
- * 
+ * <p/>
  * Supported items for now:
  * 1. one 'groupby' for multiple fields;
  * 2. metrics aggregations;
  * 3. one 'groupby' for multiple fields with metrics aggregations;
  * 4. simple entity collections.
- * 
+ *
  * @author rdidyk
  */
-public class CollectionProcessor extends ESEntityCollectionProcessor {
+public class EntityCollectionProcessorHandler extends ESEntityCollectionProcessor {
 
-    private ElasticOData odata;
-    private ElasticServiceMetadata serviceMetadata;
+    protected ElasticOData odata;
+    protected ElasticServiceMetadata serviceMetadata;
 
     @Override
     public void init(ElasticOData odata, ElasticServiceMetadata serviceMetadata) {
@@ -46,22 +45,20 @@ public class CollectionProcessor extends ESEntityCollectionProcessor {
 
     @Override
     public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-            ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        AbstractESCollectionProcessor collectionProcessor = getCollectionReadProcessor(uriInfo);
+                                     ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        ESReadProcessor collectionProcessor = getCollectionReadProcessor(uriInfo);
         collectionProcessor.init(odata, serviceMetadata);
         collectionProcessor.read(request, response, uriInfo, responseFormat);
     }
 
     /**
      * Gets specific collection reader based on items from apply option in URL.
-     * 
-     * @param uriInfo
-     *            URI info
+     *
+     * @param uriInfo URI info
      * @return reader to get data
-     * @throws ODataApplicationException
-     *             if any error occurred
+     * @throws ODataApplicationException if any error occurred
      */
-    protected AbstractESCollectionProcessor getCollectionReadProcessor(UriInfo uriInfo)
+    protected ESReadProcessor getCollectionReadProcessor(UriInfo uriInfo)
             throws ODataApplicationException {
         ApplyOption applyOption = uriInfo.getApplyOption();
         List<GroupBy> groupByItems = getGroupByItems(applyOption);
