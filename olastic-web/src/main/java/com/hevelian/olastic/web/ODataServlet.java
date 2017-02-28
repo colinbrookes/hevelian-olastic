@@ -8,9 +8,8 @@ import com.hevelian.olastic.core.elastic.mappings.DefaultMetaDataProvider;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.processors.impl.EntityCollectionProcessorHandler;
 import com.hevelian.olastic.core.processors.impl.EntityProcessorHandler;
-import com.hevelian.olastic.core.processors.impl.PrimitiveProcessor;
+import com.hevelian.olastic.core.processors.impl.PrimitiveProcessorImpl;
 import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
-import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -58,14 +57,17 @@ public class ODataServlet extends HttpServlet {
     /**
      * Create's {@link ServiceMetadata} metadata.
      *
-     * @param req      http request
-     * @param odata    OData instance
-     * @param provider CSDL provider
+     * @param req
+     *            http request
+     * @param odata
+     *            OData instance
+     * @param provider
+     *            CSDL provider
      * @return metadata
      */
     protected ServiceMetadata createServiceMetadata(HttpServletRequest req, OData odata,
-                                                    ElasticCsdlEdmProvider provider) {
-        return odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
+            ElasticCsdlEdmProvider provider) {
+        return odata.createServiceMetadata(provider, new ArrayList<>());
     }
 
     /**
@@ -90,10 +92,11 @@ public class ODataServlet extends HttpServlet {
      * Registers additional custom processor implementations for handling OData
      * requests
      *
-     * @param handler OData handler
+     * @param handler
+     *            OData handler
      */
     protected void registerProcessors(ODataHttpHandler handler) {
-        handler.register(new PrimitiveProcessor());
+        handler.register(new PrimitiveProcessorImpl());
         handler.register(new EntityProcessorHandler());
         handler.register(new EntityCollectionProcessorHandler());
     }

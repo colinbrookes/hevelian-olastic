@@ -13,14 +13,17 @@ import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 /**
+ * Base entity processor with common logic for all entity processors.
+ * 
  * @author Taras Kohut
  */
-public abstract class AbstractESEntityProcessor extends AbstractESReadProcessor<EdmEntityType, Entity> {
+public abstract class AbstractESEntityProcessor
+        extends AbstractESReadProcessor<EdmEntityType, Entity> {
 
     @Override
     protected SerializerResult serialize(ODataSerializer serializer,
-                                         InstanceData<EdmEntityType, Entity> data, ElasticEdmEntitySet entitySet,
-                                         UriInfo uriInfo) throws SerializerException {
+            InstanceData<EdmEntityType, Entity> data, ElasticEdmEntitySet entitySet,
+            UriInfo uriInfo) throws SerializerException {
         ExpandOption expand = uriInfo.getExpandOption();
         SelectOption select = uriInfo.getSelectOption();
         return serializer.entity(serviceMetadata, data.getType(), data.getValue(),
@@ -28,6 +31,5 @@ public abstract class AbstractESEntityProcessor extends AbstractESReadProcessor<
                         .contextURL(createContextUrl(entitySet, true, expand, select, null))
                         .select(select).expand(expand).build());
     }
-
 
 }
