@@ -1,5 +1,8 @@
 package com.hevelian.olastic.core.elastic;
 
+import static java.lang.String.format;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -80,7 +83,7 @@ public class ESClient {
      */
     public SearchResponse executeRequest(AggregateQuery query) {
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
-                .setTypes(query.getType()).setQuery(query.getQueryBuilder());
+                .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
         query.getAggregations().forEach(requestBuilder::addAggregation);
         query.getPipelineAggregations().forEach(requestBuilder::addAggregation);
         requestBuilder.setSize(0);
@@ -94,7 +97,7 @@ public class ESClient {
      */
     public SearchResponse executeRequest(SearchQuery query, Pagination pagination) {
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
-                .setTypes(query.getType()).setQuery(query.getQueryBuilder());
+                .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
         if (pagination != null) {
             List<Sort> orderBy = pagination.getOrderBy();
             for (Sort sort : orderBy) {
