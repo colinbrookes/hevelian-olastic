@@ -1,5 +1,7 @@
 package com.hevelian.olastic.core.elastic.queries;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.elasticsearch.index.query.QueryBuilder;
@@ -29,8 +31,25 @@ public class AggregateQuery extends Query {
      * 
      * @param index
      *            index name
-     * @param type
-     *            type name
+     * @param types
+     *            types name
+     * @param queryBuilder
+     *            main query builder
+     * @param aggregations
+     *            simple aggregations
+     */
+    public AggregateQuery(String index, String[] types, QueryBuilder queryBuilder,
+            AggregationBuilder aggregations) {
+        this(index, types, queryBuilder, Arrays.asList(aggregations), Collections.emptyList());
+    }
+
+    /**
+     * Constructor to initialize parameters.
+     * 
+     * @param index
+     *            index name
+     * @param types
+     *            types name
      * @param queryBuilder
      *            main query builder
      * @param aggregations
@@ -38,10 +57,10 @@ public class AggregateQuery extends Query {
      * @param pipelineAggregations
      *            pipeline aggregations
      */
-    public AggregateQuery(String index, String type, QueryBuilder queryBuilder,
+    public AggregateQuery(String index, String[] types, QueryBuilder queryBuilder,
             List<AggregationBuilder> aggregations,
             List<PipelineAggregationBuilder> pipelineAggregations) {
-        super(index, type, queryBuilder);
+        super(index, types, queryBuilder);
         this.aggregations = aggregations;
         this.pipelineAggregations = pipelineAggregations;
     }

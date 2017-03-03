@@ -109,8 +109,10 @@ public abstract class AbstractRequestCreator implements ESRequestCreator {
             }
         }
         queryBuilder.addFilter(getFilterQuery(uriInfo)).addFilter(getSearchQuery(uriInfo));
-        return new BaseRequest(new Query(responseEntitySet.getEIndex(),
-                responseEntitySet.getEType(), queryBuilder.build()), responseEntitySet);
+        return new BaseRequest(
+                new Query(responseEntitySet.getEIndex(),
+                        new String[] { responseEntitySet.getEType() }, queryBuilder.build()),
+                responseEntitySet);
     }
 
     /**

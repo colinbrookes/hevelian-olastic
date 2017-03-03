@@ -21,7 +21,7 @@ public class Query {
     @NonNull
     String index;
     @NonNull
-    String type;
+    String[] types;
     @NonNull
     QueryBuilder queryBuilder;
 

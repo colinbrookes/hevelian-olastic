@@ -70,7 +70,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
                 pagination);
 
         AggregateQuery aggregateQuery = new AggregateQuery(baseQuery.getIndex(),
-                baseQuery.getType(), baseQuery.getQueryBuilder(), bucketsQueries,
+                baseQuery.getTypes(), baseQuery.getQueryBuilder(), bucketsQueries,
                 Collections.emptyList());
         return new AggregateRequest(aggregateQuery, entitySet, pagination, getCountAlias());
     }

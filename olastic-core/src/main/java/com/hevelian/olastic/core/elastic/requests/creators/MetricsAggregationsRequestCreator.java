@@ -52,7 +52,7 @@ public class MetricsAggregationsRequestCreator extends AbstractAggregationsReque
         List<AggregationBuilder> metricsQueries = getMetricsAggQueries(aggregations);
 
         AggregateQuery aggregateQuery = new AggregateQuery(baseQuery.getIndex(),
-                baseQuery.getType(), baseQuery.getQueryBuilder(), metricsQueries,
+                baseQuery.getTypes(), baseQuery.getQueryBuilder(), metricsQueries,
                 Collections.emptyList());
         return new AggregateRequest(aggregateQuery, entitySet, getCountAlias());
     }

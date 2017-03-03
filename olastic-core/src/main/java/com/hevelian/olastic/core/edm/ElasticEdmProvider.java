@@ -37,7 +37,9 @@ public class ElasticEdmProvider extends EdmProviderImpl {
         try {
             ElasticCsdlEntityType entityType = csdlProvider.getEntityType(entityTypeName);
             if (entityType != null) {
-                return new ElasticEdmEntityType(this, entityTypeName, entityType);
+                return new ElasticEdmEntityType(this,
+                        new FullQualifiedName(entityTypeName.getNamespace(), entityType.getName()),
+                        entityType);
             }
             return null;
         } catch (ODataException e) {
@@ -66,5 +68,9 @@ public class ElasticEdmProvider extends EdmProviderImpl {
         } catch (ODataException e) {
             throw new EdmException(e);
         }
+    }
+
+    public ElasticCsdlEdmProvider getCsdlProvider() {
+        return csdlProvider;
     }
 }

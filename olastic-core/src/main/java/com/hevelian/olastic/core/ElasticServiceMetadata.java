@@ -3,7 +3,6 @@ package com.hevelian.olastic.core;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.constants.ODataServiceVersion;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -32,7 +31,7 @@ public class ElasticServiceMetadata implements ServiceMetadata {
     }
 
     @Override
-    public Edm getEdm() {
+    public ElasticEdmProvider getEdm() {
         return edm;
     }
 

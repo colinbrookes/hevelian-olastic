@@ -26,15 +26,16 @@ public class SearchQuery extends Query {
      * 
      * @param index
      *            index name
-     * @param type
-     *            type name
+     * @param types
+     *            types name
      * @param queryBuilder
      *            main query builder
      * @param fields
      *            fields to search
      */
-    public SearchQuery(String index, String type, QueryBuilder queryBuilder, Set<String> fields) {
-        super(index, type, queryBuilder);
+    public SearchQuery(String index, String[] types, QueryBuilder queryBuilder,
+            Set<String> fields) {
+        super(index, types, queryBuilder);
         this.fields = fields;
     }
 

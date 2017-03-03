@@ -55,7 +55,7 @@ public class SearchRequestCreator extends AbstractRequestCreator {
         Set<String> fields = getSelectList(uriInfo).stream()
                 .map(field -> entityType.getEProperties().get(field).getEField())
                 .collect(Collectors.toSet());
-        SearchQuery searchQuery = new SearchQuery(baseQuery.getIndex(), baseQuery.getType(),
+        SearchQuery searchQuery = new SearchQuery(baseQuery.getIndex(), baseQuery.getTypes(),
                 baseQuery.getQueryBuilder(), fields);
         return new SearchRequest(searchQuery, entitySet, getPagination(uriInfo));
     }
