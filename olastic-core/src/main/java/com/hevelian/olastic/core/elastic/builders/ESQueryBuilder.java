@@ -20,6 +20,8 @@ import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+
 /**
  * Non-final builder class to create to Elasticsearch with possibility to
  * override behavior in case someone needs own way to build query.
@@ -56,19 +58,21 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
     @SuppressWarnings("unchecked")
     public T addSegmentQuery(UriResource segment, UriResource nextSegment)
             throws ODataApplicationException {
-        String type = ((UriResourcePartTyped) segment).getType().getName();
+        ElasticEdmEntityType type = (ElasticEdmEntityType) ((UriResourcePartTyped) segment)
+                .getType();
+        String eType = type.getEType();
         List<String> ids = collectIds(segment);
         if (nextSegment == null) {
-            addIdQuery(type, ids);
+            addIdQuery(eType, ids);
         } else {
             if (nextSegment.getKind() == UriResourceKind.primitiveProperty) {
-                addIdQuery(type, ids);
+                addIdQuery(eType, ids);
             } else {
                 if (((UriResourceNavigationPropertyImpl) nextSegment).getProperty()
                         .isCollection()) {
-                    addParentQuery(type, ids);
+                    addParentQuery(eType, ids);
                 } else {
-                    addChildQuery(type, ids);
+                    addChildQuery(eType, ids);
                 }
             }
         }

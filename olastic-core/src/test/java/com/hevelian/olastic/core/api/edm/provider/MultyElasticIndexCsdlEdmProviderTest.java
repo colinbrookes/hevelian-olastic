@@ -179,7 +179,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
                 metaDataProvider, indices, nestedTypeMapper);
         List<CsdlProperty> csdlProperties = edmProvider.getProperties(AUTHORS_INDEX, AUTHOR_TYPE,
                 getStubProperties());
-        assertEquals(3, csdlProperties.size());
+        assertEquals(2, csdlProperties.size());
         for (CsdlProperty property : csdlProperties) {
             assertTrue(property instanceof ElasticCsdlProperty);
             assertEquals(AUTHORS_INDEX, ((ElasticCsdlProperty) property).getEIndex());
@@ -299,7 +299,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         assertEquals(AUTHOR_TYPE, ((ElasticCsdlEntityType) entityType).getEType());
         List<CsdlProperty> properties = entityType.getProperties();
         assertEquals(3, properties.size());
-        CsdlProperty idProperty = properties.get(1);
+        CsdlProperty idProperty = properties.get(2);
         assertEquals(ElasticConstants.ID_FIELD_NAME, idProperty.getName());
         List<CsdlPropertyRef> keys = entityType.getKey();
         assertEquals(1, keys.size());
@@ -538,11 +538,8 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         dimensionProperties.put("state", "boolean");
         dimension.put("properties", dimensionProperties);
         Map<String, Object> properties = new HashMap<>();
-        HashMap<Object, Object> idProperties = new HashMap<>();
-        idProperties.put("type", "string");
         HashMap<Object, Object> currentProperties = new HashMap<>();
         currentProperties.put("type", "boolean");
-        properties.put("id", idProperties);
         properties.put("dimension", dimension);
         properties.put("current", currentProperties);
         Map<String, Object> metadata = new HashMap<>();

@@ -148,14 +148,11 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
         // Retrieve type fields from Elasticsearch
         entityType.setProperties(getProperties(index, type, typeMappings));
 
-        if (entityType.getProperty(ElasticConstants.ID_FIELD_NAME) == null) {
-            // Add id property if there is no 'id' in Elasticsearch mappings.
-            CsdlProperty idProperty = new ElasticCsdlProperty()
-                    .setName(ElasticConstants.ID_FIELD_NAME)
-                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()).setNullable(false);
-            entityType.getProperties().add(idProperty);
-        }
-
+        // Add _id property
+        CsdlProperty idProperty = new ElasticCsdlProperty().setName(ElasticConstants.ID_FIELD_NAME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()).setNullable(false);
+        entityType.getProperties().add(idProperty);
+        
         // Add navigation properties
         entityType.getNavigationProperties().addAll(getNavigationProperties(index, type));
 
