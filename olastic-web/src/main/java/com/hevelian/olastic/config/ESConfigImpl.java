@@ -1,9 +1,6 @@
 package com.hevelian.olastic.config;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Set;
-
+import com.hevelian.olastic.core.elastic.ESClient;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
@@ -11,7 +8,9 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
-import com.hevelian.olastic.core.elastic.ESClient;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Set;
 
 /**
  * Elasticsearch client configuration class.
@@ -20,7 +19,7 @@ import com.hevelian.olastic.core.elastic.ESClient;
  */
 public class ESConfigImpl implements ESConfig {
 
-    private final Client client;
+    protected final Client client;
     private final Set<String> indices;
 
     /**
@@ -64,7 +63,7 @@ public class ESConfigImpl implements ESConfig {
      * application.
      */
     protected void initESClient() {
-        ESClient.init(client);
+        ESClient.init(client, new String[0]);
     }
 
     /**
