@@ -1,13 +1,9 @@
 package com.hevelian.olastic.core.elastic.queries;
 
-import org.elasticsearch.index.query.QueryBuilder;
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.elasticsearch.index.query.QueryBuilder;
 
 /**
  * Query with base parameters for all queries to create request.
@@ -26,5 +22,6 @@ public class Query {
     String[] types;
     @NonNull
     QueryBuilder queryBuilder;
+    Pagination pagination;
 
 }

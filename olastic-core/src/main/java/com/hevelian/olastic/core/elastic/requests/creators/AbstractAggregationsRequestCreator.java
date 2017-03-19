@@ -1,12 +1,8 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
-import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggQuery;
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -17,16 +13,19 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
-import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggQuery;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
  * Class with common logic for all request creators with aggregations queries.
  * 
  * @author rdidyk
  */
-public abstract class AbstractAggregationsRequestCreator extends AbstractRequestCreator {
+public abstract class AbstractAggregationsRequestCreator extends SingleRequestCreator {
 
     /** Name of count property. */
     private String countAlias;

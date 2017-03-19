@@ -1,8 +1,8 @@
 package com.hevelian.olastic.config;
 
-import java.util.Set;
-
 import org.elasticsearch.client.Client;
+
+import java.util.Set;
 
 /**
  * Interface to provide behavior for Elasticsearch configuration class.
@@ -16,7 +16,7 @@ public interface ESConfig {
      * 
      * @return attribute name
      */
-    public static String getName() {
+    static String getName() {
         return "ElasticsearchConfiguration";
     }
 

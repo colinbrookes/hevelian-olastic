@@ -18,9 +18,11 @@ public final class ElasticUtils {
     /**
      * Returns keyword field name if needed. Keyword field is non analyzed
      * field.
-     * 
-     * @param property
-     *            primitive expression property
+     *
+     * @param name
+     *            field name
+     * @param type
+     *            field edm type
      * @return property's keyword field name
      */
     public static String addKeywordIfNeeded(String name, EdmType type) {
@@ -38,6 +40,9 @@ public final class ElasticUtils {
      * @return field name
      */
     public static String addKeywordIfNeeded(String fieldName, ElasticEdmEntityType entityType) {
+        //this method has side effects
+        //it converts field name to ES field name
+        //TODO remove side effects
         ElasticEdmProperty property = entityType.getEProperties().get(fieldName);
         return addKeywordIfNeeded(property.getEField(), property.getType());
     }

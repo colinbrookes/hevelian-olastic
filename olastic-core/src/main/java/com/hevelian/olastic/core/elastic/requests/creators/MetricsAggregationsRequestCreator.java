@@ -1,21 +1,20 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
-import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
-
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 import com.hevelian.olastic.core.elastic.queries.Query;
 import com.hevelian.olastic.core.elastic.requests.AggregateRequest;
 import com.hevelian.olastic.core.elastic.requests.ESRequest;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+
+import java.util.Collections;
+import java.util.List;
+
+import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
 
 /**
  * Class responsible for creating {@link AggregateRequest} instance for metrics

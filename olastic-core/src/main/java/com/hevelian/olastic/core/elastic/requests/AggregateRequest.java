@@ -19,8 +19,6 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AggregateRequest extends BaseRequest {
-
-    Pagination pagination;
     String countAlias;
 
     /**
@@ -79,8 +77,7 @@ public class AggregateRequest extends BaseRequest {
      */
     public AggregateRequest(AggregateQuery query, ElasticEdmEntitySet entitySet,
             Pagination pagination, String countAlias) {
-        super(query, entitySet);
-        this.pagination = pagination;
+        super(query, entitySet, pagination);
         this.countAlias = countAlias;
     }
 

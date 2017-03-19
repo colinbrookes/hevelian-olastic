@@ -1,10 +1,13 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.queries.Query;
+import com.hevelian.olastic.core.elastic.queries.SearchQuery;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
+import com.hevelian.olastic.core.elastic.requests.SearchRequest;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -13,20 +16,17 @@ import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
-import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
-import com.hevelian.olastic.core.elastic.queries.Query;
-import com.hevelian.olastic.core.elastic.queries.SearchQuery;
-import com.hevelian.olastic.core.elastic.requests.ESRequest;
-import com.hevelian.olastic.core.elastic.requests.SearchRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class responsible for creating {@link SearchRequest} instance.
  * 
  * @author rdidyk
  */
-public class SearchRequestCreator extends AbstractRequestCreator {
+public class SearchRequestCreator extends SingleRequestCreator {
 
     /**
      * Constructor to initialize default ES query builder.
@@ -55,9 +55,10 @@ public class SearchRequestCreator extends AbstractRequestCreator {
         Set<String> fields = getSelectList(uriInfo).stream()
                 .map(field -> entityType.getEProperties().get(field).getEField())
                 .collect(Collectors.toSet());
+        Pagination pagination = getPagination(uriInfo);
         SearchQuery searchQuery = new SearchQuery(baseQuery.getIndex(), baseQuery.getTypes(),
-                baseQuery.getQueryBuilder(), fields);
-        return new SearchRequest(searchQuery, entitySet, getPagination(uriInfo));
+                baseQuery.getQueryBuilder(), fields, pagination);
+        return new SearchRequest(searchQuery, entitySet, pagination);
     }
 
     /**

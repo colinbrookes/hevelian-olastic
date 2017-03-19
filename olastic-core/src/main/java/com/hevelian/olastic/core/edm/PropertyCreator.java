@@ -1,10 +1,4 @@
-package com.hevelian.olastic.core.elastic.parsers;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
+package com.hevelian.olastic.core.edm;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Property;
@@ -16,23 +10,25 @@ import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 
-import com.hevelian.olastic.core.edm.ElasticEdmComplexType;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import javax.xml.bind.DatatypeConverter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Abstract parser with common behavior for all parsers.
- * 
- * @author rdidyk
- *
- * @param <T>
- *            instance data type class
- * @param <V>
- *            instance data value class
+ * Contains property creation logic.
+ *  @author rdidyk
  */
-public abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
-
+public class PropertyCreator {
+    /**
+     * Creates property using name, value and rntity type.
+     * @param name property name
+     * @param value property value
+     * @param entityType entity type
+     * @return property instance
+     */
     @SuppressWarnings("unchecked")
-    protected Property createProperty(String name, Object value, ElasticEdmEntityType entityType) {
+    public Property createProperty(String name, Object value, ElasticEdmEntityType entityType) {
         EdmElement property = entityType.getProperty(name);
         if (value instanceof List) {
             return createPropertyList(name, (List<Object>) value, entityType);
@@ -63,14 +59,14 @@ public abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
     }
 
     private Property createComplexProperty(String name, Map<String, Object> value,
-            EdmElement edmElement) {
+                                           EdmElement edmElement) {
         ComplexValue complexValue = createComplexValue(value, edmElement);
         return new Property(null, name, ValueType.COMPLEX, complexValue);
     }
 
     @SuppressWarnings("unchecked")
     private Property createPropertyList(String name, List<Object> valueObject,
-            EdmStructuredType structuredType) {
+                                        EdmStructuredType structuredType) {
         ValueType valueType;
         EdmElement property = structuredType.getProperty(name);
         EdmTypeKind propertyKind = property.getType().getKind();
@@ -92,7 +88,7 @@ public abstract class AbstractParser<T, V> implements ESResponseParser<T, V> {
 
     @SuppressWarnings("unchecked")
     private ComplexValue createComplexValue(Map<String, Object> complexObject,
-            EdmElement edmElement) {
+                                            EdmElement edmElement) {
         ComplexValue complexValue = new ComplexValue();
         for (Map.Entry<String, Object> entry : complexObject.entrySet()) {
             Object value = entry.getValue();

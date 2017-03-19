@@ -20,7 +20,7 @@ import com.hevelian.olastic.core.processors.data.InstanceData;
  * @author rdidyk
  */
 public class MetricsAggregationsParser
-        extends AbstractParser<EdmEntityType, AbstractEntityCollection> {
+        extends SingleResponseParser<EdmEntityType, AbstractEntityCollection> {
 
     private String countAlias;
 

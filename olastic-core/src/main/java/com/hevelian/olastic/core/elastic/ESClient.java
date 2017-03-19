@@ -7,9 +7,7 @@ import com.hevelian.olastic.core.elastic.queries.SearchQuery;
 import com.hevelian.olastic.core.exceptions.SearchException;
 import lombok.extern.log4j.Log4j2;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.search.SearchPhaseExecutionException;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -89,10 +87,38 @@ public class ESClient {
 
     /**
      * Execute query request with filter and aggregations.
+     *
+     * @return ES search response
+     */
+    public MultiSearchResponse executeRequest(List<SearchQuery> queries) {
+        MultiSearchRequestBuilder multiSearchRequestBuilder = client.prepareMultiSearch();
+        for (SearchQuery query  : queries) {
+            Pagination pagination = query.getPagination();
+            SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
+                    .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
+            if (pagination != null) {
+                List<Sort> orderBy = pagination.getOrderBy();
+                for (Sort sort : orderBy) {
+                    FieldSortBuilder sortQuery = SortBuilders.fieldSort(sort.getProperty())
+                            .order(SortOrder.valueOf(sort.getDirection().toString()));
+                    requestBuilder.addSort(sortQuery);
+                }
+                requestBuilder.setSize(pagination.getTop()).setFrom(pagination.getSkip());
+            }
+            Set<String> fields = query.getFields();
+            requestBuilder.setFetchSource(fields.toArray(new String[fields.size()]), defaultExcludedFields);
+            multiSearchRequestBuilder.add(requestBuilder);
+        }
+        return executeRequest(multiSearchRequestBuilder);
+    }
+
+    /**
+     * Execute query request with filter and aggregations.
      * 
      * @return ES search response
      */
-    public SearchResponse executeRequest(SearchQuery query, Pagination pagination) {
+    public SearchResponse executeRequest(SearchQuery query) {
+        Pagination pagination = query.getPagination();
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
                 .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
         if (pagination != null) {
@@ -129,6 +155,30 @@ public class ESClient {
             if (response != null) {
                 log.debug(String.format("Query execution took: %s", response.getTook()));
             } else {
+                log.error("Failed to execute query: ", searchError);
+            }
+        }
+        return response;
+    }
+
+    /**
+     * Method has to be used to execute any request. It has logging logic.
+     *
+     * @param request
+     *            request to execute
+     * @return request response
+     */
+    protected MultiSearchResponse executeRequest(MultiSearchRequestBuilder request) {
+        MultiSearchResponse response = null;
+        ElasticsearchException searchError = null;
+        try {
+            response = request.execute().actionGet();
+        } catch (SearchPhaseExecutionException | NoNodeAvailableException exception) {
+            searchError = exception;
+            throw new SearchException(searchError.getDetailedMessage());
+        } finally {
+            log.debug(String.format("Executing query request:%n%s", request));
+            if (response == null) {
                 log.error("Failed to execute query: ", searchError);
             }
         }

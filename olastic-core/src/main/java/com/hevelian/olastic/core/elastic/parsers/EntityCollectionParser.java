@@ -1,7 +1,11 @@
 package com.hevelian.olastic.core.elastic.parsers;
 
-import java.util.Map;
-
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.edm.ElasticEdmProperty;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.processors.data.InstanceData;
+import com.hevelian.olastic.core.utils.ProcessorUtils;
 import org.apache.olingo.commons.api.data.AbstractEntityCollection;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -9,12 +13,7 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
-import com.hevelian.olastic.core.edm.ElasticEdmProperty;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.processors.data.InstanceData;
-import com.hevelian.olastic.core.utils.ProcessorUtils;
+import java.util.Map;
 
 /**
  * Parser class for collection of entities.
@@ -22,7 +21,7 @@ import com.hevelian.olastic.core.utils.ProcessorUtils;
  * @author rdidyk
  */
 public class EntityCollectionParser
-        extends AbstractParser<EdmEntityType, AbstractEntityCollection> {
+        extends SingleResponseParser<EdmEntityType, AbstractEntityCollection> {
 
     private boolean count;
 
