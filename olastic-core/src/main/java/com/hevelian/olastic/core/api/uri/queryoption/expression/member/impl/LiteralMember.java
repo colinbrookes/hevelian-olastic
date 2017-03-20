@@ -1,15 +1,14 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.core.uri.parser.UriTokenizer;
 import org.apache.olingo.server.core.uri.parser.UriTokenizer.TokenKind;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Wraps olingo literal data. All methods in this class are used when literal is
@@ -49,7 +48,10 @@ public class LiteralMember extends BaseMember {
                 values.add(string.replace("\"", ""));
             }
             return values;
-        } else {
+        } else if (tokenizer.next(TokenKind.NULL)){
+            return null;
+        }
+        else {
             return value;
         }
     }
