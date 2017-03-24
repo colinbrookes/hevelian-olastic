@@ -24,6 +24,7 @@ import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupByItem;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
@@ -104,23 +105,29 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
                 order -> order.getProperty(), order -> order.getDirection() == Direction.ASC));
         List<String> properties = getProperties(groupBy);
         reverse(properties);
+
         // Last because of reverse
         String lastProperty = properties.remove(0);
         String queryField = getQueryField(lastProperty, entityType);
         TermsAggregationBuilder groupByQuery = terms(lastProperty).field(queryField).size(size);
-        addTermOrder(groupByQuery, orders.remove(queryField));
         getMetricsAggQueries(getAggregations(groupBy.getApplyOption()))
                 .forEach(groupByQuery::subAggregation);
+        groupByQuery.order(getQueryOrders(queryField, orders));
+
         for (String property : properties) {
             queryField = getQueryField(property, entityType);
             groupByQuery = terms(property).field(queryField).size(size)
                     .subAggregation(groupByQuery);
-            addTermOrder(groupByQuery, orders.remove(queryField));
+            Boolean termOrder = orders.remove(queryField);
+            if (termOrder != null) {
+                groupByQuery.order(Terms.Order.term(termOrder));
+            }
         }
+
         // Fields in $orderby are not same as $groupby fields!
         if (!orders.isEmpty()) {
             throw new ODataApplicationException(
-                    "Ordering only by fields in $groupby option is allowed.",
+                    "Ordering only by fields in $groupby or $aggregation options is allowed.",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
         }
         // For now only one 'groupby' is supported and returned in the list
@@ -153,6 +160,35 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
     }
 
     /**
+     * Get's list of orders for first query, because it has metrics aggregations
+     * and also can have count and term order.
+     * 
+     * @param field
+     *            query field
+     * @param ordersMap
+     *            orders map from URI
+     * @return list of orders
+     */
+    private List<Order> getQueryOrders(String field, Map<String, Boolean> ordersMap) {
+        List<Order> orders = new ArrayList<>();
+        Boolean termOrder = ordersMap.remove(field);
+        if (termOrder != null) {
+            orders.add(Terms.Order.term(termOrder));
+        }
+        Boolean countOrder = ordersMap.remove(getCountAlias());
+        if (countOrder != null) {
+            orders.add(Terms.Order.count(countOrder));
+        }
+        for (String alias : getMetricAliases()) {
+            Boolean aliasOrder = ordersMap.remove(alias);
+            if (aliasOrder != null) {
+                orders.add(Terms.Order.aggregation(alias, aliasOrder));
+            }
+        }
+        return orders;
+    }
+
+    /**
      * Gets field for 'term' aggregation query by property from entity type.
      * 
      * @param propertyName
@@ -166,18 +202,4 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
         return addKeywordIfNeeded(property.getEField(), property.getType());
     }
 
-    /**
-     * If 'asc' in not null, then appropriate order will be added to query
-     * builder.
-     * 
-     * @param builder
-     *            query builder
-     * @param asc
-     *            true if ascending otherwise false
-     */
-    private static void addTermOrder(TermsAggregationBuilder builder, Boolean asc) {
-        if (asc != null) {
-            builder.order(Terms.Order.term(asc));
-        }
-    }
 }

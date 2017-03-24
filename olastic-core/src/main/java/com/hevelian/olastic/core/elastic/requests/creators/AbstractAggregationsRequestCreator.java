@@ -29,12 +29,14 @@ public abstract class AbstractAggregationsRequestCreator extends SingleRequestCr
 
     /** Name of count property. */
     private String countAlias;
+    private List<String> metricAliases;
 
     /**
      * Default constructor.
      */
     public AbstractAggregationsRequestCreator() {
         super();
+        this.metricAliases = new ArrayList<>();
     }
 
     /**
@@ -45,6 +47,7 @@ public abstract class AbstractAggregationsRequestCreator extends SingleRequestCr
      */
     public AbstractAggregationsRequestCreator(ESQueryBuilder<?> queryBuilder) {
         super(queryBuilder);
+        this.metricAliases = new ArrayList<>();
     }
 
     /**
@@ -74,6 +77,7 @@ public abstract class AbstractAggregationsRequestCreator extends SingleRequestCr
                     String field = ((PrimitiveMember) expr
                             .accept(new ElasticSearchExpressionVisitor())).getField();
                     aggs.add(getAggQuery(aggExpression.getStandardMethod(), alias, field));
+                    metricAliases.add(alias);
                 } else {
                     List<UriResource> path = aggExpression.getPath();
                     if (path.size() > 1) {
@@ -94,6 +98,10 @@ public abstract class AbstractAggregationsRequestCreator extends SingleRequestCr
 
     public String getCountAlias() {
         return countAlias;
+    }
+
+    public List<String> getMetricAliases() {
+        return metricAliases;
     }
 
 }
