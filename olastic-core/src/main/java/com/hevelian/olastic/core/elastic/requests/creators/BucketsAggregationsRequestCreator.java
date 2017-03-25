@@ -112,7 +112,10 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
         TermsAggregationBuilder groupByQuery = terms(lastProperty).field(queryField).size(size);
         getMetricsAggQueries(getAggregations(groupBy.getApplyOption()))
                 .forEach(groupByQuery::subAggregation);
-        groupByQuery.order(getQueryOrders(queryField, orders));
+        List<Order> queryOrders = getQueryOrders(queryField, orders);
+        if (!queryOrders.isEmpty()) {
+            groupByQuery.order(queryOrders);
+        }
 
         for (String property : properties) {
             queryField = getQueryField(property, entityType);
