@@ -1,21 +1,27 @@
 package com.hevelian.olastic.core.elastic;
 
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import com.hevelian.olastic.core.elastic.pagination.Sort;
-import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
-import com.hevelian.olastic.core.elastic.queries.SearchQuery;
-import com.hevelian.olastic.core.exceptions.SearchException;
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
+import java.util.Set;
+
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.search.MultiSearchRequestBuilder;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchPhaseExecutionException;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
-import java.util.List;
-import java.util.Set;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
+import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
+import com.hevelian.olastic.core.elastic.queries.SearchQuery;
+import com.hevelian.olastic.core.exceptions.SearchException;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Central point to retrieve the data from Elasticsearch.
@@ -28,11 +34,9 @@ public class ESClient {
     private static ESClient INSTANCE;
 
     private Client client;
-    private String[] defaultExcludedFields;
 
-    private ESClient(Client client, String[] defaultExcludedFields) {
+    private ESClient(Client client) {
         this.client = client;
-        this.defaultExcludedFields = defaultExcludedFields;
     }
 
     /**
@@ -56,11 +60,11 @@ public class ESClient {
      * @param client
      *            Elasticsearch client instance
      */
-    public static void init(Client client, String[] defaultExcludedFields) {
+    public static void init(Client client) {
         if (INSTANCE == null) {
             synchronized (ESClient.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new ESClient(client, defaultExcludedFields);
+                    INSTANCE = new ESClient(client);
                 } else {
                     throw new IllegalStateException(
                             "Elastic to CSDL mapper is already initialized.");
@@ -92,7 +96,7 @@ public class ESClient {
      */
     public MultiSearchResponse executeRequest(List<SearchQuery> queries) {
         MultiSearchRequestBuilder multiSearchRequestBuilder = client.prepareMultiSearch();
-        for (SearchQuery query  : queries) {
+        for (SearchQuery query : queries) {
             Pagination pagination = query.getPagination();
             SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
                     .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
@@ -106,7 +110,9 @@ public class ESClient {
                 requestBuilder.setSize(pagination.getTop()).setFrom(pagination.getSkip());
             }
             Set<String> fields = query.getFields();
-            requestBuilder.setFetchSource(fields.toArray(new String[fields.size()]), defaultExcludedFields);
+            if (fields != null && !fields.isEmpty()) {
+                requestBuilder.setFetchSource(fields.toArray(new String[fields.size()]), null);
+            }
             multiSearchRequestBuilder.add(requestBuilder);
         }
         return executeRequest(multiSearchRequestBuilder);
@@ -131,7 +137,9 @@ public class ESClient {
             requestBuilder.setSize(pagination.getTop()).setFrom(pagination.getSkip());
         }
         Set<String> fields = query.getFields();
-        requestBuilder.setFetchSource(fields.toArray(new String[fields.size()]), defaultExcludedFields);
+        if (fields != null && !fields.isEmpty()) {
+            requestBuilder.setFetchSource(fields.toArray(new String[fields.size()]), null);
+        }
         return executeRequest(requestBuilder);
     }
 

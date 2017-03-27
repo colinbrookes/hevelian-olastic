@@ -17,14 +17,19 @@ import java.util.Map;
 
 /**
  * Contains property creation logic.
- *  @author rdidyk
+ * 
+ * @author rdidyk
  */
 public class PropertyCreator {
     /**
      * Creates property using name, value and rntity type.
-     * @param name property name
-     * @param value property value
-     * @param entityType entity type
+     * 
+     * @param name
+     *            property name
+     * @param value
+     *            property value
+     * @param entityType
+     *            entity type
      * @return property instance
      */
     @SuppressWarnings("unchecked")
@@ -40,7 +45,7 @@ public class PropertyCreator {
             if (property.getType() instanceof EdmDate
                     || property.getType() instanceof EdmDateTimeOffset) {
                 if (value != null) {
-                    modifiedValue = DatatypeConverter.parseDateTime((String) value).getTime();
+                    modifiedValue = DatatypeConverter.parseDateTime(value.toString()).getTime();
                 }
             } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
                 // When Elasticsearch aggregates data it return's boolean as
@@ -59,14 +64,14 @@ public class PropertyCreator {
     }
 
     private Property createComplexProperty(String name, Map<String, Object> value,
-                                           EdmElement edmElement) {
+            EdmElement edmElement) {
         ComplexValue complexValue = createComplexValue(value, edmElement);
         return new Property(null, name, ValueType.COMPLEX, complexValue);
     }
 
     @SuppressWarnings("unchecked")
     private Property createPropertyList(String name, List<Object> valueObject,
-                                        EdmStructuredType structuredType) {
+            EdmStructuredType structuredType) {
         ValueType valueType;
         EdmElement property = structuredType.getProperty(name);
         EdmTypeKind propertyKind = property.getType().getKind();
@@ -88,7 +93,7 @@ public class PropertyCreator {
 
     @SuppressWarnings("unchecked")
     private ComplexValue createComplexValue(Map<String, Object> complexObject,
-                                            EdmElement edmElement) {
+            EdmElement edmElement) {
         ComplexValue complexValue = new ComplexValue();
         for (Map.Entry<String, Object> entry : complexObject.entrySet()) {
             Object value = entry.getValue();
