@@ -44,137 +44,146 @@ import com.fasterxml.jackson.core.JsonGenerator;
  */
 public class ElasticODataJsonSerializer extends ODataJsonSerializer {
 
-	// Because Constans.JSON_NULL = "odata.null" but should be like below
-	private static final String JSON_NULL = "@odata.null";
-	private final boolean isODataMetadataNone;
-	private final boolean isODataMetadataFull;
+    // Because Constans.JSON_NULL = "odata.null" but should be like below
+    private static final String JSON_NULL = "@odata.null";
+    private final boolean isODataMetadataNone;
+    private final boolean isODataMetadataFull;
 
-	/**
-	 * Constructor to initialize content type.
-	 * 
-	 * @param contentType
-	 *            content type
-	 */
-	public ElasticODataJsonSerializer(ContentType contentType) {
-		super(contentType);
-		isODataMetadataNone = ContentTypeHelper.isODataMetadataNone(contentType);
-		isODataMetadataFull = ContentTypeHelper.isODataMetadataFull(contentType);
-	}
+    /**
+     * Constructor to initialize content type.
+     * 
+     * @param contentType
+     *            content type
+     */
+    public ElasticODataJsonSerializer(ContentType contentType) {
+        super(contentType);
+        isODataMetadataNone = ContentTypeHelper.isODataMetadataNone(contentType);
+        isODataMetadataFull = ContentTypeHelper.isODataMetadataFull(contentType);
+    }
 
-	@Override
-	protected void writeProperties(ServiceMetadata metadata, EdmStructuredType type, List<Property> properties,
-			SelectOption select, JsonGenerator json) throws IOException, SerializerException {
-		boolean all = ExpandSelectHelper.isAll(select);
-		Set<String> selected = all ? new HashSet<String>()
-				: ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
-		for (Property property : properties) {
-			String propertyName = property.getName();
-			if (all || selected.contains(propertyName)) {
-				EdmProperty edmProperty = type.getStructuralProperty(propertyName);
-				if (edmProperty == null) {
-					edmProperty = new EdmPropertyImpl(metadata.getEdm(),
-							new CsdlProperty().setType(getPropertyType(property.getValue())).setName(propertyName));
-				}
-				Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
-						: ExpandSelectHelper.getSelectedPaths(select.getSelectItems(), propertyName);
-				writeProperty(metadata, edmProperty, property, selectedPaths, json);
-			}
-		}
-	}
+    @Override
+    protected void writeProperties(ServiceMetadata metadata, EdmStructuredType type,
+            List<Property> properties, SelectOption select, JsonGenerator json)
+            throws IOException, SerializerException {
+        boolean all = ExpandSelectHelper.isAll(select);
+        Set<String> selected = all ? new HashSet<String>()
+                : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
+        for (Property property : properties) {
+            String propertyName = property.getName();
+            if (all || selected.contains(propertyName)) {
+                EdmProperty edmProperty = type.getStructuralProperty(propertyName);
+                if (edmProperty == null) {
+                    edmProperty = new EdmPropertyImpl(metadata.getEdm(), new CsdlProperty()
+                            .setType(getPropertyType(property.getValue())).setName(propertyName));
+                }
+                Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
+                        : ExpandSelectHelper.getSelectedPaths(select.getSelectItems(),
+                                propertyName);
+                writeProperty(metadata, edmProperty, property, selectedPaths, json);
+            }
+        }
+    }
 
-	// Method was overridden because of issue
-	// https://issues.apache.org/jira/browse/OLINGO-1071
-	@Override
-	public SerializerResult primitive(ServiceMetadata metadata, EdmPrimitiveType type, Property property,
-			PrimitiveSerializerOptions options) throws SerializerException {
-		OutputStream outputStream = null;
-		SerializerException cachedException = null;
-		try {
-			ContextURL contextURL = checkContextURL(options == null ? null : options.getContextURL());
-			CircleStreamBuffer buffer = new CircleStreamBuffer();
-			outputStream = buffer.getOutputStream();
-			JsonGenerator json = new JsonFactory().createGenerator(outputStream);
-			json.writeStartObject();
-			writeContextURL(contextURL, json);
-			writeMetadataETag(metadata, json);
-			writeOperations(property.getOperations(), json);
+    // Method was overridden because of issue
+    // https://issues.apache.org/jira/browse/OLINGO-1071
+    @Override
+    public SerializerResult primitive(ServiceMetadata metadata, EdmPrimitiveType type,
+            Property property, PrimitiveSerializerOptions options) throws SerializerException {
+        OutputStream outputStream = null;
+        SerializerException cachedException = null;
+        try {
+            ContextURL contextURL = checkContextURL(
+                    options == null ? null : options.getContextURL());
+            CircleStreamBuffer buffer = new CircleStreamBuffer();
+            outputStream = buffer.getOutputStream();
+            JsonGenerator json = new JsonFactory().createGenerator(outputStream);
+            json.writeStartObject();
+            writeContextURL(contextURL, json);
+            writeMetadataETag(metadata, json);
+            writeOperations(property.getOperations(), json);
 
-			if (property.isNull()) {
-				json.writeFieldName(JSON_NULL);
-				json.writeBoolean(true);
-			} else {
-				json.writeFieldName(Constants.VALUE);
-				writePrimitive(type, property, options == null ? null : options.isNullable(),
-						options == null ? null : options.getMaxLength(),
-						options == null ? null : options.getPrecision(), options == null ? null : options.getScale(),
-						options == null ? null : options.isUnicode(), json);
-			}
-			json.close();
-			outputStream.close();
-			return SerializerResultImpl.with().content(buffer.getInputStream()).build();
-		} catch (final IOException e) {
-			cachedException = new SerializerException(IO_EXCEPTION_TEXT, e,
-					SerializerException.MessageKeys.IO_EXCEPTION);
-			throw cachedException;
-		} catch (final EdmPrimitiveTypeException e) {
-			cachedException = new SerializerException("Wrong value for property!", e,
-					SerializerException.MessageKeys.WRONG_PROPERTY_VALUE, property.getName(),
-					property.getValue().toString());
-			throw cachedException;
-		} finally {
-			closeCircleStreamBufferOutput(outputStream, cachedException);
-		}
-	}
+            if (property.isNull()) {
+                json.writeFieldName(JSON_NULL);
+                json.writeBoolean(true);
+            } else {
+                json.writeFieldName(Constants.VALUE);
+                writePrimitive(type, property, options == null ? null : options.isNullable(),
+                        options == null ? null : options.getMaxLength(),
+                        options == null ? null : options.getPrecision(),
+                        options == null ? null : options.getScale(),
+                        options == null ? null : options.isUnicode(), json);
+            }
+            json.close();
+            outputStream.close();
+            return SerializerResultImpl.with().content(buffer.getInputStream()).build();
+        } catch (final IOException e) {
+            cachedException = new SerializerException(IO_EXCEPTION_TEXT, e,
+                    SerializerException.MessageKeys.IO_EXCEPTION);
+            throw cachedException;
+        } catch (final EdmPrimitiveTypeException e) {
+            cachedException = new SerializerException("Wrong value for property!", e,
+                    SerializerException.MessageKeys.WRONG_PROPERTY_VALUE, property.getName(),
+                    property.getValue().toString());
+            throw cachedException;
+        } finally {
+            closeCircleStreamBufferOutput(outputStream, cachedException);
+        }
+    }
 
-	protected ContextURL checkContextURL(ContextURL contextURL) throws SerializerException {
-		if (isODataMetadataNone) {
-			return null;
-		} else if (contextURL == null) {
-			throw new SerializerException("ContextURL null!", SerializerException.MessageKeys.NO_CONTEXT_URL);
-		}
-		return contextURL;
-	}
+    protected ContextURL checkContextURL(ContextURL contextURL) throws SerializerException {
+        if (isODataMetadataNone) {
+            return null;
+        } else if (contextURL == null) {
+            throw new SerializerException("ContextURL null!",
+                    SerializerException.MessageKeys.NO_CONTEXT_URL);
+        }
+        return contextURL;
+    }
 
-	protected void writeContextURL(ContextURL contextURL, JsonGenerator json) throws IOException {
-		if (!isODataMetadataNone && contextURL != null) {
-			json.writeStringField(Constants.JSON_CONTEXT, ContextURLBuilder.create(contextURL).toASCIIString());
-		}
-	}
+    protected void writeContextURL(ContextURL contextURL, JsonGenerator json) throws IOException {
+        if (!isODataMetadataNone && contextURL != null) {
+            json.writeStringField(Constants.JSON_CONTEXT,
+                    ContextURLBuilder.create(contextURL).toASCIIString());
+        }
+    }
 
-	protected void writeMetadataETag(ServiceMetadata metadata, JsonGenerator json) throws IOException {
-		if (!isODataMetadataNone && metadata != null && metadata.getServiceMetadataETagSupport() != null
-				&& metadata.getServiceMetadataETagSupport().getMetadataETag() != null) {
-			json.writeStringField(Constants.JSON_METADATA_ETAG,
-					metadata.getServiceMetadataETagSupport().getMetadataETag());
-		}
-	}
+    protected void writeMetadataETag(ServiceMetadata metadata, JsonGenerator json)
+            throws IOException {
+        if (!isODataMetadataNone && metadata != null
+                && metadata.getServiceMetadataETagSupport() != null
+                && metadata.getServiceMetadataETagSupport().getMetadataETag() != null) {
+            json.writeStringField(Constants.JSON_METADATA_ETAG,
+                    metadata.getServiceMetadataETagSupport().getMetadataETag());
+        }
+    }
 
-	protected void writeOperations(final List<Operation> operations, final JsonGenerator json) throws IOException {
-		if (isODataMetadataFull) {
-			for (Operation operation : operations) {
-				json.writeObjectFieldStart(operation.getMetadataAnchor());
-				json.writeStringField(Constants.ATTR_TITLE, operation.getTitle());
-				json.writeStringField(Constants.ATTR_TARGET, operation.getTarget().toASCIIString());
-				json.writeEndObject();
-			}
-		}
-	}
+    protected void writeOperations(final List<Operation> operations, final JsonGenerator json)
+            throws IOException {
+        if (isODataMetadataFull) {
+            for (Operation operation : operations) {
+                json.writeObjectFieldStart(operation.getMetadataAnchor());
+                json.writeStringField(Constants.ATTR_TITLE, operation.getTitle());
+                json.writeStringField(Constants.ATTR_TARGET, operation.getTarget().toASCIIString());
+                json.writeEndObject();
+            }
+        }
+    }
 
-	protected void writePrimitive(EdmPrimitiveType type, Property property, Boolean isNullable, Integer maxLength,
-			Integer precision, Integer scale, Boolean isUnicode, JsonGenerator json)
-			throws EdmPrimitiveTypeException, IOException, SerializerException {
-		if (property.isPrimitive()) {
-			writePrimitiveValue(property.getName(), type, property.asPrimitive(), isNullable, maxLength, precision,
-					scale, isUnicode, json);
-		} else if (property.isGeospatial()) {
-			throw new SerializerException("Property type not yet supported!",
-					SerializerException.MessageKeys.UNSUPPORTED_PROPERTY_TYPE, property.getName());
-		} else if (property.isEnum()) {
-			writePrimitiveValue(property.getName(), type, property.asEnum(), isNullable, maxLength, precision, scale,
-					isUnicode, json);
-		} else {
-			throw new SerializerException("Inconsistent property type!",
-					SerializerException.MessageKeys.INCONSISTENT_PROPERTY_TYPE, property.getName());
-		}
-	}
+    protected void writePrimitive(EdmPrimitiveType type, Property property, Boolean isNullable,
+            Integer maxLength, Integer precision, Integer scale, Boolean isUnicode,
+            JsonGenerator json) throws EdmPrimitiveTypeException, IOException, SerializerException {
+        if (property.isPrimitive()) {
+            writePrimitiveValue(property.getName(), type, property.asPrimitive(), isNullable,
+                    maxLength, precision, scale, isUnicode, json);
+        } else if (property.isGeospatial()) {
+            throw new SerializerException("Property type not yet supported!",
+                    SerializerException.MessageKeys.UNSUPPORTED_PROPERTY_TYPE, property.getName());
+        } else if (property.isEnum()) {
+            writePrimitiveValue(property.getName(), type, property.asEnum(), isNullable, maxLength,
+                    precision, scale, isUnicode, json);
+        } else {
+            throw new SerializerException("Inconsistent property type!",
+                    SerializerException.MessageKeys.INCONSISTENT_PROPERTY_TYPE, property.getName());
+        }
+    }
 }

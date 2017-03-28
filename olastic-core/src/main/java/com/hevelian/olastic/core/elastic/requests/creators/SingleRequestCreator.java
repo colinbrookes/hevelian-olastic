@@ -11,16 +11,20 @@ import org.apache.olingo.server.api.uri.UriInfo;
  *
  * @author Taras Kohut
  */
-public abstract class SingleRequestCreator extends RequestCreator{
+public abstract class SingleRequestCreator extends RequestCreator {
     /**
      * Constructor to initialize default ES query builder.
      */
-    public SingleRequestCreator(){}
+    public SingleRequestCreator() {
+        super();
+    }
 
     /**
      * Constructor to initialize ES query builder.
      */
-    public SingleRequestCreator(ESQueryBuilder queryBuilder) {super(queryBuilder);}
+    public SingleRequestCreator(ESQueryBuilder<?> queryBuilder) {
+        super(queryBuilder);
+    }
 
     /**
      * Creates request to retrieve data.
