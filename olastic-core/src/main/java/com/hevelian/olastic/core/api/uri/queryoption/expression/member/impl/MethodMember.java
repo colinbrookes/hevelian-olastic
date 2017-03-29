@@ -19,29 +19,31 @@ public class MethodMember extends BaseMember {
     public ExpressionResult contains(ExpressionMember left, ExpressionMember right) {
         PrimitiveMember primitive = (PrimitiveMember) left;
         LiteralMember literal = (LiteralMember) right;
-        return new ExpressionResult(
-                matchQuery(primitive.getField(), literal.getValue()));
+        return new ExpressionResult(matchQuery(primitive.getField(), literal.getValue()));
     }
 
     @Override
     public ExpressionResult startsWith(ExpressionMember left, ExpressionMember right) {
         PrimitiveMember primitive = (PrimitiveMember) left;
         LiteralMember literal = (LiteralMember) right;
-        return new ExpressionResult(prefixQuery(addKeywordIfNeeded(primitive),
-                (String) literal.getValue()));
+        return new ExpressionResult(
+                prefixQuery(addKeywordIfNeeded(primitive.getField(), primitive.getEdmType()),
+                        (String) literal.getValue()));
     }
 
     @Override
     public ExpressionResult endsWith(ExpressionMember left, ExpressionMember right) {
         PrimitiveMember primitive = (PrimitiveMember) left;
         LiteralMember literal = (LiteralMember) right;
-        return new ExpressionResult(wildcardQuery(addKeywordIfNeeded(primitive),
-                ElasticConstants.WILDCARD_CHAR + literal.getValue()));
+        return new ExpressionResult(
+                wildcardQuery(addKeywordIfNeeded(primitive.getField(), primitive.getEdmType()),
+                        ElasticConstants.WILDCARD_CHAR + literal.getValue()));
     }
 
     @Override
     public ExpressionMember date(ExpressionMember expressionMember) {
-        //Elasticsearch doesn't distinguish between search by the date and search by the timestamp, so no conversion is needed
+        // Elasticsearch doesn't distinguish between search by the date and
+        // search by the timestamp, so no conversion is needed
         return expressionMember;
     }
 }

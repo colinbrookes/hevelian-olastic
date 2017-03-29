@@ -19,7 +19,7 @@ import com.hevelian.olastic.core.processors.data.InstanceData;
  * 
  * @author rdidyk
  */
-public class EntityCollectionProcessor extends AbstractESCollectionProcessor {
+public class EntityCollectionProcessorImpl extends AbstractESCollectionProcessor {
 
     private boolean isCount;
 

@@ -1,5 +1,6 @@
 package com.hevelian.olastic.core.edm;
 
+import org.apache.olingo.commons.api.edm.EdmComplexType;
 import org.apache.olingo.commons.api.edm.EdmEntityContainer;
 import org.apache.olingo.commons.api.edm.EdmException;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -7,6 +8,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.apache.olingo.commons.core.edm.EdmProviderImpl;
 
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
 
@@ -35,7 +37,9 @@ public class ElasticEdmProvider extends EdmProviderImpl {
         try {
             ElasticCsdlEntityType entityType = csdlProvider.getEntityType(entityTypeName);
             if (entityType != null) {
-                return new ElasticEdmEntityType(this, entityTypeName, entityType);
+                return new ElasticEdmEntityType(this,
+                        new FullQualifiedName(entityTypeName.getNamespace(), entityType.getName()),
+                        entityType);
             }
             return null;
         } catch (ODataException e) {
@@ -53,4 +57,20 @@ public class ElasticEdmProvider extends EdmProviderImpl {
         return null;
     }
 
+    @Override
+    public EdmComplexType createComplexType(FullQualifiedName complexTypeName) {
+        try {
+            ElasticCsdlComplexType complexType = csdlProvider.getComplexType(complexTypeName);
+            if (complexType != null) {
+                return new ElasticEdmComplexType(this, complexTypeName, complexType);
+            }
+            return null;
+        } catch (ODataException e) {
+            throw new EdmException(e);
+        }
+    }
+
+    public ElasticCsdlEdmProvider getCsdlProvider() {
+        return csdlProvider;
+    }
 }

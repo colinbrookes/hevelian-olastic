@@ -9,12 +9,15 @@ import java.util.Map.Entry;
 
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.core.edm.EdmEntityTypeImpl;
 
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlNavigationProperty;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
 
 /**
@@ -26,7 +29,18 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
 
     private ElasticCsdlEntityType csdlEntityType;
     private Map<String, ElasticEdmProperty> propertiesCash;
+    private Map<String, ElasticEdmNavigationProperty> navigationPropertiesCash;
 
+    /**
+     * Constructor to initialize entity type.
+     * 
+     * @param edm
+     *            EDM provider
+     * @param name
+     *            entity type FQN
+     * @param entityType
+     *            CSDL entity type
+     */
     public ElasticEdmEntityType(Edm edm, FullQualifiedName name, ElasticCsdlEntityType entityType) {
         super(edm, name, entityType);
         this.csdlEntityType = entityType;
@@ -89,6 +103,33 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
             properties.put(entry.getKey(), entry.getValue());
         }
         return properties;
+    }
+
+    public Map<String, ElasticEdmNavigationProperty> getENavigationProperties() {
+        if (navigationPropertiesCash == null) {
+            Map<String, ElasticEdmNavigationProperty> localNavigationProperties = new LinkedHashMap<>();
+            List<CsdlNavigationProperty> structuredTypeNavigationProperties = csdlEntityType
+                    .getNavigationProperties();
+            for (CsdlNavigationProperty property : structuredTypeNavigationProperties) {
+                if (property instanceof ElasticCsdlNavigationProperty) {
+                    localNavigationProperties.put(property.getName(),
+                            new ElasticEdmNavigationProperty(edm,
+                                    (ElasticCsdlNavigationProperty) property));
+                }
+            }
+            navigationPropertiesCash = Collections.unmodifiableMap(localNavigationProperties);
+        }
+        return navigationPropertiesCash;
+    }
+
+    @Override
+    public Map<String, EdmNavigationProperty> getNavigationProperties() {
+        Map<String, EdmNavigationProperty> navigationProperties = new HashMap<>();
+        for (Entry<String, ElasticEdmNavigationProperty> entry : getENavigationProperties()
+                .entrySet()) {
+            navigationProperties.put(entry.getKey(), entry.getValue());
+        }
+        return navigationProperties;
     }
 
 }

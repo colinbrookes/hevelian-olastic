@@ -1,24 +1,23 @@
 package com.hevelian.olastic.core.elastic.requests;
 
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import org.elasticsearch.action.search.SearchResponse;
-
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.Query;
+import org.elasticsearch.action.search.MultiSearchResponse;
+
+import java.util.List;
 
 /**
- * Interface to provide behavior for all single requests implementations.
- * 
- * @author rdidyk
+ * Interface to provide behavior for all multiple request implementations.
+ * @author Taras Kohut
  */
-public interface ESRequest {
-
+public interface ESMultiRequest<T extends Query> {
     /**
-     * Gets query.
-     * 
+     * Gets list of queries.
+     *
      * @return query
      */
-    Query getQuery();
+    List<T> getQueries();
 
     /**
      * Gets pagination.
@@ -29,16 +28,15 @@ public interface ESRequest {
 
     /**
      * Gets entity set.
-     * 
+     *
      * @return the edm entity set
      */
     ElasticEdmEntitySet getEntitySet();
 
     /**
      * Executes request and returns search response.
-     * 
+     *
      * @return found data
      */
-    SearchResponse execute();
-
+    MultiSearchResponse execute();
 }

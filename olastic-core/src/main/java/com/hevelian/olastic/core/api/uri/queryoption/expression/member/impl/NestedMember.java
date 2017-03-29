@@ -5,20 +5,18 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
+import lombok.AllArgsConstructor;
+
 /**
  * Wraps the data for nested query building.
  *
  * @author Taras Kohut
  */
+@AllArgsConstructor
 public class NestedMember extends BaseMember {
 
     private String nestedType;
     private QueryBuilder query;
-
-    public NestedMember(String nestedType, QueryBuilder query) {
-        this.nestedType = nestedType;
-        this.query = query;
-    }
 
     @Override
     public ExpressionResult any() throws ODataApplicationException {

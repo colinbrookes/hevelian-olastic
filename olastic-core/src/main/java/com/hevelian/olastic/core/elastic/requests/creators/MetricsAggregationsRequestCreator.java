@@ -1,21 +1,20 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
-import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
-
-import java.util.Collections;
-import java.util.List;
-
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
+import com.hevelian.olastic.core.elastic.queries.Query;
+import com.hevelian.olastic.core.elastic.requests.AggregateRequest;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
-import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
-import com.hevelian.olastic.core.elastic.queries.Query;
-import com.hevelian.olastic.core.elastic.requests.AggregateRequest;
-import com.hevelian.olastic.core.elastic.requests.BaseRequest;
+import java.util.Collections;
+import java.util.List;
+
+import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getAggregations;
 
 /**
  * Class responsible for creating {@link AggregateRequest} instance for metrics
@@ -25,18 +24,34 @@ import com.hevelian.olastic.core.elastic.requests.BaseRequest;
  */
 public class MetricsAggregationsRequestCreator extends AbstractAggregationsRequestCreator {
 
+    /**
+     * Default constructor.
+     */
+    public MetricsAggregationsRequestCreator() {
+        super();
+    }
+
+    /**
+     * Constructor to initialize ES query builder.
+     * 
+     * @param queryBuilder
+     *            ES query builder
+     */
+    public MetricsAggregationsRequestCreator(ESQueryBuilder<?> queryBuilder) {
+        super(queryBuilder);
+    }
+
     @Override
     public AggregateRequest create(UriInfo uriInfo) throws ODataApplicationException {
-        BaseRequest baseRequest = super.create(uriInfo);
-        ElasticEdmEntitySet entitySet = baseRequest.getEntitySet();
-        ElasticEdmEntityType entityType = entitySet.getEntityType();
+        ESRequest baseRequestInfo = getBaseRequestInfo(uriInfo);
+        Query baseQuery = baseRequestInfo.getQuery();
+        ElasticEdmEntitySet entitySet = baseRequestInfo.getEntitySet();
 
         List<Aggregate> aggregations = getAggregations(uriInfo.getApplyOption());
-        List<AggregationBuilder> metricsQueries = getMetricsAggQueries(aggregations, entityType);
+        List<AggregationBuilder> metricsQueries = getMetricsAggQueries(aggregations);
 
-        Query baseQuery = baseRequest.getQuery();
         AggregateQuery aggregateQuery = new AggregateQuery(baseQuery.getIndex(),
-                baseQuery.getType(), baseQuery.getQueryBuilder(), metricsQueries,
+                baseQuery.getTypes(), baseQuery.getQueryBuilder(), metricsQueries,
                 Collections.emptyList());
         return new AggregateRequest(aggregateQuery, entitySet, getCountAlias());
     }

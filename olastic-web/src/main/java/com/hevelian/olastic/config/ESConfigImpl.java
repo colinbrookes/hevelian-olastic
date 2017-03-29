@@ -20,7 +20,7 @@ import com.hevelian.olastic.core.elastic.ESClient;
  */
 public class ESConfigImpl implements ESConfig {
 
-    private final Client client;
+    protected final Client client;
     private final Set<String> indices;
 
     /**

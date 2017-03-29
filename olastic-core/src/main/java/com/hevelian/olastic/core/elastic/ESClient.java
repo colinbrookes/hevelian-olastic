@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.search.MultiSearchRequestBuilder;
+import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchPhaseExecutionException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -52,7 +54,7 @@ public class ESClient {
 
     /**
      * Method that initializes current client. It initializes new instance with
-     * Elasticsearch Client. This method can be called only ones, in other case
+     * Elasticsearch Client. This method can be called only once, in other case
      * the illegal state exception will be thrown.
      * 
      * @param client
@@ -80,7 +82,7 @@ public class ESClient {
      */
     public SearchResponse executeRequest(AggregateQuery query) {
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
-                .setTypes(query.getType()).setQuery(query.getQueryBuilder());
+                .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
         query.getAggregations().forEach(requestBuilder::addAggregation);
         query.getPipelineAggregations().forEach(requestBuilder::addAggregation);
         requestBuilder.setSize(0);
@@ -89,12 +91,42 @@ public class ESClient {
 
     /**
      * Execute query request with filter and aggregations.
+     *
+     * @return ES search response
+     */
+    public MultiSearchResponse executeRequest(List<SearchQuery> queries) {
+        MultiSearchRequestBuilder multiSearchRequestBuilder = client.prepareMultiSearch();
+        for (SearchQuery query : queries) {
+            Pagination pagination = query.getPagination();
+            SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
+                    .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
+            if (pagination != null) {
+                List<Sort> orderBy = pagination.getOrderBy();
+                for (Sort sort : orderBy) {
+                    FieldSortBuilder sortQuery = SortBuilders.fieldSort(sort.getProperty())
+                            .order(SortOrder.valueOf(sort.getDirection().toString()));
+                    requestBuilder.addSort(sortQuery);
+                }
+                requestBuilder.setSize(pagination.getTop()).setFrom(pagination.getSkip());
+            }
+            Set<String> fields = query.getFields();
+            if (fields != null && !fields.isEmpty()) {
+                requestBuilder.setFetchSource(fields.toArray(new String[fields.size()]), null);
+            }
+            multiSearchRequestBuilder.add(requestBuilder);
+        }
+        return executeRequest(multiSearchRequestBuilder);
+    }
+
+    /**
+     * Execute query request with filter and aggregations.
      * 
      * @return ES search response
      */
-    public SearchResponse executeRequest(SearchQuery query, Pagination pagination) {
+    public SearchResponse executeRequest(SearchQuery query) {
+        Pagination pagination = query.getPagination();
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
-                .setTypes(query.getType()).setQuery(query.getQueryBuilder());
+                .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
         if (pagination != null) {
             List<Sort> orderBy = pagination.getOrderBy();
             for (Sort sort : orderBy) {
@@ -131,6 +163,30 @@ public class ESClient {
             if (response != null) {
                 log.debug(String.format("Query execution took: %s", response.getTook()));
             } else {
+                log.error("Failed to execute query: ", searchError);
+            }
+        }
+        return response;
+    }
+
+    /**
+     * Method has to be used to execute any request. It has logging logic.
+     *
+     * @param request
+     *            request to execute
+     * @return request response
+     */
+    protected MultiSearchResponse executeRequest(MultiSearchRequestBuilder request) {
+        MultiSearchResponse response = null;
+        ElasticsearchException searchError = null;
+        try {
+            response = request.execute().actionGet();
+        } catch (SearchPhaseExecutionException | NoNodeAvailableException exception) {
+            searchError = exception;
+            throw new SearchException(searchError.getDetailedMessage());
+        } finally {
+            log.debug(String.format("Executing query request:%n%s", request));
+            if (response == null) {
                 log.error("Failed to execute query: ", searchError);
             }
         }

@@ -1,16 +1,10 @@
 package com.hevelian.olastic.core.elastic.parsers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.apache.olingo.commons.api.data.AbstractEntityCollection;
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.processors.data.InstanceData;
+import org.apache.olingo.commons.api.data.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriResourceKind;
 import org.elasticsearch.action.search.SearchResponse;
@@ -19,9 +13,11 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation.SingleValue;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
-import com.hevelian.olastic.core.processors.data.InstanceData;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * Class to parse buckets aggregations from Elasticsearch response.
@@ -29,17 +25,21 @@ import com.hevelian.olastic.core.processors.data.InstanceData;
  * @author rdidyk
  */
 public class BucketsAggregationsParser
-        extends AbstractParser<EdmEntityType, AbstractEntityCollection> {
+        extends SingleResponseParser<EdmEntityType, AbstractEntityCollection> {
 
     private String countAlias;
+    private Pagination pagination;
 
     /**
      * Constructor.
      * 
+     * @param pagination
+     *            pagination information
      * @param countAlias
      *            name of count alias, or null if no count option applied
      */
-    public BucketsAggregationsParser(String countAlias) {
+    public BucketsAggregationsParser(Pagination pagination, String countAlias) {
+        this.pagination = pagination;
         this.countAlias = countAlias;
     }
 
@@ -48,15 +48,16 @@ public class BucketsAggregationsParser
             ElasticEdmEntitySet entitySet) {
         ElasticEdmEntityType entityType = entitySet.getEntityType();
         EntityCollection entities = new EntityCollection();
-        entities.getEntities().addAll(
-                getAggregatedEntities(response.getAggregations().asMap(), null, entityType));
+        List<Entity> entityList = getAggregatedEntities(response.getAggregations().asMap(), null,
+                entityType);
+        entities.getEntities().addAll(subList(entityList));
         return new InstanceData<>(entityType, entities);
     }
 
     /**
      * Method recursively goes through aggregations, creates entities and adds
      * fields to them. When entity has all fields from aggregations it adds to
-     * entities list. If {@link #groupBy} has aggregation
+     * entities list. If groupBy has aggregation
      * {@link UriResourceKind}.count then property with {@link #countAlias} name
      * will be added to entity with doc count from response aggregations.
      *
@@ -145,4 +146,33 @@ public class BucketsAggregationsParser
         }
     }
 
+    /**
+     * This is custom pagination, because Elasticsearch doesn't support this.
+     * Method to get sublist from parent list with top and skip parameter. We
+     * need to check whether top and skip are in parent list size or not, and
+     * then calculate from and to indexes.
+     * 
+     * @param entities
+     *            entities to paginate
+     * @return new sublist
+     */
+    private List<Entity> subList(List<Entity> entities) {
+        if (entities.isEmpty()) {
+            return entities;
+        }
+        int top = pagination.getTop();
+        int skip = pagination.getSkip();
+        int fromIndex;
+        int toIndex;
+        int max = skip + top;
+        int actualSize = entities.size();
+        if (max <= actualSize) {
+            fromIndex = skip;
+            toIndex = top + skip;
+        } else {
+            fromIndex = skip > actualSize ? actualSize : skip;
+            toIndex = actualSize;
+        }
+        return entities.subList(fromIndex, toIndex);
+    }
 }

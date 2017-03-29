@@ -3,8 +3,9 @@ package com.hevelian.olastic.core.common;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.ex.ODataException;
+
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
 
 /**
  * Interface to provide different type of mappings for nested types. I.e.: By
@@ -26,7 +27,7 @@ public interface NestedTypeMapper {
      * @throws ODataException
      *             if any error occurred
      */
-    public List<CsdlComplexType> getComplexTypes(String index) throws ODataException;
+    public List<ElasticCsdlComplexType> getComplexTypes(String index) throws ODataException;
 
     /**
      * Map Elasticsearch nested object name to CSDL complex type. By default

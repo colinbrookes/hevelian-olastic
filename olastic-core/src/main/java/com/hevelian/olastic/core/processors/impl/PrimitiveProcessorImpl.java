@@ -1,9 +1,12 @@
 package com.hevelian.olastic.core.processors.impl;
 
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
-
-import java.util.List;
-
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.edm.ElasticEdmProperty;
+import com.hevelian.olastic.core.elastic.parsers.PrimitiveParser;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
+import com.hevelian.olastic.core.elastic.requests.creators.SearchRequestCreator;
+import com.hevelian.olastic.core.processors.AbstractESReadProcessor;
+import com.hevelian.olastic.core.processors.data.InstanceData;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -11,6 +14,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
+import org.apache.olingo.server.api.processor.PrimitiveProcessor;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -20,13 +24,9 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.elasticsearch.action.search.SearchResponse;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.edm.ElasticEdmProperty;
-import com.hevelian.olastic.core.elastic.parsers.PrimitiveParser;
-import com.hevelian.olastic.core.elastic.requests.ESRequest;
-import com.hevelian.olastic.core.elastic.requests.creators.SearchRequestCreator;
-import com.hevelian.olastic.core.processors.ESPrimitiveProcessor;
-import com.hevelian.olastic.core.processors.data.InstanceData;
+import java.util.List;
+
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
  * Custom elastic Processor for handling an instance of a primitive type, e.g.,
@@ -34,7 +34,8 @@ import com.hevelian.olastic.core.processors.data.InstanceData;
  * 
  * @author rdidyk
  */
-public class PrimitiveProcessor extends ESPrimitiveProcessor {
+public class PrimitiveProcessorImpl extends AbstractESReadProcessor<EdmPrimitiveType, Property>
+        implements PrimitiveProcessor {
 
     @Override
     public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo,

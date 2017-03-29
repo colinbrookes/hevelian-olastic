@@ -1,26 +1,17 @@
 package com.hevelian.olastic.core.elastic.requests;
 
-import org.elasticsearch.action.search.SearchResponse;
-
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.elastic.ESClient;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.SearchQuery;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.FieldDefaults;
+import org.elasticsearch.action.search.SearchResponse;
 
 /**
  * Search request with search query and pagination.
  * 
  * @author rdidyk
  */
-@Getter
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SearchRequest extends BaseRequest {
-
-    Pagination pagination;
 
     /**
      * Constructor to initialize values.
@@ -33,13 +24,12 @@ public class SearchRequest extends BaseRequest {
      *            pagination
      */
     public SearchRequest(SearchQuery query, ElasticEdmEntitySet entitySet, Pagination pagination) {
-        super(query, entitySet);
-        this.pagination = pagination;
+        super(query, entitySet, pagination);
     }
 
     @Override
     public SearchResponse execute() {
-        return ESClient.getInstance().executeRequest(getQuery(), getPagination());
+        return ESClient.getInstance().executeRequest(getQuery());
     }
 
     @Override

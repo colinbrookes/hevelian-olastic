@@ -16,6 +16,14 @@ public class ElasticEdmProperty extends EdmPropertyImpl {
 
     private ElasticCsdlProperty csdlProperty;
 
+    /**
+     * Constructor to initialize property.
+     * 
+     * @param edm
+     *            EDM provider
+     * @param property
+     *            CSDL property
+     */
     public ElasticEdmProperty(Edm edm, ElasticCsdlProperty property) {
         super(edm, property);
         this.csdlProperty = property;

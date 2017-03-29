@@ -1,19 +1,30 @@
 package com.hevelian.olastic.core.stub;
 
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
-import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.*;
-import org.apache.olingo.commons.api.ex.ODataException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.ex.ODataException;
+
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlNavigationProperty;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * Initializes stub provider for testing purposes.
@@ -48,48 +59,47 @@ public class TestProvider extends ElasticCsdlEdmProvider {
     public static final String BOOKS = "book";
     public static final String CHARACTERS = "character";
 
-    private CsdlNavigationProperty booksCollection;
-    private CsdlNavigationProperty charactersCollection;
-    private CsdlNavigationProperty addressesCollection;
-    private CsdlNavigationProperty authorBookParent;
-    private CsdlNavigationProperty authorAddressesParent;
-    private CsdlNavigationProperty bookParent;
+    private ElasticCsdlNavigationProperty booksCollection;
+    private ElasticCsdlNavigationProperty charactersCollection;
+    private ElasticCsdlNavigationProperty addressesCollection;
+    private ElasticCsdlNavigationProperty authorBookParent;
+    private ElasticCsdlNavigationProperty authorAddressesParent;
+    private ElasticCsdlNavigationProperty bookParent;
 
     public TestProvider(MappingMetaDataProvider metaDataProvider) {
         super(metaDataProvider);
-        booksCollection = new CsdlNavigationProperty();
+        booksCollection = new ElasticCsdlNavigationProperty();
         booksCollection.setCollection(true);
         booksCollection.setName(BOOKS);
         booksCollection.setPartner(AUTHOR_TYPE);
         booksCollection.setType(BOOK_FQN);
 
-        charactersCollection = new CsdlNavigationProperty();
+        charactersCollection = new ElasticCsdlNavigationProperty();
         charactersCollection.setCollection(true);
         charactersCollection.setName(CHARACTERS);
         charactersCollection.setPartner(BOOK_TYPE);
         charactersCollection.setType(CHARACTER_FQN);
 
-        addressesCollection = new CsdlNavigationProperty();
+        addressesCollection = new ElasticCsdlNavigationProperty();
         addressesCollection.setCollection(true);
         addressesCollection.setName(ADDRESSES);
         addressesCollection.setPartner(AUTHOR_TYPE);
         addressesCollection.setType(ADDRESS_FQN);
 
-        authorBookParent = new CsdlNavigationProperty();
+        authorBookParent = new ElasticCsdlNavigationProperty();
         authorBookParent.setName(AUTHOR_TYPE);
         authorBookParent.setPartner(BOOK_TYPE);
         authorBookParent.setType(AUTHOR_FQN);
 
-        authorAddressesParent = new CsdlNavigationProperty();
+        authorAddressesParent = new ElasticCsdlNavigationProperty();
         authorAddressesParent.setName(AUTHOR_TYPE);
         authorAddressesParent.setPartner(ADDRESS_TYPE);
         authorAddressesParent.setType(AUTHOR_FQN);
 
-        bookParent = new CsdlNavigationProperty();
+        bookParent = new ElasticCsdlNavigationProperty();
         bookParent.setName(BOOK_TYPE);
         bookParent.setPartner(CHARACTER_TYPE);
         bookParent.setType(BOOK_FQN);
-
     }
 
     @Override
@@ -236,7 +246,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
 
     @Override
     public ElasticCsdlEntitySet getEntitySet(FullQualifiedName entityContainer,
-                                             String entitySetName) throws ODataException {
+            String entitySetName) throws ODataException {
         ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
         entitySet.setEIndex(AUTHORS_INDEX);
         if (entityContainer.equals(CONTAINER)) {
@@ -274,9 +284,10 @@ public class TestProvider extends ElasticCsdlEdmProvider {
     }
 
     @Override
-    public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+    public ElasticCsdlComplexType getComplexType(FullQualifiedName complexTypeName)
+            throws ODataException {
         if (complexTypeName.equals(DIMENSION_FQN)) {
-            CsdlComplexType complexType = new CsdlComplexType();
+            ElasticCsdlComplexType complexType = new ElasticCsdlComplexType();
             List<CsdlProperty> complexTypeProperties = new ArrayList<>();
             CsdlProperty name = new ElasticCsdlProperty().setName("name")
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
@@ -285,6 +296,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             complexTypeProperties.add(name);
             complexTypeProperties.add(state);
             complexType.setName(DIMENSION_TYPE);
+            complexType.setENestedType(DIMENSION_TYPE);
             complexType.setProperties(complexTypeProperties);
             return complexType;
         }

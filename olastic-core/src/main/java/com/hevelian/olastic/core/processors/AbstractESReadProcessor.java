@@ -1,18 +1,20 @@
 package com.hevelian.olastic.core.processors;
 
-import static com.hevelian.olastic.core.utils.MetaDataUtils.castToType;
-
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
+import com.hevelian.olastic.core.elastic.requests.SearchRequest;
+import com.hevelian.olastic.core.processors.data.InstanceData;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.ContextURL.Suffix;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
-import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
@@ -21,35 +23,21 @@ import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.elasticsearch.action.search.SearchResponse;
 
-import com.hevelian.olastic.core.ElasticOData;
-import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.elastic.requests.ESRequest;
-import com.hevelian.olastic.core.elastic.requests.SearchRequest;
-import com.hevelian.olastic.core.processors.data.InstanceData;
-
 /**
  * Abstract class with template method to provide behavior for all read
  * processors.
- * 
- * @author rdidyk
  *
  * @param <T>
  *            instance data type class
  * @param <V>
  *            instance data value class
+ * @author rdidyk
  */
 public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
 
     protected ElasticOData odata;
     protected ElasticServiceMetadata serviceMetadata;
     protected ODataRequest request;
-
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        init(castToType(odata, ElasticOData.class),
-                castToType(serviceMetadata, ElasticServiceMetadata.class));
-    }
 
     @Override
     public void init(ElasticOData odata, ElasticServiceMetadata serviceMetadata) {
@@ -78,7 +66,7 @@ public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
 
     /**
      * Creates request to read data from Elasticsearch.
-     * 
+     *
      * @param uriInfo
      *            URI info for request
      * @return created {@link SearchRequest} instance
@@ -89,19 +77,21 @@ public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
     /**
      * Parse response from Elasticsearch and returns instance data with type and
      * value to serialize.
-     * 
+     *
      * @param response
      *            response from Elasticsearch
      * @param entitySet
      *            the edm entity set
      * @return instance data with type and value
+     * @throws ODataApplicationException
+     *             if any error occurred during parsing response
      */
     protected abstract InstanceData<T, V> parseResponse(SearchResponse response,
-            ElasticEdmEntitySet entitySet);
+            ElasticEdmEntitySet entitySet) throws ODataApplicationException;
 
     /**
      * Serializes instance data.
-     * 
+     *
      * @param serializer
      *            responsible serializer
      * @param data
@@ -120,7 +110,7 @@ public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
 
     /**
      * Creates context URL for response serializer.
-     * 
+     *
      * @param entitySet
      *            the edm entity set
      * @param isSingleEntity

@@ -34,4 +34,12 @@ public class ElasticCsdlEntitySet extends CsdlEntitySet
         this.eType = eType;
         return this;
     }
+
+    @Override
+    public CsdlEntitySet setName(String name) {
+        if (eType == null) {
+            setEType(name);
+        }
+        return super.setName(name);
+    }
 }
