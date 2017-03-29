@@ -1,5 +1,12 @@
 package com.hevelian.olastic.core.edm;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -10,11 +17,6 @@ import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 
-import javax.xml.bind.DatatypeConverter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Contains property creation logic.
  * 
@@ -22,7 +24,7 @@ import java.util.Map;
  */
 public class PropertyCreator {
     /**
-     * Creates property using name, value and rntity type.
+     * Creates property using name, value and entity type.
      * 
      * @param name
      *            property name
@@ -45,7 +47,11 @@ public class PropertyCreator {
             if (property.getType() instanceof EdmDate
                     || property.getType() instanceof EdmDateTimeOffset) {
                 if (value != null) {
-                    modifiedValue = DatatypeConverter.parseDateTime(value.toString()).getTime();
+                    if (value instanceof Long) {
+                        modifiedValue = new Date((Long) value);
+                    } else {
+                        modifiedValue = DatatypeConverter.parseDateTime(value.toString()).getTime();
+                    }
                 }
             } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
                 // When Elasticsearch aggregates data it return's boolean as
