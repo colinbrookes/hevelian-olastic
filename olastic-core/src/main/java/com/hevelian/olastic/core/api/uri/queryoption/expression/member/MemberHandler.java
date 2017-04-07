@@ -28,6 +28,7 @@ import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.Nest
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ParentMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
 import com.hevelian.olastic.core.edm.ElasticEdmComplexType;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.edm.ElasticEdmProperty;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
 
@@ -91,8 +92,9 @@ public class MemberHandler {
             UriResourceNavigation navigationResource = (UriResourceNavigation) firstPart;
             ExpressionResult lambdaResult = (ExpressionResult) lambda.getExpression()
                     .accept(new ElasticSearchExpressionVisitor());
-            return new ChildMember(navigationResource.getProperty().getType().getName(),
-                    lambdaResult.getQueryBuilder()).any();
+            ElasticEdmEntityType entityType = (ElasticEdmEntityType) navigationResource
+                    .getProperty().getType();
+            return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
         }
         // complex type collection
         else {
@@ -137,7 +139,8 @@ public class MemberHandler {
 
     private List<String> collectNavigationTypes(List<UriResource> resourceParts) {
         return resourceParts.stream().filter(UriResourceNavigation.class::isInstance)
-                .map(part -> ((UriResourceNavigation) part).getProperty().getType().getName())
+                .map(part -> ((ElasticEdmEntityType) ((UriResourceNavigation) part).getProperty()
+                        .getType()).getEType())
                 .collect(Collectors.toList());
     }
 
