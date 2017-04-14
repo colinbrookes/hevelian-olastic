@@ -27,7 +27,7 @@ public class MethodMember extends BaseMember {
         PrimitiveMember primitive = (PrimitiveMember) left;
         LiteralMember literal = (LiteralMember) right;
         return new ExpressionResult(
-                prefixQuery(addKeywordIfNeeded(primitive.getField(), primitive.getEdmType()),
+                prefixQuery(addKeywordIfNeeded(primitive.getField(), primitive.getAnnotations()),
                         (String) literal.getValue()));
     }
 
@@ -36,7 +36,7 @@ public class MethodMember extends BaseMember {
         PrimitiveMember primitive = (PrimitiveMember) left;
         LiteralMember literal = (LiteralMember) right;
         return new ExpressionResult(
-                wildcardQuery(addKeywordIfNeeded(primitive.getField(), primitive.getEdmType()),
+                wildcardQuery(addKeywordIfNeeded(primitive.getField(), primitive.getAnnotations()),
                         ElasticConstants.WILDCARD_CHAR + literal.getValue()));
     }
 

@@ -1,9 +1,11 @@
 package com.hevelian.olastic.core.elastic.utils;
 
-import org.apache.olingo.commons.api.edm.EdmType;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
-
+import com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider;
 import com.hevelian.olastic.core.elastic.ElasticConstants;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Elasticsearch utils.
@@ -19,12 +21,19 @@ public final class ElasticUtils {
      *
      * @param name
      *            field name
-     * @param type
+     * @param annotations
      *            field edm type
      * @return property's keyword field name
      */
-    public static String addKeywordIfNeeded(String name, EdmType type) {
-        return type instanceof EdmString ? addKeyword(name) : name;
+    public static String addKeywordIfNeeded(String name, List<EdmAnnotation> annotations) {
+        boolean isAnalyzed = false;
+        Optional<EdmAnnotation> analyzedAnnotation = annotations.stream()
+                .filter(annotation -> annotation.getTerm().getName().equals(AnnotationProvider.ANALYZED_TERM_NAME))
+                .findFirst();
+        if (analyzedAnnotation.isPresent()) {
+            isAnalyzed = (Boolean)(analyzedAnnotation.get().getExpression().asConstant().asPrimitive());
+        }
+        return isAnalyzed ? addKeyword(name) : name;
     }
 
     /**

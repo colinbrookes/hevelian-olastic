@@ -1,12 +1,17 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static com.hevelian.olastic.core.TestUtils.getAnalyzedAnnotation;
 import static org.junit.Assert.*;
 
 /**
@@ -17,11 +22,12 @@ public class MethodMemberTest {
     String field = "someField";
     String value = "'value'";
     EdmType edmString = new EdmString();
+    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
 
     @Test
     public void contains_PrimitiveAndLiteral_QueryIsCorrect() throws Exception {
         MethodMember methodMember = new MethodMember();
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = methodMember.contains(left, right);
 
@@ -36,7 +42,7 @@ public class MethodMemberTest {
     @Test
     public void startsWith_PrimitiveAndLiteral_QueryIsCorrect() throws Exception {
         MethodMember methodMember = new MethodMember();
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = methodMember.startsWith(left, right);
 
@@ -52,7 +58,7 @@ public class MethodMemberTest {
     @Test
     public void endsWith_PrimitiveAndLiteral_QueryIsCorrect() throws Exception {
         MethodMember methodMember = new MethodMember();
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = methodMember.endsWith(left, right);
 

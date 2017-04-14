@@ -1,10 +1,17 @@
 package com.hevelian.olastic.core;
 
+import com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.edm.EdmTerm;
+import org.apache.olingo.commons.api.edm.annotation.EdmConstantExpression;
+import org.apache.olingo.commons.api.edm.annotation.EdmExpression;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test routines.
@@ -90,6 +97,28 @@ public class TestUtils {
      */
     public static void checkFilterParentNotEqualsQuery(String query, String parent, String field, String value) {
         checkFilterParentEqualsQueryInternal(query, parent, field, value, true);
+    }
+
+    /**
+     * Mocks analyzed annotation.
+     * @return mocked analyzed annotation
+     */
+    public static EdmAnnotation getAnalyzedAnnotation() {
+        EdmAnnotation annotation = mock(EdmAnnotation.class);
+        EdmTerm term = mock(EdmTerm.class);
+        EdmExpression expression = mock(EdmExpression.class);
+        EdmConstantExpression constantExpression = mock(EdmConstantExpression.class);
+        doReturn(Boolean.parseBoolean(
+                new AnnotationProvider()
+                .getAnnotation(AnnotationProvider.ANALYZED_TERM_NAME)
+                        .getExpression()
+                        .asConstant()
+                        .getValue())).when(constantExpression).asPrimitive();
+        doReturn(constantExpression).when(expression).asConstant();
+        doReturn(AnnotationProvider.ANALYZED_TERM_NAME).when(term).getName();
+        doReturn(term).when(annotation).getTerm();
+        doReturn(expression).when(annotation).getExpression();
+        return annotation;
     }
 
     private static void checkFilterParentEqualsQueryInternal(String query, String parent, String field, String value, boolean isNotQuery) {
