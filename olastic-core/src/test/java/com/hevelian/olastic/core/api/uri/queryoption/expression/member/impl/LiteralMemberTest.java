@@ -1,21 +1,19 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import static com.hevelian.olastic.core.TestUtils.checkFilterEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterNotEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterParentEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterParentNotEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterRangeQuery;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmInt32;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.json.JSONObject;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static com.hevelian.olastic.core.TestUtils.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for  {@link LiteralMember} class.
@@ -28,6 +26,8 @@ public class LiteralMemberTest {
 
     String intValue = "10";
     EdmType edmString = new EdmString();
+    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
+    List<EdmAnnotation> emptyAnnotations = Collections.emptyList();
     EdmType edmInt = new EdmInt32();
     List<String> parentTypes = Arrays.asList("parentType");
 
@@ -46,7 +46,7 @@ public class LiteralMemberTest {
     @Test
     public void eq_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
-        ParentMember right = new ParentMember(parentTypes, field, edmString);
+        ParentMember right = new ParentMember(parentTypes, field, annotations);
         ExpressionResult result = (ExpressionResult)left.eq(right);
 
         checkFilterParentEqualsQuery(result.getQueryBuilder().toString(), parentTypes.get(0), field, value);
@@ -55,7 +55,7 @@ public class LiteralMemberTest {
     @Test
     public void eq_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
-        PrimitiveMember right = new PrimitiveMember(field, edmString);
+        PrimitiveMember right = new PrimitiveMember(field, annotations);
         ExpressionResult result = (ExpressionResult)left.eq(right);
 
         checkFilterEqualsQuery(result.getQueryBuilder().toString(), field, value);
@@ -65,7 +65,7 @@ public class LiteralMemberTest {
     public void eq_SeveralTypes_CorrectParentQuery() throws Exception {
         List<String> severalTypes = Arrays.asList("Author", "Book", "Character");
         LiteralMember left = new LiteralMember(value, edmString);
-        ParentMember right = new ParentMember(severalTypes, field, edmString);
+        ParentMember right = new ParentMember(severalTypes, field, annotations);
         ExpressionResult result = (ExpressionResult)left.eq(right);
         JSONObject firstChild = new JSONObject(result.getQueryBuilder().toString()).getJSONObject("has_parent");
         String firstActualType = (String)firstChild.get("parent_type");
@@ -90,7 +90,7 @@ public class LiteralMemberTest {
     @Test
     public void ne_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
-        ParentMember right = new ParentMember(parentTypes, field, edmString);
+        ParentMember right = new ParentMember(parentTypes, field, annotations);
         ExpressionResult result = (ExpressionResult)left.ne(right);
 
         checkFilterParentNotEqualsQuery(result.getQueryBuilder().toString(), parentTypes.get(0), field, value);
@@ -99,7 +99,7 @@ public class LiteralMemberTest {
     @Test
     public void ne_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
-        PrimitiveMember right = new PrimitiveMember(field, edmString);
+        PrimitiveMember right = new PrimitiveMember(field, annotations);
         ExpressionResult result = (ExpressionResult)left.ne(right);
 
         checkFilterNotEqualsQuery(result.getQueryBuilder().toString(), field, value);
@@ -108,7 +108,7 @@ public class LiteralMemberTest {
     @Test
     public void ge_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, edmInt);
+        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.ge(right);
         checkParentRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "to", intValue);
     }
@@ -116,7 +116,7 @@ public class LiteralMemberTest {
     @Test
     public void ge_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        PrimitiveMember right = new PrimitiveMember(field, edmInt);
+        PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.ge(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "le", field,  intValue);
     }
@@ -124,7 +124,7 @@ public class LiteralMemberTest {
     @Test
     public void gtLiteralAndParentCorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, edmInt);
+        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.gt(right);
         checkParentRangeQuery(result.getQueryBuilder().toString(), true, false, "range", field, "to", intValue);
     }
@@ -132,7 +132,7 @@ public class LiteralMemberTest {
     @Test
     public void gtLiteralAndPrimitiveCorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        PrimitiveMember right = new PrimitiveMember(field, edmInt);
+        PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.gt(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "lt", field, intValue);
     }
@@ -140,7 +140,7 @@ public class LiteralMemberTest {
     @Test
     public void le_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, edmInt);
+        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.le(right);
         checkParentRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "from", intValue);
     }
@@ -148,7 +148,7 @@ public class LiteralMemberTest {
     @Test
     public void le_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        PrimitiveMember right = new PrimitiveMember(field, edmInt);
+        PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.le(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "ge", field, intValue);
     }
@@ -156,7 +156,7 @@ public class LiteralMemberTest {
     @Test
     public void lt_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, edmInt);
+        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.lt(right);
         checkParentRangeQuery(result.getQueryBuilder().toString(), false, true, "range", field, "from", intValue);
     }
@@ -164,7 +164,7 @@ public class LiteralMemberTest {
     @Test
     public void lt_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        PrimitiveMember right = new PrimitiveMember(field, edmInt);
+        PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
         ExpressionResult result = (ExpressionResult)left.lt(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "gt", field, intValue);
     }

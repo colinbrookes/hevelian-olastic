@@ -202,7 +202,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
      */
     private static String getQueryField(String propertyName, ElasticEdmEntityType entityType) {
         ElasticEdmProperty property = entityType.getEProperties().get(propertyName);
-        return addKeywordIfNeeded(property.getEField(), property.getType());
+        return addKeywordIfNeeded(property.getEField(), property.getAnnotations());
     }
 
 }

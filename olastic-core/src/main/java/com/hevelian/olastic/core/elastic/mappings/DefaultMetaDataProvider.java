@@ -1,7 +1,6 @@
 package com.hevelian.olastic.core.elastic.mappings;
 
-import java.io.IOException;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
@@ -15,7 +14,8 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 
-import lombok.extern.log4j.Log4j2;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Basic implementation of the mapping metadata provider that retrieves mappings
@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class DefaultMetaDataProvider implements MappingMetaDataProvider {
-
+    private HashMap<String, Object> cache = new HashMap<>();
     private final Client client;
 
     public DefaultMetaDataProvider(Client client) {
@@ -34,29 +34,44 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
 
     @Override
     public ImmutableOpenMap<String, MappingMetaData> getAllMappings(String index) {
-        return new GetMappingsRequestBuilder(getClient(), GetMappingsAction.INSTANCE, index).get()
-                .mappings().get(index);
+        Object mapping = cache.get(makeKey(index));
+        if (mapping == null) {
+            mapping = new GetMappingsRequestBuilder(getClient(), GetMappingsAction.INSTANCE, index).get()
+                    .mappings().get(index);
+            cache.put(makeKey(index), mapping);
+        }
+        return (ImmutableOpenMap<String, MappingMetaData>) mapping;
     }
 
     @Override
     public MappingMetaData getMappingForType(String index, String type) {
-        GetMappingsResponse mappingsResponse = getClient().admin().indices()
-                .prepareGetMappings(index).addTypes(type).execute().actionGet();
-        return mappingsResponse.getMappings().isEmpty() ? null
-                : mappingsResponse.getMappings().get(index).get(type);
+        Object mapping = cache.get(makeKey(index, type));
+        if (mapping == null) {
+            mapping = getClient().admin().indices()
+                    .prepareGetMappings(index).addTypes(type).execute().actionGet();
+            cache.put(makeKey(index, type), mapping);
+        }
+
+        return ((GetMappingsResponse)(mapping)).getMappings().isEmpty() ? null
+                :((GetMappingsResponse)(mapping)).getMappings().get(index).get(type);
     }
 
     @Override
     public ImmutableOpenMap<String, FieldMappingMetaData> getMappingsForField(String index,
             String field) {
-        GetMappingsResponse typeMappingsResponse = getClient().admin().indices()
-                .prepareGetMappings(index).execute().actionGet();
+        Object mappingss = cache.get(makeKey(index, field));
+        if (mappingss == null) {
+            mappingss =  getClient().admin().indices()
+                    .prepareGetMappings(index).execute().actionGet();
+            cache.put(makeKey(index, field), mappingss);
+        }
+
         ImmutableOpenMap.Builder<String, FieldMappingMetaData> mappingsMapBuilder = new ImmutableOpenMap.Builder<>();
         // TODO this workaround was implemented because of this ES 5.x issue
         // https://github.com/elastic/elasticsearch/issues/22209
         // revert this when the issue is fixed
         try {
-            Object[] mappings = typeMappingsResponse.getMappings().get(index).values().toArray();
+            Object[] mappings = ((GetMappingsResponse)mappingss).getMappings().get(index).values().toArray();
             for (Object mapping : mappings) {
                 MappingMetaData mappingMetaData = (MappingMetaData) mapping;
                 String type = mappingMetaData.type();
@@ -77,13 +92,22 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
 
     @Override
     public FieldMappingMetaData getMappingForField(String index, String type, String field) {
-        GetFieldMappingsResponse fieldMappingsResponse = getClient().admin().indices()
-                .prepareGetFieldMappings(index).setTypes(type).setFields(field).execute()
-                .actionGet();
-        return fieldMappingsResponse.mappings().get(index).get(type).get(field);
+        Object mapping = cache.get(makeKey(index, type, field));
+        if (mapping == null) {
+            mapping = getClient().admin().indices()
+                    .prepareGetFieldMappings(index).setTypes(type).setFields(field).execute()
+                    .actionGet();
+            cache.put(makeKey(index, type, field), mapping);
+        }
+
+        return ((GetFieldMappingsResponse)mapping).mappings().get(index).get(type).get(field);
     }
 
     public Client getClient() {
         return client;
+    }
+
+    private String makeKey(String... args) {
+        return String.join("/", args);
     }
 }

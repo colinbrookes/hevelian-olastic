@@ -202,7 +202,7 @@ public class ElasticSearchExpressionVisitorTest {
         String actualType = (String)rootObj.get("path");
         JSONObject queryObject = rootObj.getJSONObject("query");
         JSONObject term = queryObject.getJSONObject("term");
-        JSONObject termValue = term.getJSONObject("_dimension.name.keyword");
+        JSONObject termValue = term.getJSONObject("_dimension.name");
         assertNotNull(termValue);
         assertEquals("_dimension", actualType);
     }

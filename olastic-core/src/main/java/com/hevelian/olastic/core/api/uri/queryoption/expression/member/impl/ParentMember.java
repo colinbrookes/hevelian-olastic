@@ -1,37 +1,33 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
-import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
-import static org.elasticsearch.index.query.QueryBuilders.hasParentQuery;
-import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
-import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.elasticsearch.index.query.QueryBuilder;
 
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.olingo.commons.api.edm.EdmType;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.elasticsearch.index.query.QueryBuilder;
-
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * Wraps the data needed for building parent query.
  *
  * @author Taras Kohut
  */
-public class ParentMember extends TypedMember {
+public class ParentMember extends AnnotatedMember {
 
     private List<String> parentTypes;
 
-    public ParentMember(List<String> parentTypes, String field, EdmType type) {
-        super(field, type);
+    public ParentMember(List<String> parentTypes, String field,  List<EdmAnnotation> annotations) {
+        super(field, annotations);
         this.parentTypes = parentTypes;
     }
 
     @Override
     public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = termQuery(addKeywordIfNeeded(getField(), getEdmType()),
+        QueryBuilder query = termQuery(addKeywordIfNeeded(getField(), getAnnotations()),
                 ((LiteralMember) expressionMember).getValue());
         return buildParentQuery(query);
     }
@@ -39,7 +35,7 @@ public class ParentMember extends TypedMember {
     @Override
     public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
         QueryBuilder query = boolQuery()
-                .mustNot(termQuery(addKeywordIfNeeded(getField(), getEdmType()),
+                .mustNot(termQuery(addKeywordIfNeeded(getField(), getAnnotations()),
                         ((LiteralMember) expressionMember).getValue()));
         return buildParentQuery(query);
     }

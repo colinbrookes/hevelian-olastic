@@ -41,7 +41,7 @@ public class PrimitiveTypeMapper {
         } else if (BinaryFieldMapper.CONTENT_TYPE.equals(elasticType)) {
             result = EdmPrimitiveTypeKind.Binary;
         } else {
-            log.warn("Type '{1}' is not supported. Setting String instead.", elasticType);
+            log.warn("Type '{}' is not supported. Setting String instead.", elasticType);
             result = EdmPrimitiveTypeKind.String;
         }
         return result;

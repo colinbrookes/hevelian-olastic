@@ -1,5 +1,6 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmInt32;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
@@ -10,9 +11,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hevelian.olastic.core.TestUtils.checkFilterParentEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterParentNotEqualsQuery;
-import static org.junit.Assert.*;
+import static com.hevelian.olastic.core.TestUtils.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link ParentMember} class.
@@ -22,13 +22,14 @@ public class ParentMemberTest {
     String field = "someField";
     String value = "'value'";
     String intValue = "10";
+    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
     EdmType edmString = new EdmString();
     EdmType edmInt = new EdmInt32();
     List<String> parentTypes = Arrays.asList("parentType");
     
     @Test
     public void eq_ParentAndLiteral_CorrectESQuery() throws Exception {
-        ParentMember left = new ParentMember(parentTypes, field, edmString);
+        ParentMember left = new ParentMember(parentTypes, field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = left.eq(right);
 
@@ -38,7 +39,7 @@ public class ParentMemberTest {
     @Test
     public void eq_SeveralTypes_CorrectParentQuery() throws Exception {
         List<String> severalTypes = Arrays.asList("Author", "Book", "Character");
-        ParentMember left = new ParentMember(severalTypes, field, edmString);
+        ParentMember left = new ParentMember(severalTypes, field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = left.eq(right);
         JSONObject firstChild = new JSONObject(result.getQueryBuilder().toString()).getJSONObject("has_parent");
@@ -63,7 +64,7 @@ public class ParentMemberTest {
 
     @Test
     public void ne_ParentAndLiteral_CorrectESQuery() throws Exception {
-        ParentMember left = new ParentMember(parentTypes, field, edmString);
+        ParentMember left = new ParentMember(parentTypes, field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = left.ne(right);
 
@@ -72,7 +73,7 @@ public class ParentMemberTest {
 
     @Test
     public void ge_ParentAndLiteral_CorrectESQuery() throws Exception {
-        ParentMember left = new ParentMember(parentTypes, field, edmString);
+        ParentMember left = new ParentMember(parentTypes, field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.ge(right);
         checkRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "from", intValue);
@@ -80,7 +81,7 @@ public class ParentMemberTest {
 
     @Test
     public void gtParentLiteralCorrectESQuery() throws Exception {
-        ParentMember left = new ParentMember(parentTypes, field, edmString);
+        ParentMember left = new ParentMember(parentTypes, field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.gt(right);
         checkRangeQuery(result.getQueryBuilder().toString(), false, true, "range", field, "from", intValue);
@@ -88,7 +89,7 @@ public class ParentMemberTest {
 
     @Test
     public void le_ParentAndLiteral_CorrectESQuery() throws Exception {
-        ParentMember left = new ParentMember(parentTypes, field, edmString);
+        ParentMember left = new ParentMember(parentTypes, field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.le(right);
         checkRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "to", intValue);
@@ -96,7 +97,7 @@ public class ParentMemberTest {
 
     @Test
     public void lt_ParentAndLiteral_CorrectESQuery() throws Exception {
-        ParentMember left = new ParentMember(parentTypes, field, edmString);
+        ParentMember left = new ParentMember(parentTypes, field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.lt(right);
         checkRangeQuery(result.getQueryBuilder().toString(), true, false, "range", field, "to", intValue);
@@ -104,14 +105,14 @@ public class ParentMemberTest {
 
     @Test
     public void getField() throws Exception {
-        ParentMember primitive = new ParentMember(parentTypes, field, edmString);
+        ParentMember primitive = new ParentMember(parentTypes, field, annotations);
         assertEquals(field, primitive.getField());
     }
 
     @Test
-    public void getEdmType() throws Exception {
-        ParentMember primitive = new ParentMember(parentTypes, field, edmString);
-        assertEquals(edmString, primitive.getEdmType());
+    public void getAnnotations() throws Exception {
+        ParentMember primitive = new ParentMember(parentTypes, field, annotations);
+        assertEquals(annotations, primitive.getAnnotations());
     }
 
     private void checkRangeQuery(String query, boolean includeLower, boolean includeUpper,
@@ -129,46 +130,46 @@ public class ParentMemberTest {
 
     @Test(expected = ODataApplicationException.class)
     public void any_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).any();
+        new ParentMember(parentTypes, field, annotations).any();
     }
 
     @Test(expected = ODataApplicationException.class)
     public void all_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).all();
+        new ParentMember(parentTypes, field, annotations).all();
     }
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).contains(null, null);
+        new ParentMember(parentTypes, field, annotations).contains(null, null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).startsWith(null, null);
+        new ParentMember(parentTypes, field, annotations).startsWith(null, null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).endsWith(null, null);
+        new ParentMember(parentTypes, field, annotations).endsWith(null, null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).date(null);
+        new ParentMember(parentTypes, field, annotations).date(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void and_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).and(null);
+        new ParentMember(parentTypes, field, annotations).and(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void or_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).or(null);
+        new ParentMember(parentTypes, field, annotations).or(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void not_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, edmString).not();
+        new ParentMember(parentTypes, field, annotations).not();
     }
 }

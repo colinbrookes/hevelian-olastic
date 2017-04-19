@@ -1,11 +1,12 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 
+import java.util.List;
 import java.util.Locale;
 
 import static com.hevelian.olastic.core.elastic.ElasticConstants.ID_FIELD_NAME;
@@ -17,10 +18,10 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  *
  * @author Taras Kohut
  */
-public class PrimitiveMember extends TypedMember {
+public class PrimitiveMember extends AnnotatedMember {
 
-    public PrimitiveMember(String field, EdmType edmType) {
-        super(field, edmType);
+    public PrimitiveMember(String field, List<EdmAnnotation> annotations) {
+        super(field, annotations);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class PrimitiveMember extends TypedMember {
             }
             return idsQuery().addIds(value.toString());
         } else {
-            String fieldName = addKeywordIfNeeded(getField(), getEdmType());
+            String fieldName = addKeywordIfNeeded(getField(), getAnnotations());
             if (value == null) {
                 return boolQuery().mustNot(existsQuery(fieldName));
             } else {

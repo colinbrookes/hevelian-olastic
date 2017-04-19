@@ -14,8 +14,7 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class NestedMember extends BaseMember {
-
-    private String nestedType;
+    private String nestedPath;
     private QueryBuilder query;
 
     @Override
@@ -24,7 +23,7 @@ public class NestedMember extends BaseMember {
     }
 
     private ExpressionResult buildNestedQuery() {
-        return new ExpressionResult(QueryBuilders.nestedQuery(nestedType, query, ScoreMode.None));
+        return new ExpressionResult(QueryBuilders.nestedQuery(nestedPath, query, ScoreMode.None));
     }
 
 }

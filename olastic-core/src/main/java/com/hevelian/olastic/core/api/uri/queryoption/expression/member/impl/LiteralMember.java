@@ -40,7 +40,7 @@ public class LiteralMember extends BaseMember {
     public Object getValue() {
         UriTokenizer tokenizer = new UriTokenizer(value);
         if (tokenizer.next(UriTokenizer.TokenKind.StringValue) && edmType instanceof EdmString) {
-            return value.substring(1, value.length() - 1);
+            return value.substring(1, value.length() - 1).replaceAll("''", "'");
         } else if (tokenizer.next(TokenKind.jsonArrayOrObject) && edmType == null) {
             String arrayAsString = value.substring(1, value.length() - 1);
             List<String> values = new ArrayList<>();

@@ -1,14 +1,16 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmInt32;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.junit.Test;
 
-import static com.hevelian.olastic.core.TestUtils.checkFilterEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterNotEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterRangeQuery;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.hevelian.olastic.core.TestUtils.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -21,9 +23,10 @@ public class PrimitiveMemberTest {
     String intValue = "10";
     EdmType edmString = new EdmString();
     EdmType edmInt = new EdmInt32();
+    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
     @Test
     public void eq_PrimitiveAndLiteral_CorrectESQuery() throws Exception {
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = left.eq(right);
         checkFilterEqualsQuery(result.getQueryBuilder().toString(), field, value);
@@ -31,7 +34,7 @@ public class PrimitiveMemberTest {
 
     @Test
     public void ne_PrimitiveAndLiteral_CorrectESQuery() throws Exception {
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(value, edmString);
         ExpressionResult result = left.ne(right);
         checkFilterNotEqualsQuery(result.getQueryBuilder().toString(), field, value);
@@ -40,7 +43,7 @@ public class PrimitiveMemberTest {
 
     @Test
     public void ge_PrimitiveAndLiteral_CorrectESQuery() throws Exception {
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.ge(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "ge", field, intValue);
@@ -48,7 +51,7 @@ public class PrimitiveMemberTest {
 
     @Test
     public void gtPrimitiveLiteralCorrectESQuery() throws Exception {
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.gt(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "gt", field, intValue);
@@ -56,7 +59,7 @@ public class PrimitiveMemberTest {
 
     @Test
     public void le_PrimitiveAndLiteral_CorrectESQuery() throws Exception {
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.le(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "le", field, intValue);
@@ -64,7 +67,7 @@ public class PrimitiveMemberTest {
 
     @Test
     public void lt_PrimitiveAndLiteral_CorrectESQuery() throws Exception {
-        PrimitiveMember left = new PrimitiveMember(field, edmString);
+        PrimitiveMember left = new PrimitiveMember(field, annotations);
         LiteralMember right = new LiteralMember(intValue, edmInt);
         ExpressionResult result = left.lt(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "lt", field, intValue);
@@ -72,59 +75,59 @@ public class PrimitiveMemberTest {
 
     @Test
     public void getField() throws Exception {
-        PrimitiveMember primitive = new PrimitiveMember(field, edmString);
+        PrimitiveMember primitive = new PrimitiveMember(field, annotations);
         assertEquals(field, primitive.getField());
     }
 
     @Test
-    public void getEdmType() throws Exception {
-        PrimitiveMember primitive = new PrimitiveMember(field, edmString);
-        assertEquals(edmString, primitive.getEdmType());
+    public void getAnnotations() throws Exception {
+        PrimitiveMember primitive = new PrimitiveMember(field, annotations);
+        assertEquals(annotations, primitive.getAnnotations());
     }
 
     @Test(expected = ODataApplicationException.class)
     public void any_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).any();
+        new PrimitiveMember(field, annotations).any();
     }
 
     @Test(expected = ODataApplicationException.class)
     public void all_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).all();
+        new PrimitiveMember(field, annotations).all();
     }
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).contains(null, null);
+        new PrimitiveMember(field, annotations).contains(null, null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).startsWith(null, null);
+        new PrimitiveMember(field, annotations).startsWith(null, null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).endsWith(null, null);
+        new PrimitiveMember(field, annotations).endsWith(null, null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).date(null);
+        new PrimitiveMember(field, annotations).date(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void and_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).and(null);
+        new PrimitiveMember(field, annotations).and(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void or_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).or(null);
+        new PrimitiveMember(field, annotations).or(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void not_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, edmString).not();
+        new PrimitiveMember(field, annotations).not();
     }
 
 }

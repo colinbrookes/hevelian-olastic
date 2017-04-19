@@ -1,36 +1,24 @@
 package com.hevelian.olastic.core.stub;
 
+import com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider;
+import com.hevelian.olastic.core.api.edm.provider.*;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.*;
+import org.apache.olingo.commons.api.ex.ODataException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
-import org.apache.olingo.commons.api.ex.ODataException;
-
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntityType;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlNavigationProperty;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
-import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * Initializes stub provider for testing purposes.
  */
 public class TestProvider extends ElasticCsdlEdmProvider {
 
+    private static List<CsdlAnnotation> analyzedAnnotations = Arrays.asList(new AnnotationProvider().getAnnotation(AnnotationProvider.ANALYZED_TERM_NAME));
     public static final String NAMESPACE = "OData.Test";
     public static final String CONTAINER_NAME = "Container";
     public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE,
@@ -178,7 +166,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                     .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
             CsdlProperty birthDate = new ElasticCsdlProperty().setName("birthDate")
                     .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName());
-            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+            CsdlProperty name = new ElasticCsdlProperty().setName("name").setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(AUTHOR_TYPE);
@@ -191,9 +179,9 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(ADDRESS_FQN)) {
 
-            CsdlProperty address = new ElasticCsdlProperty().setName("address")
+            CsdlProperty address = new ElasticCsdlProperty().setName("address").setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-            CsdlProperty city = new ElasticCsdlProperty().setName("_city")
+            CsdlProperty city = new ElasticCsdlProperty().setName("_city").setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             CsdlPropertyRef cityPropertyRef = new CsdlPropertyRef();
@@ -214,7 +202,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(BOOK_FQN)) {
 
-            CsdlProperty title = new ElasticCsdlProperty().setName("title")
+            CsdlProperty title = new ElasticCsdlProperty().setName("title").setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(BOOK_TYPE);
@@ -228,7 +216,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(CHARACTER_FQN)) {
 
-            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+            CsdlProperty name = new ElasticCsdlProperty().setName("name").setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(CHARACTER_TYPE);

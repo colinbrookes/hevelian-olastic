@@ -1,27 +1,21 @@
 package com.hevelian.olastic.core.elastic;
 
-import java.util.List;
-import java.util.Set;
-
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
+import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
+import com.hevelian.olastic.core.elastic.queries.SearchQuery;
+import com.hevelian.olastic.core.exceptions.SearchException;
+import lombok.extern.log4j.Log4j2;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.search.MultiSearchRequestBuilder;
-import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchPhaseExecutionException;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import com.hevelian.olastic.core.elastic.pagination.Sort;
-import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
-import com.hevelian.olastic.core.elastic.queries.SearchQuery;
-import com.hevelian.olastic.core.exceptions.SearchException;
-
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Central point to retrieve the data from Elasticsearch.
@@ -159,7 +153,7 @@ public class ESClient {
             searchError = exception;
             throw new SearchException(searchError.getDetailedMessage());
         } finally {
-            log.debug(String.format("Executing query request:%n%s", request));
+            log.debug(String.format("Executing query request:%n%s", request.request()));
             if (response != null) {
                 log.debug(String.format("Query execution took: %s", response.getTook()));
             } else {
@@ -185,7 +179,7 @@ public class ESClient {
             searchError = exception;
             throw new SearchException(searchError.getDetailedMessage());
         } finally {
-            log.debug(String.format("Executing query request:%n%s", request));
+            log.debug(String.format("Executing query requests:%n%s", request.request().requests()));
             if (response == null) {
                 log.error("Failed to execute query: ", searchError);
             }
