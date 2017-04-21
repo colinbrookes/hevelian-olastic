@@ -1,17 +1,17 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-
 import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
 import static org.elasticsearch.index.query.QueryBuilders.wildcardQuery;
+
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
 
 /**
  * Handles method calls.
  *
  * @author Taras Kohut
+ * @contributor Ruslan Didyk
  */
 public class MethodMember extends BaseMember {
 
@@ -19,7 +19,10 @@ public class MethodMember extends BaseMember {
     public ExpressionResult contains(ExpressionMember left, ExpressionMember right) {
         PrimitiveMember primitive = (PrimitiveMember) left;
         LiteralMember literal = (LiteralMember) right;
-        return new ExpressionResult(matchQuery(primitive.getField(), literal.getValue()));
+        return new ExpressionResult(
+                wildcardQuery(addKeywordIfNeeded(primitive.getField(), primitive.getAnnotations()),
+                        ElasticConstants.WILDCARD_CHAR + literal.getValue()
+                                + ElasticConstants.WILDCARD_CHAR));
     }
 
     @Override
