@@ -1,16 +1,12 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
-import static com.hevelian.olastic.core.TestUtils.checkFilterEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterNotEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterParentEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterRangeQuery;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-
-import java.util.ArrayList;
-
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import com.hevelian.olastic.core.stub.TestProvider;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -24,13 +20,11 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hevelian.olastic.core.ElasticOData;
-import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
-import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-import com.hevelian.olastic.core.stub.TestProvider;
+import java.util.ArrayList;
+
+import static com.hevelian.olastic.core.TestUtils.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link ElasticSearchExpressionVisitor} class. These tests look more
@@ -223,6 +217,56 @@ public class ElasticSearchExpressionVisitorTest {
         JSONObject termValue = term.getJSONObject("_dimension.name");
         assertNotNull(termValue);
         assertEquals("_dimension", actualType);
+    }
+
+    @Test
+    public void visitMember_lambdaAnyByNestedComplexType_correctESQuery() throws Exception {
+        String rawODataPath = "/book";
+        String rawQueryPath = "$filter=info/pages/any(p:p/words/any(w:w eq 'w') and p/pageName eq 'page name')";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+
+        JSONObject queryObj = new JSONObject(query);
+        JSONObject rootObj = queryObj.getJSONObject("nested");
+        String pagesPath = (String)rootObj.get("path");
+        JSONObject pagesQueryObject = rootObj.getJSONObject("query");
+        JSONArray mustQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("must");
+        JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("term");
+        JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
+        String wordsTermValue = wordsTerm.getJSONObject("info.pages.words").getString("value");
+        String pageTermValue = pageNameTerm.getJSONObject("info.pages.pageName").getString("value");
+
+        assertEquals("info.pages", pagesPath);
+        assertEquals("w", wordsTermValue);
+        assertEquals("page name", pageTermValue);
+    }
+
+    @Test
+    public void visitMember_lambdaAnyByNestedComplexTypeAnalyzed_correctESQuery() throws Exception {
+        String rawODataPath = "/book";
+        String rawQueryPath = "$filter=info/pages/any(p:p/analyzedWords/any(w:w eq 'w') and p/analyzedPageName eq 'page name' or p/pageNumber eq 5)";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+
+        JSONObject queryObj = new JSONObject(query);
+        JSONObject rootObj = queryObj.getJSONObject("nested");
+        String pagesPath = (String)rootObj.get("path");
+        JSONObject pagesQueryObject = rootObj.getJSONObject("query");
+        JSONArray shouldQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("should");
+        JSONArray mustQueryObj = ((JSONObject)shouldQueryObj.get(0)).getJSONObject("bool").getJSONArray("must");
+        JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("term");
+        JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
+        JSONObject pageNumberTerm = ((JSONObject)shouldQueryObj.get(1)).getJSONObject("term");
+        String wordsTermValue = wordsTerm.getJSONObject("info.pages.analyzedWords.keyword").getString("value");
+        String pageTermValue = pageNameTerm.getJSONObject("info.pages.analyzedPageName.keyword").getString("value");
+        int pageNumberValue = pageNumberTerm.getJSONObject("info.pages.pageNumber").getInt("value");
+
+        assertEquals("info.pages", pagesPath);
+        assertEquals("w", wordsTermValue);
+        assertEquals("page name", pageTermValue);
+        assertEquals(5,  pageNumberValue);
     }
 
     @Test

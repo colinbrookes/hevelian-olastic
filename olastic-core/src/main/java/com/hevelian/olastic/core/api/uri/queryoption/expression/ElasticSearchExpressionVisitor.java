@@ -1,23 +1,19 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
-import java.util.List;
-
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MethodExpression;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MemberHandler;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MethodExpression;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.LiteralMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.MethodMember;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
-import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
-import org.apache.olingo.server.api.uri.queryoption.expression.Member;
-import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.queryoption.expression.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
@@ -26,7 +22,12 @@ import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented
  * filter expression.
  */
 public class ElasticSearchExpressionVisitor implements ExpressionVisitor<ExpressionMember> {
-
+    /** Storage for each collection property
+     * For example:
+     * $filter=info/pages/any(p:p/words/any(w:w eq 'word'))
+     * it will store "pages" and "words" resource
+     * **/
+    private HashMap <String, UriResource> collectionResourceCache = new HashMap<>();
     @Override
     public ExpressionMember visitBinaryOperator(BinaryOperatorKind operator, ExpressionMember left,
             ExpressionMember right) throws ExpressionVisitException, ODataApplicationException {
@@ -102,8 +103,12 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
     @Override
     public ExpressionMember visitMember(Member member)
             throws ExpressionVisitException, ODataApplicationException {
-        MemberHandler handler = new MemberHandler(member);
-        return handler.handle();
+        MemberHandler handler = new MemberHandler(member, this);
+        UriResource collectionResource = handler.getCollectionResource();
+        if (collectionResource != null) {
+            collectionResourceCache.put(handler.getPath(), collectionResource);
+        }
+        return handler.handle(Collections.unmodifiableMap(collectionResourceCache));
     }
 
     @Override
