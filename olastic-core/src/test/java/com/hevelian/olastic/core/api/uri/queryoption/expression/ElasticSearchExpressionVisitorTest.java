@@ -4,6 +4,7 @@ import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.ElasticServiceMetadata;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.stub.TestProvider;
 import org.apache.olingo.server.api.OData;
@@ -22,15 +23,15 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 import static com.hevelian.olastic.core.TestUtils.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests for {@link ElasticSearchExpressionVisitor} class.
- * These tests look more like integration ones, this is required
- * because in order to perform regular unit testing several olingo objects should be created manually, and this is relatively hard.
+ * Tests for {@link ElasticSearchExpressionVisitor} class. These tests look more
+ * like integration ones, this is required because in order to perform regular
+ * unit testing several olingo objects should be created manually, and this is
+ * relatively hard.
+ * 
  * @author Taras Kohut
  */
 public class ElasticSearchExpressionVisitorTest {
@@ -41,12 +42,11 @@ public class ElasticSearchExpressionVisitorTest {
     public void setUp() throws UriParserException, UriValidationException {
         defaultOData = ElasticOData.newInstance();
         defaultMetadata = defaultOData.createServiceMetadata(
-                new TestProvider(mock(MappingMetaDataProvider.class)),
-                new ArrayList<>());
+                new TestProvider(mock(MappingMetaDataProvider.class)), new ArrayList<>());
     }
 
     public static UriInfo buildUriInfo(ServiceMetadata metadata, OData odata, String rawODataPath,
-                                       String rawQueryPath) throws UriParserException, UriValidationException {
+            String rawQueryPath) throws UriParserException, UriValidationException {
         return new Parser(metadata.getEdm(), odata).parseUri(rawODataPath, rawQueryPath, null);
     }
 
@@ -55,8 +55,9 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=age gt 30";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
         checkFilterRangeQuery(query, "gt", "age", "30");
     }
 
@@ -65,8 +66,9 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=age ge 30";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
         checkFilterRangeQuery(query, "ge", "age", "30");
     }
 
@@ -75,8 +77,9 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=age lt 30";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
         checkFilterRangeQuery(query, "lt", "age", "30");
     }
 
@@ -85,8 +88,9 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=age le 30";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
         checkFilterRangeQuery(query, "le", "age", "30");
     }
 
@@ -95,8 +99,9 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=name eq '30'";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
         checkFilterEqualsQuery(query, "name", "'30'");
     }
 
@@ -105,8 +110,9 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=name ne '30'";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
         checkFilterNotEqualsQuery(query, "name", "'30'");
     }
 
@@ -115,21 +121,23 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=name eq '30' and age gt 30";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("bool");
         JSONArray mustArr = rootObj.getJSONArray("must");
-        JSONObject leftMatchAll = ((JSONObject)mustArr.get(0)).getJSONObject("term");
-        JSONObject rightMatchAll = ((JSONObject)mustArr.get(1)).getJSONObject("range");
+        JSONObject leftMatchAll = ((JSONObject) mustArr.get(0)).getJSONObject("term");
+        JSONObject rightMatchAll = ((JSONObject) mustArr.get(1)).getJSONObject("range");
         assertNotNull(leftMatchAll);
         assertNotNull(rightMatchAll);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void visitBinaryOperator_has_notImplementedException() throws Exception {
-       new ElasticSearchExpressionVisitor().visitBinaryOperator(BinaryOperatorKind.HAS, null, null);
+        new ElasticSearchExpressionVisitor().visitBinaryOperator(BinaryOperatorKind.HAS, null,
+                null);
     }
 
     @Test
@@ -137,14 +145,15 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=name eq '30' or age gt 30";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("bool");
         JSONArray mustArr = rootObj.getJSONArray("should");
-        JSONObject leftMatchAll = ((JSONObject)mustArr.get(0)).getJSONObject("term");
-        JSONObject rightMatchAll = ((JSONObject)mustArr.get(1)).getJSONObject("range");
+        JSONObject leftMatchAll = ((JSONObject) mustArr.get(0)).getJSONObject("term");
+        JSONObject rightMatchAll = ((JSONObject) mustArr.get(1)).getJSONObject("range");
         assertNotNull(leftMatchAll);
         assertNotNull(rightMatchAll);
     }
@@ -154,13 +163,14 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=not (name eq '30')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("bool");
         JSONArray mustArr = rootObj.getJSONArray("must_not");
-        JSONObject matchAllObj = ((JSONObject)mustArr.get(0)).getJSONObject("term");
+        JSONObject matchAllObj = ((JSONObject) mustArr.get(0)).getJSONObject("term");
         assertNotNull(matchAllObj);
     }
 
@@ -169,12 +179,13 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=book/any(b:b/title eq 'name')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("has_child");
-        String actualType = (String)rootObj.get("type");
+        String actualType = (String) rootObj.get("type");
         JSONObject queryObject = rootObj.getJSONObject("query");
         JSONObject matchAll = queryObject.getJSONObject("term");
         assertNotNull(matchAll);
@@ -194,12 +205,13 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=_dimension/any(d:d/name eq 'validity')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("nested");
-        String actualType = (String)rootObj.get("path");
+        String actualType = (String) rootObj.get("path");
         JSONObject queryObject = rootObj.getJSONObject("query");
         JSONObject term = queryObject.getJSONObject("term");
         JSONObject termValue = term.getJSONObject("_dimension.name");
@@ -262,13 +274,14 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=endswith(name,'on')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("wildcard");
         JSONObject queryObject = rootObj.getJSONObject("name.keyword");
-        String value = (String)queryObject.get("wildcard");
+        String value = (String) queryObject.get("wildcard");
         assertEquals("*on", value);
     }
 
@@ -277,29 +290,31 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=startswith(name,'j')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("prefix");
         JSONObject queryObject = rootObj.getJSONObject("name.keyword");
-        String value = (String)queryObject.get("value");
+        String value = (String) queryObject.get("value");
         assertEquals("j", value);
     }
 
     @Test
-     public void visitMethodCall_contains_CorrectEsQuery() throws Exception {
+    public void visitMethodCall_contains_CorrectEsQuery() throws Exception {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=contains(name,'j')";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
-        JSONObject rootObj = queryObj.getJSONObject("match");
-        JSONObject queryObject = rootObj.getJSONObject("name");
-        String value = (String)queryObject.get("query");
-        assertEquals("j", value);
+        JSONObject rootObj = queryObj.getJSONObject("wildcard");
+        JSONObject queryObject = rootObj.getJSONObject("name.keyword");
+        String value = (String) queryObject.get("wildcard");
+        assertEquals(ElasticConstants.WILDCARD_CHAR + "j" + ElasticConstants.WILDCARD_CHAR, value);
     }
 
     @Test(expected = ODataApplicationException.class)
@@ -315,13 +330,14 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/author";
         String rawQueryPath = "$filter=date(birthDate) eq 2016-02-14";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         JSONObject queryObj = new JSONObject(query);
         JSONObject rootObj = queryObj.getJSONObject("term");
         JSONObject queryObject = rootObj.getJSONObject("birthDate");
-        String value = (String)queryObject.get("value");
+        String value = (String) queryObject.get("value");
         assertEquals("2016-02-14", value);
     }
 
@@ -330,12 +346,12 @@ public class ElasticSearchExpressionVisitorTest {
         String rawODataPath = "/book";
         String rawQueryPath = "$filter=author/name eq 'Dawkins'";
         UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
 
         checkFilterParentEqualsQuery(query, "author", "name", "'Dawkins'");
     }
-
 
     @Test
     public void visitLambdaExpression_anyExpression_null() throws Exception {
