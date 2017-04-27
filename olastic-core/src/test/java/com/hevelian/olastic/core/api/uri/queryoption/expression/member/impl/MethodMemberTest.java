@@ -1,6 +1,8 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
@@ -16,6 +18,7 @@ import static org.junit.Assert.*;
 
 /**
  * Tests for {@link MethodMember} class.
+ * 
  * @author Taras Kohut
  */
 public class MethodMemberTest {
@@ -32,11 +35,12 @@ public class MethodMemberTest {
         ExpressionResult result = methodMember.contains(left, right);
 
         JSONObject queryObj = new JSONObject(result.getQueryBuilder().toString());
-        JSONObject rootObj = queryObj.getJSONObject("match");
-        String fieldName = field;
+        JSONObject rootObj = queryObj.getJSONObject("wildcard");
+        String fieldName = field + ".keyword";
         JSONObject valueObject = rootObj.getJSONObject(fieldName);
-        String actualValue = (String)valueObject.get("query");
-        assertEquals(value.substring(1,value.length()-1), actualValue);
+        String actualValue = (String) valueObject.get("wildcard");
+        assertEquals(ElasticConstants.WILDCARD_CHAR + value.substring(1, value.length() - 1)
+                + ElasticConstants.WILDCARD_CHAR, actualValue);
     }
 
     @Test
@@ -50,9 +54,9 @@ public class MethodMemberTest {
         JSONObject rootObj = queryObj.getJSONObject("prefix");
         String fieldName = field + ".keyword";
         JSONObject valueObject = rootObj.getJSONObject(fieldName);
-        String actualValue = (String)valueObject.get("value");
+        String actualValue = (String) valueObject.get("value");
 
-        assertEquals(value.substring(1,value.length()-1), actualValue);
+        assertEquals(value.substring(1, value.length() - 1), actualValue);
     }
 
     @Test
@@ -66,8 +70,8 @@ public class MethodMemberTest {
         JSONObject rootObj = queryObj.getJSONObject("wildcard");
         String fieldName = field + ".keyword";
         JSONObject valueObject = rootObj.getJSONObject(fieldName);
-        String actualValue = (String)valueObject.get("wildcard");
-        assertEquals('*' + value.substring(1,value.length()-1), actualValue);
+        String actualValue = (String) valueObject.get("wildcard");
+        assertEquals('*' + value.substring(1, value.length() - 1), actualValue);
     }
 
     @Test
