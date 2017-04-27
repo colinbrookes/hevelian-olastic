@@ -207,6 +207,55 @@ public class ElasticSearchExpressionVisitorTest {
         assertEquals("_dimension", actualType);
     }
 
+    @Test
+    public void visitMember_lambdaAnyByNestedComplexType_correctESQuery() throws Exception {
+        String rawODataPath = "/book";
+        String rawQueryPath = "$filter=info/pages/any(p:p/words/any(w:w eq 'w') and p/pageName eq 'page name')";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+
+        JSONObject queryObj = new JSONObject(query);
+        JSONObject rootObj = queryObj.getJSONObject("nested");
+        String pagesPath = (String)rootObj.get("path");
+        JSONObject pagesQueryObject = rootObj.getJSONObject("query");
+        JSONArray mustQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("must");
+        JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("term");
+        JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
+        String wordsTermValue = wordsTerm.getJSONObject("info.pages.words").getString("value");
+        String pageTermValue = pageNameTerm.getJSONObject("info.pages.pageName").getString("value");
+
+        assertEquals("info.pages", pagesPath);
+        assertEquals("w", wordsTermValue);
+        assertEquals("page name", pageTermValue);
+    }
+
+    @Test
+    public void visitMember_lambdaAnyByNestedComplexTypeAnalyzed_correctESQuery() throws Exception {
+        String rawODataPath = "/book";
+        String rawQueryPath = "$filter=info/pages/any(p:p/analyzedWords/any(w:w eq 'w') and p/analyzedPageName eq 'page name' or p/pageNumber eq 5)";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult)result).getQueryBuilder().toString();
+
+        JSONObject queryObj = new JSONObject(query);
+        JSONObject rootObj = queryObj.getJSONObject("nested");
+        String pagesPath = (String)rootObj.get("path");
+        JSONObject pagesQueryObject = rootObj.getJSONObject("query");
+        JSONArray shouldQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("should");
+        JSONArray mustQueryObj = ((JSONObject)shouldQueryObj.get(0)).getJSONObject("bool").getJSONArray("must");
+        JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("term");
+        JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
+        JSONObject pageNumberTerm = ((JSONObject)shouldQueryObj.get(1)).getJSONObject("term");
+        String wordsTermValue = wordsTerm.getJSONObject("info.pages.analyzedWords.keyword").getString("value");
+        String pageTermValue = pageNameTerm.getJSONObject("info.pages.analyzedPageName.keyword").getString("value");
+        int pageNumberValue = pageNumberTerm.getJSONObject("info.pages.pageNumber").getInt("value");
+
+        assertEquals("info.pages", pagesPath);
+        assertEquals("w", wordsTermValue);
+        assertEquals("page name", pageTermValue);
+        assertEquals(5,  pageNumberValue);
+    }
 
     @Test
     public void visitMethodCall_endsWith_CorrectEsQuery() throws Exception {

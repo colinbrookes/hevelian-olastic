@@ -25,6 +25,9 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             CONTAINER_NAME);
 
     public static final String DIMENSION_TYPE = "_dimension";
+    public static final String BOOK_INFO_TYPE = "info";
+    public static final String BOOK_PAGES_TYPE = "pages";
+    public static final String BOOK_WORDS_TYPE = "words";
 
     public static final String AUTHORS_INDEX = "authors";
     public static final String AUTHOR_TYPE = "author";
@@ -34,6 +37,15 @@ public class TestProvider extends ElasticCsdlEdmProvider {
 
     public static final FullQualifiedName DIMENSION_FQN = new FullQualifiedName(NAMESPACE,
             DIMENSION_TYPE);
+
+    public static final FullQualifiedName BOOK_INFO_FQN = new FullQualifiedName(NAMESPACE,
+            BOOK_INFO_TYPE);
+
+    public static final FullQualifiedName BOOK_PAGES_FQN = new FullQualifiedName(NAMESPACE,
+            BOOK_PAGES_TYPE);
+
+    public static final FullQualifiedName BOOK_WORDS_FQN = new FullQualifiedName(NAMESPACE,
+            BOOK_WORDS_TYPE);
 
     public static final FullQualifiedName ADDRESS_FQN = new FullQualifiedName(NAMESPACE,
             ADDRESS_TYPE);
@@ -204,10 +216,12 @@ public class TestProvider extends ElasticCsdlEdmProvider {
 
             CsdlProperty title = new ElasticCsdlProperty().setName("title").setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty info = new ElasticCsdlProperty().setName("info")
+                    .setType(BOOK_INFO_FQN);
 
             entityType.setName(BOOK_TYPE);
             entityType.setEType(BOOK_TYPE);
-            entityType.setProperties(Arrays.asList(id, title, dimensionProperty));
+            entityType.setProperties(Arrays.asList(id, title, dimensionProperty, info));
             entityType.setKey(Collections.singletonList(propertyRef));
 
             entityType
@@ -288,6 +302,47 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             complexType.setProperties(complexTypeProperties);
             return complexType;
         }
+        if (complexTypeName.equals(BOOK_INFO_FQN)) {
+            ElasticCsdlComplexType complexType = new ElasticCsdlComplexType();
+            List<CsdlProperty> complexTypeProperties = new ArrayList<>();
+            CsdlProperty pages = new ElasticCsdlProperty().setName("pages")
+                    .setType(BOOK_PAGES_FQN)
+                    .setCollection(true);
+            complexTypeProperties.add(pages);
+            complexType.setName(BOOK_INFO_TYPE);
+            complexType.setENestedType(BOOK_INFO_TYPE);
+            complexType.setProperties(complexTypeProperties);
+            return complexType;
+        }
+
+        if (complexTypeName.equals(BOOK_PAGES_FQN)) {
+            ElasticCsdlComplexType complexType = new ElasticCsdlComplexType();
+            List<CsdlProperty> complexTypeProperties = new ArrayList<>();
+            CsdlProperty pageNumber = new ElasticCsdlProperty().setName("pageNumber")
+                    .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+            CsdlProperty pageName = new ElasticCsdlProperty().setName("pageName")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty analyzedPageName = new ElasticCsdlProperty().setName("analyzedPageName")
+                    .setAnnotations(analyzedAnnotations)
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+            CsdlProperty words = new ElasticCsdlProperty().setName("words")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                    .setCollection(true);
+            CsdlProperty analyzedWords = new ElasticCsdlProperty().setName("analyzedWords")
+                    .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                    .setAnnotations(analyzedAnnotations)
+                    .setCollection(true);
+            complexTypeProperties.add(pageNumber);
+            complexTypeProperties.add(pageName);
+            complexTypeProperties.add(analyzedPageName);
+            complexTypeProperties.add(words);
+            complexTypeProperties.add(analyzedWords);
+            complexType.setName(BOOK_PAGES_TYPE);
+            complexType.setENestedType(BOOK_PAGES_TYPE);
+            complexType.setProperties(complexTypeProperties);
+            return complexType;
+        }
+
         return null;
     }
 
