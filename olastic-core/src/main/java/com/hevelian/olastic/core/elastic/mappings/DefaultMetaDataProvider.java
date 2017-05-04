@@ -32,12 +32,13 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
         this.client = client;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ImmutableOpenMap<String, MappingMetaData> getAllMappings(String index) {
         Object mapping = cache.get(makeKey(index));
         if (mapping == null) {
-            mapping = new GetMappingsRequestBuilder(getClient(), GetMappingsAction.INSTANCE, index).get()
-                    .mappings().get(index);
+            mapping = new GetMappingsRequestBuilder(getClient(), GetMappingsAction.INSTANCE, index)
+                    .get().mappings().get(index);
             cache.put(makeKey(index), mapping);
         }
         return (ImmutableOpenMap<String, MappingMetaData>) mapping;
@@ -47,13 +48,13 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
     public MappingMetaData getMappingForType(String index, String type) {
         Object mapping = cache.get(makeKey(index, type));
         if (mapping == null) {
-            mapping = getClient().admin().indices()
-                    .prepareGetMappings(index).addTypes(type).execute().actionGet();
+            mapping = getClient().admin().indices().prepareGetMappings(index).addTypes(type)
+                    .execute().actionGet();
             cache.put(makeKey(index, type), mapping);
         }
 
-        return ((GetMappingsResponse)(mapping)).getMappings().isEmpty() ? null
-                :((GetMappingsResponse)(mapping)).getMappings().get(index).get(type);
+        return ((GetMappingsResponse) (mapping)).getMappings().isEmpty() ? null
+                : ((GetMappingsResponse) (mapping)).getMappings().get(index).get(type);
     }
 
     @Override
@@ -61,8 +62,8 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
             String field) {
         Object mappingss = cache.get(makeKey(index, field));
         if (mappingss == null) {
-            mappingss =  getClient().admin().indices()
-                    .prepareGetMappings(index).execute().actionGet();
+            mappingss = getClient().admin().indices().prepareGetMappings(index).execute()
+                    .actionGet();
             cache.put(makeKey(index, field), mappingss);
         }
 
@@ -71,7 +72,8 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
         // https://github.com/elastic/elasticsearch/issues/22209
         // revert this when the issue is fixed
         try {
-            Object[] mappings = ((GetMappingsResponse)mappingss).getMappings().get(index).values().toArray();
+            Object[] mappings = ((GetMappingsResponse) mappingss).getMappings().get(index).values()
+                    .toArray();
             for (Object mapping : mappings) {
                 MappingMetaData mappingMetaData = (MappingMetaData) mapping;
                 String type = mappingMetaData.type();
@@ -94,13 +96,12 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
     public FieldMappingMetaData getMappingForField(String index, String type, String field) {
         Object mapping = cache.get(makeKey(index, type, field));
         if (mapping == null) {
-            mapping = getClient().admin().indices()
-                    .prepareGetFieldMappings(index).setTypes(type).setFields(field).execute()
-                    .actionGet();
+            mapping = getClient().admin().indices().prepareGetFieldMappings(index).setTypes(type)
+                    .setFields(field).execute().actionGet();
             cache.put(makeKey(index, type, field), mapping);
         }
 
-        return ((GetFieldMappingsResponse)mapping).mappings().get(index).get(type).get(field);
+        return ((GetFieldMappingsResponse) mapping).mappings().get(index).get(type).get(field);
     }
 
     public Client getClient() {
