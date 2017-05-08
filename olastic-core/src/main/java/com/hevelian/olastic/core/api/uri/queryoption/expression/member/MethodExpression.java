@@ -13,8 +13,8 @@ public interface MethodExpression {
      *
      * @param left  method  parameter - column
      * @param right method parameter - literal
-     * @return
-     * @throws ODataApplicationException
+     * @return result of the expression
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember contains(ExpressionMember left, ExpressionMember right) throws ODataApplicationException;
 
@@ -23,8 +23,8 @@ public interface MethodExpression {
      *
      * @param left  method  parameter - column
      * @param right method parameter - literal
-     * @return
-     * @throws ODataApplicationException
+     * @return result of the expression
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember startsWith(ExpressionMember left, ExpressionMember right) throws ODataApplicationException;
     /**
@@ -32,8 +32,8 @@ public interface MethodExpression {
      *
      * @param left  method  parameter - column
      * @param right method parameter - literal
-     * @return
-     * @throws ODataApplicationException
+     * @return result of the expression
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember endsWith(ExpressionMember left, ExpressionMember right) throws ODataApplicationException;
 
@@ -41,8 +41,8 @@ public interface MethodExpression {
      * Converts date time offset to date.
      *
      * @param expressionMember date column
-     * @return
-     * @throws ODataApplicationException
+     * @return result of the expression
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember date(ExpressionMember expressionMember) throws ODataApplicationException;
 }

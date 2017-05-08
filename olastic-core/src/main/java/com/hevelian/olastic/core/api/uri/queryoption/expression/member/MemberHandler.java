@@ -1,48 +1,30 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member;
 
-import static com.hevelian.olastic.core.elastic.ElasticConstants.NESTED_PATH_SEPARATOR;
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.*;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import com.hevelian.olastic.core.edm.ElasticEdmProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.*;
+import org.apache.olingo.server.api.uri.queryoption.expression.*;
+import org.apache.olingo.server.core.uri.UriInfoImpl;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.commons.api.edm.EdmProperty;
-import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceComplexProperty;
-import org.apache.olingo.server.api.uri.UriResourceKind;
-import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
-import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
-import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
-import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.UriResourcePartTyped;
-import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
-import org.apache.olingo.server.api.uri.UriResourceProperty;
-import org.apache.olingo.server.api.uri.queryoption.expression.Binary;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
-import org.apache.olingo.server.api.uri.queryoption.expression.Member;
-import org.apache.olingo.server.core.uri.UriInfoImpl;
-
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ChildMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.NestedMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ParentMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
-import com.hevelian.olastic.core.edm.ElasticEdmProperty;
+import static com.hevelian.olastic.core.elastic.ElasticConstants.NESTED_PATH_SEPARATOR;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
  * Processes raw olingo expression member data.
  * 
  * @author Taras Kohut
- * @contributor rdidyk
+ * @author rdidyk
  */
 public class MemberHandler {
 
@@ -66,6 +48,8 @@ public class MemberHandler {
      *
      * @param member
      *            raw olingo expression member
+     * @param visitor
+     *            visitor instance
      */
     public MemberHandler(Member member, ExpressionVisitor<?> visitor) {
         this.visitor = visitor;
@@ -84,8 +68,8 @@ public class MemberHandler {
      *            cache with parent members collection resources. Used for
      *            nested lambdas
      * @return expression member
-     * @throws ODataApplicationException
-     * @throws ExpressionVisitException
+     * @throws ODataApplicationException OData app exception
+     * @throws ExpressionVisitException expression visitor exception
      */
     public ExpressionMember handle(Map<String, UriResource> collectionResourceCache)
             throws ODataApplicationException, ExpressionVisitException {

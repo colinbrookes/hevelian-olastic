@@ -70,7 +70,7 @@ public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
      * @param uriInfo
      *            URI info for request
      * @return created {@link SearchRequest} instance
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException OData app exception
      */
     protected abstract ESRequest createRequest(UriInfo uriInfo) throws ODataApplicationException;
 

@@ -1,15 +1,15 @@
 package com.hevelian.olastic.core.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
 import org.apache.olingo.server.api.uri.queryoption.apply.Filter;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
 import org.apache.olingo.server.api.uri.queryoption.apply.Search;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Utility class with methods to work with {@link ApplyOption} system query.
@@ -73,6 +73,7 @@ public final class ApplyOptionUtils {
      *            predicate for filter
      * @param clazz
      *            item class
+     * @param <T> type of item
      * @return list of items math to predicate and class
      */
     public static <T> List<T> getItems(ApplyOption applyOption, Predicate<ApplyItem> predicate,

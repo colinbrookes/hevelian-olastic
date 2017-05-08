@@ -21,6 +21,7 @@ public abstract class SingleRequestCreator extends RequestCreator {
 
     /**
      * Constructor to initialize ES query builder.
+     * @param queryBuilder Es query builder instance
      */
     public SingleRequestCreator(ESQueryBuilder<?> queryBuilder) {
         super(queryBuilder);

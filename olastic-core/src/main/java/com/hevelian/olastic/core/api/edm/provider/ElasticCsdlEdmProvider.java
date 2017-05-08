@@ -31,7 +31,7 @@ import java.util.List;
  * documents based on the Elasticsearch mappings.
  *
  * @author yuflyud
- * @contributor rdidyk
+ * @author rdidyk
  */
 public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     private AnnotationProvider annotationProvider;
@@ -128,6 +128,10 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * mappings. <br>
      * If no 'id' property found in mappings then the 'id' is added and used as
      * the OData key property.
+     * @param index ES index
+     * @param type ES type
+     * @return entity type definition
+     * @throws ODataException odata exception
      */
     public ElasticCsdlEntityType createEntityType(String index, String type) throws ODataException {
         MappingMetaData typeMappings = mappingMetaDataProvider.getMappingForType(index, type);
@@ -164,6 +168,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param type ES type.
      * @param metaData ES mapping metadata object.
      * @return list of properties
+     * @throws ODataException odata exception
      */
     protected List<CsdlProperty> getProperties(String index, String type, MappingMetaData metaData)
             throws ODataException {
@@ -319,6 +324,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param index
      *            schema index name
      * @return Entity Container
+     * @throws ODataException odata exception
      */
     protected CsdlEntityContainer getEntityContainerForSchema(String index) throws ODataException {
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();

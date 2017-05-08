@@ -22,9 +22,9 @@ import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getGroupByItems;
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
- * Custom Elastic processor for handling all request to retrieve data from
+ * <p>Custom Elastic processor for handling all request to retrieve data from
  * collection of entities.
- * <p/>
+ * </p>
  * Supported items for now:
  * 1. one 'groupby' for multiple fields;
  * 2. metrics aggregations;

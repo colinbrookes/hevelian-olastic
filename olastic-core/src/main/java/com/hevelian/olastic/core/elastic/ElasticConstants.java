@@ -4,8 +4,8 @@ package com.hevelian.olastic.core.elastic;
  * Elasticsearch constants.
  * 
  * @author yuflyud
- * @contributor rdidyk
- * @contributor Taras Kohut
+ * @author rdidyk
+ * @author Taras Kohut
  */
 public final class ElasticConstants {
 

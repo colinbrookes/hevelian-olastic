@@ -34,6 +34,8 @@ public interface NestedTypeMapper {
      * 
      * @param index
      *            name of the index
+     * @param type
+     *            name of the type
      * @param field
      *            name of the nested object within the index
      * @return the corresponding complex type
