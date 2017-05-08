@@ -3,9 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hevelian.olastic</groupId>
 	<artifactId>olastic-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>OData-Elasticseatch Parent Pom</name>
+	<version>1.2.0-SNAPSHOT</version>
+	<name>OData-Elasticsearch Parent Pom</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library - parent pom</description>
+	<url>https://github.com/Hevelian/hevelian-olastic</url>
 	<packaging>pom</packaging>
 
 	<!-- TODO use global parent pom for all hevelian products -->
@@ -20,10 +21,43 @@
 		<module>olastic-web</module>
 	</modules>
 
+	<scm>
+		<url>https://github.com/Hevelian/hevelian-olastic</url>
+	</scm>
+
+	<organization>
+		<name>Hevelian</name>
+	</organization>
+	<inceptionYear>2012</inceptionYear>
+
+	<developers>
+		<developer>
+			<name>Colin Brookes</name>
+		</developer>
+		<developer>
+			<name>Yuriy Flyud</name>
+		</developer>
+
+		<developer>
+			<name>Ruslan Didyk</name>
+		</developer>
+
+		<developer>
+			<name>Taras Kohut</name>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+		</license>
+	</licenses>
+
 	<distributionManagement>
 		<repository>
 			<id>release-repository</id>
-			<url>https://oss.sonatype.org/content/repositories/releases</url>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshot-repository</id>
@@ -73,6 +107,53 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+
+				<configuration>
+					<useAgent>true</useAgent>
+					<gpgArguments>
+						<gpgArgument>--no-tty</gpgArgument>
+					</gpgArguments>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
