@@ -10,6 +10,32 @@
 
 	<!-- TODO use global parent pom for all hevelian products -->
 
+	<scm>
+		<url>https://github.com/Hevelian/hevelian-olastic</url>
+	</scm>
+	
+	<organization>
+		<name>Hevelian</name>
+	</organization>
+	<inceptionYear>2012</inceptionYear>
+
+	<developers>
+		<developer>
+			<name>Colin Brookes</name>
+		</developer>
+		<developer>
+			<name>Yuriy Flyud</name>
+		</developer>
+	</developers>
+
+	<!--######### DISTRIBUTION INFO ######### -->
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+		</license>
+	</licenses>
+
 	<properties>
 		<olingo.version>4.3.0</olingo.version>
 		<elasticsearch.version>5.2.2</elasticsearch.version>
@@ -23,7 +49,7 @@
 	<distributionManagement>
 		<repository>
 			<id>release-repository</id>
-			<url>https://oss.sonatype.org/content/repositories/releases</url>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshot-repository</id>
@@ -60,7 +86,7 @@
 				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>snapshot-repository</serverId>
+					<serverId>release-repository</serverId>
 					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
@@ -74,6 +100,53 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				
+				<configuration>
+					<useAgent>true</useAgent>
+					<gpgArguments>
+						<gpgArgument>--no-tty</gpgArgument>
+					</gpgArguments>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>			
 		</plugins>
 	</build>
 
