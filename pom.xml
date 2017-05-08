@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hevelian.olastic</groupId>
 	<artifactId>olastic-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.1.0-RELEASE</version>
 	<name>OData-Elasticseatch Parent Pom</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library - parent pom</description>
 	<packaging>pom</packaging>
