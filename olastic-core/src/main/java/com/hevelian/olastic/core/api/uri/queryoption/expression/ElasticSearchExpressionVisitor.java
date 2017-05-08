@@ -22,12 +22,13 @@ import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented
  * filter expression.
  */
 public class ElasticSearchExpressionVisitor implements ExpressionVisitor<ExpressionMember> {
-    /** Storage for each collection property
-     * For example:
-     * $filter=info/pages/any(p:p/words/any(w:w eq 'word'))
-     * it will store "pages" and "words" resource
-     * **/
-    private HashMap <String, UriResource> collectionResourceCache = new HashMap<>();
+    /**
+     * Storage for each collection property For example:
+     * $filter=info/pages/any(p:p/words/any(w:w eq 'word')) it will store
+     * "pages" and "words" resource.
+     */
+    private HashMap<String, UriResource> collectionResourceCache = new HashMap<>();
+
     @Override
     public ExpressionMember visitBinaryOperator(BinaryOperatorKind operator, ExpressionMember left,
             ExpressionMember right) throws ExpressionVisitException, ODataApplicationException {

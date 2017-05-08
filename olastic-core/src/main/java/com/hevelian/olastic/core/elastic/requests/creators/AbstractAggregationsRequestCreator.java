@@ -1,8 +1,12 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
-import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggQuery;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -13,12 +17,8 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.hevelian.olastic.core.elastic.utils.AggregationUtils.getAggQuery;
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 
 /**
  * Class with common logic for all request creators with aggregations queries.
@@ -74,8 +74,8 @@ public abstract class AbstractAggregationsRequestCreator extends SingleRequestCr
                 String alias = aggExpression.getAlias();
                 Expression expr = aggExpression.getExpression();
                 if (expr != null) {
-                    String field = ((PrimitiveMember) expr
-                            .accept(new ElasticSearchExpressionVisitor())).getField();
+                    String field = ((PrimitiveMember) expr.accept(getExpressionVisitor()))
+                            .getField();
                     aggs.add(getAggQuery(aggExpression.getStandardMethod(), alias, field));
                     metricAliases.add(alias);
                 } else {
