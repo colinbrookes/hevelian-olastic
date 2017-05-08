@@ -19,7 +19,7 @@ import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented
  * entity.
  * 
  * @author Taras Kohut
- * @contributor rdidyk
+ * @author rdidyk
  */
 public class EntityProcessorHandler implements ESProcessor, EntityProcessor {
 

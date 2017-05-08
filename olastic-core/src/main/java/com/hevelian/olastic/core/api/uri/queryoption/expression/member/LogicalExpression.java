@@ -14,7 +14,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember and(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -24,7 +24,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember or(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -32,7 +32,7 @@ public interface LogicalExpression {
      * Performs logical not operation on the expression member
      * 
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember not() throws ODataApplicationException;
 
@@ -42,7 +42,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember eq(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -52,7 +52,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember ne(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -62,7 +62,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember ge(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -72,7 +72,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember gt(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -82,7 +82,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember le(ExpressionMember expressionMember) throws ODataApplicationException;
 
@@ -92,7 +92,7 @@ public interface LogicalExpression {
      * @param expressionMember
      *            member to apply
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember lt(ExpressionMember expressionMember) throws ODataApplicationException;
 

@@ -1,27 +1,21 @@
 package com.hevelian.olastic.core.common;
 
-import static com.hevelian.olastic.core.elastic.ElasticConstants.FIELD_DATATYPE_PROPERTY;
-import static com.hevelian.olastic.core.elastic.ElasticConstants.PROPERTIES_PROPERTY;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.ex.ODataException;
-import org.elasticsearch.index.mapper.ObjectMapper;
-
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexProperty;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.index.mapper.ObjectMapper;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.hevelian.olastic.core.elastic.ElasticConstants.FIELD_DATATYPE_PROPERTY;
+import static com.hevelian.olastic.core.elastic.ElasticConstants.PROPERTIES_PROPERTY;
 
 /**
  * Class for mapping Elasticsearch nested types to Edm complex types.
@@ -150,7 +144,7 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
      *            type name
      * @param field
      *            nested field name
-     * @return
+     * @return name of complex type
      */
     public abstract String getComplexTypeName(String type, String field);
 

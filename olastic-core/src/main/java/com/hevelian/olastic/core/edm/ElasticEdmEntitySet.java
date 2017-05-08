@@ -1,17 +1,11 @@
 package com.hevelian.olastic.core.edm;
 
-import java.util.Iterator;
-
-import org.apache.olingo.commons.api.edm.EdmBindingTarget;
-import org.apache.olingo.commons.api.edm.EdmEntityContainer;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.edm.EdmException;
-import org.apache.olingo.commons.api.edm.EdmNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
+import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.core.edm.EdmEntitySetImpl;
 import org.apache.olingo.commons.core.edm.Target;
 
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
+import java.util.Iterator;
 
 /**
  * Custom implementation of {@link EdmEntityType}.
@@ -59,7 +53,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
     /**
      * Sets index to entity set.
      * 
-     * @param eIndex
+     * @param eIndex ES index
      */
     public void setEIndex(String eIndex) {
         csdlEntitySet.setEIndex(eIndex);
@@ -68,7 +62,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
     /**
      * Sets type to entity set.
      * 
-     * @param eType
+     * @param eType ES type
      */
     public void setEType(String eType) {
         csdlEntitySet.setEType(eType);

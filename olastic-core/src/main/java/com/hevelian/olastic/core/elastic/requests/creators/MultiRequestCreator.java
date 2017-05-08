@@ -23,6 +23,7 @@ public abstract class MultiRequestCreator extends RequestCreator {
 
     /**
      * Constructor to initialize ES query builder.
+     * @param queryBuilder Es query builder instance
      */
     public MultiRequestCreator(ESQueryBuilder<?> queryBuilder) {
         super(queryBuilder);

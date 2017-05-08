@@ -15,7 +15,7 @@ import java.util.Locale;
  * Contains utility methods.
  * 
  * @author Taras Kohut
- * @contributor rdidyk
+ * @author rdidyk
  */
 public final class ProcessorUtils {
     private ProcessorUtils() {
@@ -28,7 +28,7 @@ public final class ProcessorUtils {
      *            name of entity set
      * @param id
      *            odata id string
-     * @return
+     * @return id URI
      */
     public static URI createId(String entitySetName, Object id) {
         try {
@@ -51,6 +51,8 @@ public final class ProcessorUtils {
      * 
      * @param msg
      *            message to show
+     * @param <T> type
+     * @return just for the signature
      * @throws ODataApplicationException
      *             created exception
      */
@@ -62,7 +64,8 @@ public final class ProcessorUtils {
     /**
      * Method throws exception with HTTP.501 status code and with default
      * message.
-     *
+     * @param <T> type
+     * @return just for the signature
      * @throws ODataApplicationException
      *             created exception
      */

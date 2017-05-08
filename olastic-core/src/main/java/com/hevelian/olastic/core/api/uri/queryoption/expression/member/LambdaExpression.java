@@ -13,14 +13,14 @@ public interface LambdaExpression {
      * Performs any lambda operation on the expression member
      * 
      * @return result of the expression
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember any() throws ODataApplicationException;
 
     /**
      * Performs all lambda operation on the expression member
-     * 
-     * @throws ODataApplicationException
+     * @return result of the expression
+     * @throws ODataApplicationException odata app exception
      */
     ExpressionMember all() throws ODataApplicationException;
 }

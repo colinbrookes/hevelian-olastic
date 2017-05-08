@@ -15,9 +15,9 @@ public class Pagination {
     private List<Sort> orderBy;
     /**
      * Initializes pagination with all the data
-     * @param top
-     * @param skip
-     * @param orderBy
+     * @param top top count
+     * @param skip skip count
+     * @param orderBy order by field
      */
     public Pagination(int top, int skip,  List<Sort> orderBy) {
         this.top = top;

@@ -1,17 +1,17 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
+
 import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
 import static org.elasticsearch.index.query.QueryBuilders.wildcardQuery;
-
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.elastic.ElasticConstants;
 
 /**
  * Handles method calls.
  *
  * @author Taras Kohut
- * @contributor Ruslan Didyk
+ * @author Ruslan Didyk
  */
 public class MethodMember extends BaseMember {
 

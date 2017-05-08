@@ -27,7 +27,7 @@ public interface ESReadProcessor extends ESProcessor {
      *            requested content type after content negotiation
      * @throws ODataApplicationException
      *             if the service implementation encounters a failure
-     * @throws ODataLibraryException
+     * @throws ODataLibraryException OData library exception
      */
     void read(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType responseFormat) throws ODataApplicationException, ODataLibraryException;

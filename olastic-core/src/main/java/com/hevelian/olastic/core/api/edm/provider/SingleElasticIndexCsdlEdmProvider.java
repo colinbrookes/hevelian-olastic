@@ -1,11 +1,11 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.hevelian.olastic.core.common.NestedTypeMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Implementation of {@link ElasticCsdlEdmProvider} to work with Elasticsearch
@@ -32,7 +32,7 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
     /**
      * Constructor to initialize mapping metadata provider, single index to work
-     * with and {@link IElasticToCsdlMapper} implementation.
+     * with and {@link ElasticToCsdlMapper} implementation.
      * 
      * @param metaDataProvider
      *            mapping meta data provider
@@ -53,14 +53,14 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
      * 
      * @param metaDataProvider
      *            mapping meta data provider
-     * @param indices
-     *            indices names
+     * @param index
+     *            ES index
      * @param nestedTypeMapper
      *            nested type mapper
      */
     public SingleElasticIndexCsdlEdmProvider(MappingMetaDataProvider metaDataProvider, String index,
-            NestedTypeMapper NestedTypeMapper) {
-        super(metaDataProvider, NestedTypeMapper);
+            NestedTypeMapper nestedTypeMapper) {
+        super(metaDataProvider, nestedTypeMapper);
         this.index = index;
     }
 

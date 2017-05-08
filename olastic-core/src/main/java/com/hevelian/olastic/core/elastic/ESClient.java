@@ -85,7 +85,7 @@ public class ESClient {
 
     /**
      * Execute query request with filter and aggregations.
-     *
+     * @param queries list of queries to execute
      * @return ES search response
      */
     public MultiSearchResponse executeRequest(List<SearchQuery> queries) {
@@ -114,7 +114,7 @@ public class ESClient {
 
     /**
      * Execute query request with filter and aggregations.
-     * 
+     * @param query search query
      * @return ES search response
      */
     public SearchResponse executeRequest(SearchQuery query) {

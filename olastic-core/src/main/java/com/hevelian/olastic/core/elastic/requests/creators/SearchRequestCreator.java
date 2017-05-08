@@ -63,7 +63,7 @@ public class SearchRequestCreator extends SingleRequestCreator {
 
     /**
      * Returns the list of fields from URL.
-     *
+     * @param uriInfo uri info
      * @return fields fields from URL
      */
     protected List<String> getSelectList(UriInfo uriInfo) {

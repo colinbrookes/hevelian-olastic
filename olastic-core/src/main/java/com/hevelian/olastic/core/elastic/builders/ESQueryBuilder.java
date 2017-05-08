@@ -1,26 +1,20 @@
 package com.hevelian.olastic.core.elastic.builders;
 
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriParameter;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.apache.olingo.server.api.uri.UriResourceKind;
-import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.UriResourcePartTyped;
+import org.apache.olingo.server.api.uri.*;
 import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
  * Non-final builder class to create to Elasticsearch with possibility to
@@ -52,6 +46,7 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
      *            current segment
      * @param nextSegment
      *            next segment
+     * @return casted queryBuilder
      * @throws ODataApplicationException
      *             if any error occurred
      */
@@ -85,6 +80,7 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
      * @param segment
      *            uri resource part
      * @return ids list
+     * @throws ODataApplicationException odata app exception
      */
     protected List<String> collectIds(UriResource segment) throws ODataApplicationException {
         List<UriParameter> keyPredicates;

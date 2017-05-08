@@ -1,14 +1,10 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.hevelian.olastic.core.common.NestedTypeMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+
+import java.util.*;
 
 /**
  * Implementation of {@link ElasticCsdlEdmProvider} to work with Elasticsearch
@@ -70,7 +66,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
     /**
      * Constructor to initialize mapping metadata provider, multiple indices to
-     * work with, {@link IElasticToCsdlMapper} and {@link NestedTypeMapper}
+     * work with, {@link ElasticToCsdlMapper} and {@link NestedTypeMapper}
      * implementations.
      * 
      * @param metaDataProvider
