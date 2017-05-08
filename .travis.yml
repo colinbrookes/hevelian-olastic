@@ -1,11 +1,24 @@
 language: java
+
 jdk:
   - oraclejdk8
-  
-before_install:
-  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
-after_success:
-  - echo "<settings><servers><server><id>snapshot-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server><server><id>snapshot-repository</id><username>\${env.OSS_USERNAME}</username><password>\${env.OSS_PASSWORD}</password></server></servers><profiles><profile><id>snapshot-repository</id><activation><activeByDefault>true</activeByDefault></activation><properties><gpg.executable>\${env.GPG_EXECUTABLE}</gpg.executable><gpg.passphrase>\${env.GPG_PASSPHRASE}</gpg.passphrase></properties></profile></profiles></settings>" > ~/travis-settings.xml
-  - mvn deploy --settings ~/travis-settings.xml
+script: mvn --settings .travis/settings.xml clean  verify
+
+deploy:
+  -
+    provider: script
+    script: .travis/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: Hevelian/hevelian-olastic
+      branch: master
+      jdk: oraclejdk8
+  -
+    provider: script
+    script: .travis/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: Hevelian/hevelian-olastic
+      tags: true
+      jdk: oraclejdk8

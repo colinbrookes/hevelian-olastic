@@ -54,11 +54,11 @@
 
 	<distributionManagement>
 		<repository>
-			<id>release-repository</id>
+			<id>ossrh</id>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshot-repository</id>
+			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
@@ -92,7 +92,7 @@
 				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>snapshot-repository</serverId>
+					<serverId>ossrh</serverId>
 					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
@@ -139,9 +139,6 @@
 
 				<configuration>
 					<useAgent>true</useAgent>
-					<gpgArguments>
-						<gpgArgument>--no-tty</gpgArgument>
-					</gpgArguments>
 				</configuration>
 				<executions>
 					<execution>
