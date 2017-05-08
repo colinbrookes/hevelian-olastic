@@ -12,12 +12,11 @@ then
         shred -v ~/.gnupg/*
         rm -rf ~/.gnupg
     fi
-
-    source .travis/gpg.sh
-
 else
     echo "not on a tag -> keep snapshot version in pom.xml"
 fi
+
+source .travis/gpg.sh
 mvn clean deploy --settings .travis/settings.xml -DskipTests=true --batch-mode --update-snapshots
 if [ ! -z "$TRAVIS" ]; then
         shred -v ~/.gnupg/*
