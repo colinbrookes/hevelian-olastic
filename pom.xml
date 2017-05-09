@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hevelian.olastic</groupId>
 	<artifactId>olastic-parent</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>OData-Elasticsearch Parent Pom</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library - parent pom</description>
 	<url>https://github.com/Hevelian/hevelian-olastic</url>
@@ -54,11 +54,11 @@
 
 	<distributionManagement>
 		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+			<id>release-repository</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>ossrh</id>
+			<id>snapshot-repository</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
@@ -106,7 +106,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>2.2.1</version>
@@ -149,7 +149,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 

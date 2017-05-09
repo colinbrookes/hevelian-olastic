@@ -28,20 +28,17 @@ import java.util.Set;
  * Elasticsearch and exposes its mappings and data through OData interface.
  *
  * @author yuflyud
- * @author rdidyk
+ * @contributor rdidyk
  */
 public class ODataServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7048611704658443045L;
 
-    private Client client;
-    private Set<String> indices;
+    protected ESConfig config;
 
     @Override
     public void init() throws ServletException {
-        ESConfig config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
-        client = config.getClient();
-        indices = config.getIndices();
+        config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
     }
 
     @Override
@@ -76,7 +73,7 @@ public class ODataServlet extends HttpServlet {
      * @return provider instance
      */
     protected ElasticCsdlEdmProvider createEdmProvider() {
-        return new MultyElasticIndexCsdlEdmProvider(createMetaDataProvider(), indices);
+        return new MultyElasticIndexCsdlEdmProvider(createMetaDataProvider(), getIndices());
     }
 
     /**
@@ -85,7 +82,7 @@ public class ODataServlet extends HttpServlet {
      * @return provider instance
      */
     protected MappingMetaDataProvider createMetaDataProvider() {
-        return new DefaultMetaDataProvider(client);
+        return new DefaultMetaDataProvider(getClient());
     }
 
     /**
@@ -102,10 +99,10 @@ public class ODataServlet extends HttpServlet {
     }
 
     public Client getClient() {
-        return client;
+        return config.getClient();
     }
 
     public Set<String> getIndices() {
-        return indices;
+        return config.getIndices();
     }
 }

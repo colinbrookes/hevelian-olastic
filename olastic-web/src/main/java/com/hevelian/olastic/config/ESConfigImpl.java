@@ -6,12 +6,14 @@ import java.util.Set;
 
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import com.hevelian.olastic.core.elastic.ESClient;
+import com.hevelian.olastic.core.exceptions.SearchException;
 
 /**
  * Elasticsearch client configuration class.
@@ -21,7 +23,6 @@ import com.hevelian.olastic.core.elastic.ESClient;
 public class ESConfigImpl implements ESConfig {
 
     protected final Client client;
-    private final Set<String> indices;
 
     /**
      * Creates a new Elasticsearch client configuration with predefined
@@ -41,7 +42,6 @@ public class ESConfigImpl implements ESConfig {
         this.client = initClient(settings,
                 new InetSocketTransportAddress(InetAddress.getByName(host), port));
         initESClient();
-        this.indices = loadIndices();
     }
 
     /**
@@ -67,16 +67,6 @@ public class ESConfigImpl implements ESConfig {
         ESClient.init(client);
     }
 
-    /**
-     * Load's indices from Elasticsearch.
-     * 
-     * @return indices set
-     */
-    protected Set<String> loadIndices() {
-        return client.admin().indices().stats(new IndicesStatsRequest()).actionGet().getIndices()
-                .keySet();
-    }
-
     @Override
     public void close() {
         client.close();
@@ -89,7 +79,12 @@ public class ESConfigImpl implements ESConfig {
 
     @Override
     public Set<String> getIndices() {
-        return indices;
+        try {
+            return client.admin().indices().stats(new IndicesStatsRequest()).actionGet()
+                    .getIndices().keySet();
+        } catch (NoNodeAvailableException e) {
+            throw new SearchException(e.getDetailedMessage());
+        }
     }
 
 }
