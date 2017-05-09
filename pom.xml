@@ -54,11 +54,11 @@
 
 	<distributionManagement>
 		<repository>
-			<id>release-repository</id>
+			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshot-repository</id>
+			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
