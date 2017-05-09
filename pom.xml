@@ -54,11 +54,11 @@
 
 	<distributionManagement>
 		<repository>
-			<id>ossrh</id>
+			<id>release-repository</id>
 			<url>https://oss.sonatype.org/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>ossrh</id>
+			<id>snapshot-repository</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
@@ -92,7 +92,7 @@
 				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>ossrh</serverId>
+					<serverId>snapshot-repository</serverId>
 					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
