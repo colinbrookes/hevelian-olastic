@@ -2,14 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>olastic-web</artifactId>
-	<name>OData-Elasticseatch Web</name>
+	<name>OData-Elasticsearch Web</name>
 	<description>OData bridge for Elasticsearch based on Apache Olingo library</description>
 	<packaging>war</packaging>
 
 	<parent>
 		<groupId>com.hevelian.olastic</groupId>
 		<artifactId>olastic-parent</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>1.1.0-SNAPSHOT</version>
 	</parent>
 
 	<properties>
