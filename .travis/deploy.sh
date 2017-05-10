@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -ev
-# only do deployment, when travis detects a new tag
+# do deployment using release profile, when travis detects a new tag
 if [ ! -z "$TRAVIS_TAG" ]
 then
     echo "on a tag -> set pom.xml <version> to $TRAVIS_TAG"
@@ -15,6 +15,7 @@ then
     source .travis/gpg.sh
     
     mvn clean deploy --settings .travis/settings.xml -DskipTests=true --batch-mode --update-snapshots -Prelease
+# do deployment to snapshot repo
 else
     echo "not on a tag -> keep snapshot version in pom.xml"
     mvn clean deploy --settings .travis/settings.xml -DskipTests=true --batch-mode --update-snapshots
