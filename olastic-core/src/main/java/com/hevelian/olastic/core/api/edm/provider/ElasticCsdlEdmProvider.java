@@ -1,32 +1,5 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
-import static com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider.ANALYZED_TERM_NAME;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
-import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
-import org.apache.olingo.commons.api.edm.provider.CsdlTerm;
-import org.apache.olingo.commons.api.ex.ODataException;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.index.mapper.ObjectMapper;
-import org.elasticsearch.index.mapper.TextFieldMapper;
-
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider;
@@ -38,13 +11,29 @@ import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.*;
+import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.index.mapper.ObjectMapper;
+import org.elasticsearch.index.mapper.TextFieldMapper;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider.ANALYZED_TERM_NAME;
 
 /**
  * {@link CsdlEdmProvider} implementation that generates the service/metadata
  * documents based on the Elasticsearch mappings.
  *
  * @author yuflyud
- * @contributor rdidyk
+ * @author rdidyk
  */
 public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     private AnnotationProvider annotationProvider;
@@ -141,6 +130,10 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * mappings. <br>
      * If no 'id' property found in mappings then the 'id' is added and used as
      * the OData key property.
+     * @param index ES index
+     * @param type ES type
+     * @return CSDL entity type
+     * @throws ODataException OData exception
      */
     public ElasticCsdlEntityType createEntityType(String index, String type) throws ODataException {
         MappingMetaData typeMappings = mappingMetaDataProvider.getMappingForType(index, type);
@@ -180,6 +173,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param metaData
      *            ES mapping metadata object.
      * @return list of properties
+     * @throws ODataException OData exception
      */
     protected List<CsdlProperty> getProperties(String index, String type, MappingMetaData metaData)
             throws ODataException {
@@ -336,6 +330,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param index
      *            schema index name
      * @return Entity Container
+     * @throws ODataException OData exception
      */
     protected CsdlEntityContainer getEntityContainerForSchema(String index) throws ODataException {
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
