@@ -28,7 +28,7 @@ import java.util.Set;
  * Elasticsearch and exposes its mappings and data through OData interface.
  *
  * @author yuflyud
- * @contributor rdidyk
+ * @author rdidyk
  */
 public class ODataServlet extends HttpServlet {
 
