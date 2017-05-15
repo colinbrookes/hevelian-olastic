@@ -16,11 +16,3 @@ deploy:
     on:
       repo: Hevelian/hevelian-olastic
       jdk: oraclejdk8
-  -
-    provider: script
-    script: bash .travis/deploy.sh
-    skip_cleanup: true
-    on:
-      repo: Hevelian/hevelian-olastic
-      tags: true
-      jdk: oraclejdk8
