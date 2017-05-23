@@ -1,21 +1,33 @@
 package com.hevelian.olastic.core.elastic;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.search.MultiSearchRequestBuilder;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchPhaseExecutionException;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
+import org.elasticsearch.index.IndexNotFoundException;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 import com.hevelian.olastic.core.elastic.queries.SearchQuery;
 import com.hevelian.olastic.core.exceptions.SearchException;
-import lombok.extern.log4j.Log4j2;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.search.*;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 
-import java.util.List;
-import java.util.Set;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Central point to retrieve the data from Elasticsearch.
@@ -73,8 +85,10 @@ public class ESClient {
      * @param query
      *            aggregate query
      * @return ES search response
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    public SearchResponse executeRequest(AggregateQuery query) {
+    public SearchResponse executeRequest(AggregateQuery query) throws ODataApplicationException {
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
                 .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
         query.getAggregations().forEach(requestBuilder::addAggregation);
@@ -85,10 +99,15 @@ public class ESClient {
 
     /**
      * Execute query request with filter and aggregations.
-     * @param queries list of queries to execute
+     * 
+     * @param queries
+     *            list of queries to execute
      * @return ES search response
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    public MultiSearchResponse executeRequest(List<SearchQuery> queries) {
+    public MultiSearchResponse executeRequest(List<SearchQuery> queries)
+            throws ODataApplicationException {
         MultiSearchRequestBuilder multiSearchRequestBuilder = client.prepareMultiSearch();
         for (SearchQuery query : queries) {
             Pagination pagination = query.getPagination();
@@ -114,10 +133,14 @@ public class ESClient {
 
     /**
      * Execute query request with filter and aggregations.
-     * @param query search query
+     * 
+     * @param query
+     *            search query
      * @return ES search response
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    public SearchResponse executeRequest(SearchQuery query) {
+    public SearchResponse executeRequest(SearchQuery query) throws ODataApplicationException {
         Pagination pagination = query.getPagination();
         SearchRequestBuilder requestBuilder = client.prepareSearch(query.getIndex())
                 .setTypes(query.getTypes()).setQuery(query.getQueryBuilder());
@@ -143,8 +166,11 @@ public class ESClient {
      * @param request
      *            request to execute
      * @return request response
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    protected SearchResponse executeRequest(SearchRequestBuilder request) {
+    protected SearchResponse executeRequest(SearchRequestBuilder request)
+            throws ODataApplicationException {
         SearchResponse response = null;
         ElasticsearchException searchError = null;
         try {
@@ -152,6 +178,12 @@ public class ESClient {
         } catch (SearchPhaseExecutionException | NoNodeAvailableException exception) {
             searchError = exception;
             throw new SearchException(searchError.getDetailedMessage());
+        } catch (IndexNotFoundException exception) {
+            searchError = exception;
+            throw new ODataApplicationException(
+                    String.format("One or more indices %s not found.",
+                            indicesToString(request.request().indices())),
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception);
         } finally {
             log.debug(String.format("Executing query request:%n%s", request.request()));
             if (response != null) {
@@ -169,8 +201,11 @@ public class ESClient {
      * @param request
      *            request to execute
      * @return request response
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    protected MultiSearchResponse executeRequest(MultiSearchRequestBuilder request) {
+    protected MultiSearchResponse executeRequest(MultiSearchRequestBuilder request)
+            throws ODataApplicationException {
         MultiSearchResponse response = null;
         ElasticsearchException searchError = null;
         try {
@@ -178,6 +213,13 @@ public class ESClient {
         } catch (SearchPhaseExecutionException | NoNodeAvailableException exception) {
             searchError = exception;
             throw new SearchException(searchError.getDetailedMessage());
+        } catch (IndexNotFoundException exception) {
+            searchError = exception;
+            String indices = request.request().requests().stream()
+                    .map(r -> indicesToString(r.indices())).collect(Collectors.joining(", "));
+            throw new ODataApplicationException(
+                    String.format("One or more indices %s not fount.", indices),
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception);
         } finally {
             log.debug(String.format("Executing query requests:%n%s", request.request().requests()));
             if (response == null) {
@@ -189,6 +231,19 @@ public class ESClient {
 
     public Client getClient() {
         return client;
+    }
+
+    /**
+     * Join indices to one String value. I.e.: author, book, address -> [author,
+     * book, address]
+     * 
+     * @param indices
+     *            indices array
+     * @return joined indices
+     */
+    private static String indicesToString(String[] indices) {
+        return Arrays.asList(indices).stream().map(Object::toString)
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 
 }

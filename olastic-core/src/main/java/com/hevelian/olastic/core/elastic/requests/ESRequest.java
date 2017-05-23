@@ -1,6 +1,8 @@
 package com.hevelian.olastic.core.elastic.requests;
 
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
+
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.action.search.SearchResponse;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
@@ -38,7 +40,9 @@ public interface ESRequest {
      * Executes request and returns search response.
      * 
      * @return found data
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    SearchResponse execute();
+    SearchResponse execute() throws ODataApplicationException;
 
 }

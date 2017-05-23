@@ -1,5 +1,6 @@
 package com.hevelian.olastic.core.elastic.requests;
 
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.action.search.SearchResponse;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
@@ -82,7 +83,7 @@ public class AggregateRequest extends BaseRequest {
     }
 
     @Override
-    public SearchResponse execute() {
+    public SearchResponse execute() throws ODataApplicationException {
         return ESClient.getInstance().executeRequest(getQuery());
     }
 

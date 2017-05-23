@@ -8,18 +8,22 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.action.search.MultiSearchResponse;
 
 import java.util.List;
 
 /**
  * Multi search request with search queries and pagination.
+ * 
  * @author Taras Kohut
  */
 @AllArgsConstructor
 @Getter
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class MultiSearchRequest implements ESMultiRequest<SearchQuery> {
+
     List<SearchQuery> queries;
     ElasticEdmEntitySet entitySet;
     Pagination pagination;
@@ -35,7 +39,7 @@ public class MultiSearchRequest implements ESMultiRequest<SearchQuery> {
     }
 
     @Override
-    public MultiSearchResponse execute() {
+    public MultiSearchResponse execute() throws ODataApplicationException {
         return ESClient.getInstance().executeRequest(getQueries());
     }
 }

@@ -1,14 +1,17 @@
 package com.hevelian.olastic.core.elastic.requests;
 
+import java.util.List;
+
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.elasticsearch.action.search.MultiSearchResponse;
+
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.Query;
-import org.elasticsearch.action.search.MultiSearchResponse;
-
-import java.util.List;
 
 /**
  * Interface to provide behavior for all multiple request implementations.
+ * 
  * @author Taras Kohut
  */
 public interface ESMultiRequest<T extends Query> {
@@ -37,6 +40,8 @@ public interface ESMultiRequest<T extends Query> {
      * Executes request and returns search response.
      *
      * @return found data
+     * @throws ODataApplicationException
+     *             if any error appeared during executing request
      */
-    MultiSearchResponse execute();
+    MultiSearchResponse execute() throws ODataApplicationException;
 }

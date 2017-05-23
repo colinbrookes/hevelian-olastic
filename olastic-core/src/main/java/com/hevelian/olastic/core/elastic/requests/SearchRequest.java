@@ -4,6 +4,8 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
 import com.hevelian.olastic.core.elastic.ESClient;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.SearchQuery;
+
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.action.search.SearchResponse;
 
 /**
@@ -28,7 +30,7 @@ public class SearchRequest extends BaseRequest {
     }
 
     @Override
-    public SearchResponse execute() {
+    public SearchResponse execute() throws ODataApplicationException {
         return ESClient.getInstance().executeRequest(getQuery());
     }
 
