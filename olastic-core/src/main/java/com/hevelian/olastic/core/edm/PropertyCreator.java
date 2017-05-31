@@ -1,7 +1,11 @@
 package com.hevelian.olastic.core.edm;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -47,10 +51,16 @@ public class PropertyCreator {
             if (property.getType() instanceof EdmDate
                     || property.getType() instanceof EdmDateTimeOffset) {
                 if (value != null) {
+                    // For Date values we return Calendar instance because of
+                    // bug in Date when milliseconds are less then 1582 year.
+                    // Olingo parses Calendar object without any issues.
                     if (value instanceof Long) {
-                        modifiedValue = new Date((Long) value);
+                        Instant instant = Instant.ofEpochMilli((long) value);
+                        ZoneId zoneId = ZoneId.from(ZoneOffset.UTC);
+                        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
+                        modifiedValue = GregorianCalendar.from(dateTime.atZone(zoneId));
                     } else {
-                        modifiedValue = DatatypeConverter.parseDateTime(value.toString()).getTime();
+                        modifiedValue = DatatypeConverter.parseDateTime(value.toString());
                     }
                 }
             } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
