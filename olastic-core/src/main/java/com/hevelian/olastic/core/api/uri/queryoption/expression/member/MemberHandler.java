@@ -5,6 +5,7 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.edm.ElasticEdmProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -99,11 +100,15 @@ public class MemberHandler {
             throws ODataApplicationException, ExpressionVisitException {
         UriResourceLambdaAny lambda = (UriResourceLambdaAny) lastPart;
         Expression expression = lambda.getExpression();
-        if (firstPart instanceof UriResourceNavigation) {
-            UriResourceNavigation navigationResource = (UriResourceNavigation) firstPart;
+        boolean isNavigationLambdaVar = firstPart instanceof UriResourcePartTyped && ((UriResourcePartTyped)firstPart).getType() instanceof EdmEntityType;
+        //navigation property collection
+        // /author?$filter=book/any(b:b/character/any(c:c/name eq 'Oliver Twist'))
+        if (firstPart instanceof UriResourceNavigation || isNavigationLambdaVar) {
+            //pre-last resource - the one before lambda; it's always a collection type
+            UriResourceNavigation preLastNavResource = (UriResourceNavigation)resourceParts.get(resourceParts.size() - 2);
             ExpressionResult lambdaResult = (ExpressionResult) lambda.getExpression()
                     .accept(visitor);
-            ElasticEdmEntityType entityType = (ElasticEdmEntityType) navigationResource
+            ElasticEdmEntityType entityType = (ElasticEdmEntityType) preLastNavResource
                     .getProperty().getType();
             return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
         }

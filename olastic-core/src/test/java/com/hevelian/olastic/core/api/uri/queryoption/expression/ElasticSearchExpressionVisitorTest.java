@@ -174,100 +174,6 @@ public class ElasticSearchExpressionVisitorTest {
         assertNotNull(matchAllObj);
     }
 
-    @Test
-    public void visitMember_lambdaAny_correctESQuery() throws Exception {
-        String rawODataPath = "/author";
-        String rawQueryPath = "$filter=book/any(b:b/title eq 'name')";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression()
-                .accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult) result).getQueryBuilder().toString();
-
-        JSONObject queryObj = new JSONObject(query);
-        JSONObject rootObj = queryObj.getJSONObject("has_child");
-        String actualType = (String) rootObj.get("type");
-        JSONObject queryObject = rootObj.getJSONObject("query");
-        JSONObject matchAll = queryObject.getJSONObject("term");
-        assertNotNull(matchAll);
-        assertEquals("book", actualType);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void visitMember_lambdaAll_notImplementedException() throws Exception {
-        String rawODataPath = "/author";
-        String rawQueryPath = "$filter=book/all(b:b/title eq 'name')";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-    }
-
-    @Test
-    public void visitMember_lambdaAnyByComplexType_correctESQuery() throws Exception {
-        String rawODataPath = "/author";
-        String rawQueryPath = "$filter=_dimension/any(d:d/name eq 'validity')";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression()
-                .accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult) result).getQueryBuilder().toString();
-
-        JSONObject queryObj = new JSONObject(query);
-        JSONObject rootObj = queryObj.getJSONObject("nested");
-        String actualType = (String) rootObj.get("path");
-        JSONObject queryObject = rootObj.getJSONObject("query");
-        JSONObject term = queryObject.getJSONObject("term");
-        JSONObject termValue = term.getJSONObject("_dimension.name");
-        assertNotNull(termValue);
-        assertEquals("_dimension", actualType);
-    }
-
-    @Test
-    public void visitMember_lambdaAnyByNestedComplexType_correctESQuery() throws Exception {
-        String rawODataPath = "/book";
-        String rawQueryPath = "$filter=info/pages/any(p:p/words/any(w:w eq 'w') and p/pageName eq 'page name')";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
-
-        JSONObject queryObj = new JSONObject(query);
-        JSONObject rootObj = queryObj.getJSONObject("nested");
-        String pagesPath = (String)rootObj.get("path");
-        JSONObject pagesQueryObject = rootObj.getJSONObject("query");
-        JSONArray mustQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("must");
-        JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("term");
-        JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
-        String wordsTermValue = wordsTerm.getJSONObject("info.pages.words").getString("value");
-        String pageTermValue = pageNameTerm.getJSONObject("info.pages.pageName").getString("value");
-
-        assertEquals("info.pages", pagesPath);
-        assertEquals("w", wordsTermValue);
-        assertEquals("page name", pageTermValue);
-    }
-
-    @Test
-    public void visitMember_lambdaAnyByNestedComplexTypeAnalyzed_correctESQuery() throws Exception {
-        String rawODataPath = "/book";
-        String rawQueryPath = "$filter=info/pages/any(p:p/analyzedWords/any(w:w eq 'w') and p/analyzedPageName eq 'page name' or p/pageNumber eq 5)";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult)result).getQueryBuilder().toString();
-
-        JSONObject queryObj = new JSONObject(query);
-        JSONObject rootObj = queryObj.getJSONObject("nested");
-        String pagesPath = (String)rootObj.get("path");
-        JSONObject pagesQueryObject = rootObj.getJSONObject("query");
-        JSONArray shouldQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("should");
-        JSONArray mustQueryObj = ((JSONObject)shouldQueryObj.get(0)).getJSONObject("bool").getJSONArray("must");
-        JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("term");
-        JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
-        JSONObject pageNumberTerm = ((JSONObject)shouldQueryObj.get(1)).getJSONObject("term");
-        String wordsTermValue = wordsTerm.getJSONObject("info.pages.analyzedWords.keyword").getString("value");
-        String pageTermValue = pageNameTerm.getJSONObject("info.pages.analyzedPageName.keyword").getString("value");
-        int pageNumberValue = pageNumberTerm.getJSONObject("info.pages.pageNumber").getInt("value");
-
-        assertEquals("info.pages", pagesPath);
-        assertEquals("w", wordsTermValue);
-        assertEquals("page name", pageTermValue);
-        assertEquals(5,  pageNumberValue);
-    }
 
     @Test
     public void visitMethodCall_endsWith_CorrectEsQuery() throws Exception {
@@ -341,17 +247,6 @@ public class ElasticSearchExpressionVisitorTest {
         assertEquals("2016-02-14", value);
     }
 
-    @Test
-    public void visitMember_ParentsProperty_correctESQuery() throws Exception {
-        String rawODataPath = "/book";
-        String rawQueryPath = "$filter=author/name eq 'Dawkins'";
-        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
-        ExpressionMember result = uriInfo.getFilterOption().getExpression()
-                .accept(new ElasticSearchExpressionVisitor());
-        String query = ((ExpressionResult) result).getQueryBuilder().toString();
-
-        checkFilterParentEqualsQuery(query, "author", "name", "'Dawkins'");
-    }
 
     @Test
     public void visitLambdaExpression_anyExpression_null() throws Exception {

@@ -58,25 +58,6 @@ public class TestUtils {
         checkFilterEqualsQueryInternal(query, field, value, true);
     }
 
-    private static void checkFilterEqualsQueryInternal(String query, String field, String value, boolean isNotQuery) {
-        JSONObject queryObj = new JSONObject(query);
-        JSONObject rootObj;
-
-        if (isNotQuery) {
-            JSONObject bool =  queryObj.getJSONObject("bool");
-            JSONArray array;
-            array =  bool.getJSONArray("must_not");
-            rootObj = ((JSONObject)array.get(0)).getJSONObject("term");
-        } else {
-            rootObj = queryObj.getJSONObject("term");
-        }
-
-        String fieldName = field + ".keyword";
-        JSONObject valueObject = rootObj.getJSONObject(fieldName);
-        String actualValue = (String)valueObject.get("value");
-        assertEquals(value.substring(1,value.length()-1), actualValue);
-    }
-
     /**
      * Checks if ES query for equals filter by parent's property is correct
      * @param query ESQuery
@@ -100,6 +81,53 @@ public class TestUtils {
     }
 
     /**
+     * Checks if ES query for equals filter by grand-child's property is correct
+     * @param query ESQuery
+     * @param field field name
+     * @param value Expected value enclosed in ''
+     */
+    public static void checkFilterGrandChildEqualsQuery(String query, String field, String value, String child, String grandChild) {
+        JSONObject childObj = new JSONObject(query).getJSONObject("has_child");
+        String childType = (String)childObj.get("type");
+        assertEquals(child, childType);
+        JSONObject subChildObj = childObj.getJSONObject("query").getJSONObject("has_child");
+        String subChildType = (String)subChildObj.get("type");
+        assertEquals(grandChild, subChildType);
+        JSONObject rootObj;
+        rootObj = subChildObj.getJSONObject("query").getJSONObject("term");
+
+
+        String fieldName = field + ".keyword";
+        JSONObject valueObject = rootObj.getJSONObject(fieldName);
+        String actualValue = (String)valueObject.get("value");
+        assertEquals(value.substring(1,value.length()-1), actualValue);
+    }
+
+    /**
+     * Checks if ES query for equals filter by grand-parent's property is correct
+     * @param query ESQuery
+     * @param field field name
+     * @param value Expected value enclosed in ''
+     */
+    public static void checkFilterGrandParentEqualsQuery(String query, String field, String value, String parent, String grandParent) {
+        JSONObject childObj = new JSONObject(query).getJSONObject("has_parent");
+        String childType = (String)childObj.get("parent_type");
+        assertEquals(parent, childType);
+        JSONObject subChildObj = childObj.getJSONObject("query").getJSONObject("has_parent");
+        String subChildType = (String)subChildObj.get("parent_type");
+        assertEquals(grandParent, subChildType);
+        JSONObject rootObj;
+        rootObj = subChildObj.getJSONObject("query").getJSONObject("term");
+
+
+        String fieldName = field + ".keyword";
+        JSONObject valueObject = rootObj.getJSONObject(fieldName);
+        String actualValue = (String)valueObject.get("value");
+        assertEquals(value.substring(1,value.length()-1), actualValue);
+    }
+
+
+    /**
      * Mocks analyzed annotation.
      * @return mocked analyzed annotation
      */
@@ -119,6 +147,26 @@ public class TestUtils {
         doReturn(term).when(annotation).getTerm();
         doReturn(expression).when(annotation).getExpression();
         return annotation;
+    }
+
+
+    private static void checkFilterEqualsQueryInternal(String query, String field, String value, boolean isNotQuery) {
+        JSONObject queryObj = new JSONObject(query);
+        JSONObject rootObj;
+
+        if (isNotQuery) {
+            JSONObject bool =  queryObj.getJSONObject("bool");
+            JSONArray array;
+            array =  bool.getJSONArray("must_not");
+            rootObj = ((JSONObject)array.get(0)).getJSONObject("term");
+        } else {
+            rootObj = queryObj.getJSONObject("term");
+        }
+
+        String fieldName = field + ".keyword";
+        JSONObject valueObject = rootObj.getJSONObject(fieldName);
+        String actualValue = (String)valueObject.get("value");
+        assertEquals(value.substring(1,value.length()-1), actualValue);
     }
 
     private static void checkFilterParentEqualsQueryInternal(String query, String parent, String field, String value, boolean isNotQuery) {
