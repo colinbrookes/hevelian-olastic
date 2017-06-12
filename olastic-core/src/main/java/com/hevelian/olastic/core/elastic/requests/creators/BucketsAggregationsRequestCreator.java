@@ -109,7 +109,8 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
         // Last because of reverse
         String lastProperty = properties.remove(0);
         String queryField = getQueryField(lastProperty, entityType);
-        TermsAggregationBuilder groupByQuery = terms(lastProperty).field(queryField).size(size);
+        TermsAggregationBuilder groupByQuery = terms(lastProperty).field(queryField).size(size)
+                .shardSize(getShardSize(size));
         getMetricsAggQueries(getAggregations(groupBy.getApplyOption()))
                 .forEach(groupByQuery::subAggregation);
         List<Order> queryOrders = getQueryOrders(queryField, orders);
@@ -135,6 +136,19 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
         }
         // For now only one 'groupby' is supported and returned in the list
         return Arrays.asList(groupByQuery);
+    }
+
+    /**
+     * Get's shard_size for terms aggregation.
+     * 
+     * @param size
+     *            actual requested size
+     * @return shard_size
+     */
+    protected int getShardSize(int size) {
+        // The default shard_size will be size if the search request needs to go
+        // to a single shard - by Elasticsearch documentation
+        return size;
     }
 
     /**

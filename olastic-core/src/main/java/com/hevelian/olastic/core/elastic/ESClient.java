@@ -73,7 +73,7 @@ public class ESClient {
                     INSTANCE = new ESClient(client);
                 } else {
                     throw new IllegalStateException(
-                            "Elastic to CSDL mapper is already initialized.");
+                            "Elasticsearch query executor client is already initialized.");
                 }
             }
         }
