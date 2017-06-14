@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
@@ -13,7 +14,6 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import com.hevelian.olastic.core.elastic.ESClient;
-import com.hevelian.olastic.core.exceptions.SearchException;
 
 /**
  * Elasticsearch client configuration class.
@@ -83,7 +83,7 @@ public class ESConfigImpl implements ESConfig {
             return client.admin().indices().stats(new IndicesStatsRequest()).actionGet()
                     .getIndices().keySet();
         } catch (NoNodeAvailableException e) {
-            throw new SearchException(e.getDetailedMessage());
+            throw new ODataRuntimeException("Elasticsearch has no node available.", e);
         }
     }
 
