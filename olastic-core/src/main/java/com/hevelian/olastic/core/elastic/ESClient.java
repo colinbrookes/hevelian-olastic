@@ -1,19 +1,15 @@
 package com.hevelian.olastic.core.elastic;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
+import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
+import com.hevelian.olastic.core.elastic.queries.SearchQuery;
+import com.hevelian.olastic.core.exceptions.SearchException;
+import lombok.extern.log4j.Log4j2;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.search.MultiSearchRequestBuilder;
-import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.action.search.SearchPhaseExecutionException;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.index.IndexNotFoundException;
@@ -21,13 +17,11 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
-import com.hevelian.olastic.core.elastic.pagination.Sort;
-import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
-import com.hevelian.olastic.core.elastic.queries.SearchQuery;
-import com.hevelian.olastic.core.exceptions.SearchException;
-
-import lombok.extern.log4j.Log4j2;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Central point to retrieve the data from Elasticsearch.
@@ -183,7 +177,8 @@ public class ESClient {
             throw new ODataApplicationException(
                     String.format("One or more indices %s not found.",
                             indicesToString(request.request().indices())),
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception);
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception,
+                    Integer.toString(HttpStatusCode.NOT_FOUND.getStatusCode()));
         } finally {
             log.debug(String.format("Executing query request:%n%s", request.request()));
             if (response != null) {
@@ -219,7 +214,8 @@ public class ESClient {
                     .map(r -> indicesToString(r.indices())).collect(Collectors.joining(", "));
             throw new ODataApplicationException(
                     String.format("One or more indices %s not fount.", indices),
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception);
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception,
+                    Integer.toString(HttpStatusCode.NOT_FOUND.getStatusCode()));
         } finally {
             log.debug(String.format("Executing query requests:%n%s", request.request().requests()));
             if (response == null) {
