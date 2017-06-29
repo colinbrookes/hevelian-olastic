@@ -106,21 +106,21 @@ public class ExpressionResultTest {
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new ExpressionResult(matchAllQuery).contains(null, null);
+        new ExpressionResult(matchAllQuery).contains(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ExpressionResult(matchAllQuery).startsWith(null, null);
+        new ExpressionResult(matchAllQuery).startsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ExpressionResult(matchAllQuery).endsWith(null, null);
+        new ExpressionResult(matchAllQuery).endsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new ExpressionResult(matchAllQuery).date(null);
+        new ExpressionResult(matchAllQuery).date();
     }
 }

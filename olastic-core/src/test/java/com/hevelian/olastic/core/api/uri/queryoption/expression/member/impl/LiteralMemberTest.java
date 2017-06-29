@@ -181,22 +181,22 @@ public class LiteralMemberTest {
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new LiteralMember(value, edmString).contains(null, null);
+        new LiteralMember(value, edmString).contains(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new LiteralMember(value, edmString).startsWith(null, null);
+        new LiteralMember(value, edmString).startsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new LiteralMember(value, edmString).endsWith(null, null);
+        new LiteralMember(value, edmString).endsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new LiteralMember(value, edmString).date(null);
+        new LiteralMember(value, edmString).date();
     }
 
     @Test(expected = ODataApplicationException.class)

@@ -68,6 +68,33 @@ public class ParentMember extends AnnotatedMember {
         return buildParentQuery(query);
     }
 
+    @Override
+    public ExpressionResult contains(ExpressionMember right) {
+        LiteralMember literal = (LiteralMember) right;
+        QueryBuilder query = buildContainsQuery(this, literal.getValue());
+        return buildParentQuery(query);
+    }
+
+    @Override
+    public ExpressionResult startsWith(ExpressionMember right) {
+        LiteralMember literal = (LiteralMember) right;
+        QueryBuilder query =  buildStartsWithQuery(this, (String)literal.getValue());
+        return buildParentQuery(query);
+    }
+
+    @Override
+    public ExpressionResult endsWith(ExpressionMember right) {
+        LiteralMember literal = (LiteralMember) right;
+        QueryBuilder query = buildEndsWithQuery(this, (String)literal.getValue());
+        return buildParentQuery(query);
+    }
+
+    @Override
+    public ExpressionMember date() {
+        // Elasticsearch doesn't distinguish between search by the date and
+        // search by the timestamp, so no conversion is needed
+        return this;
+    }
     private ExpressionResult buildParentQuery(QueryBuilder query) {
         ListIterator<String> iterator = parentTypes.listIterator(parentTypes.size());
         QueryBuilder resultQuery = query;

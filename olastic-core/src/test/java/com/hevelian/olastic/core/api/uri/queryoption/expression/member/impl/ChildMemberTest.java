@@ -67,22 +67,22 @@ public class ChildMemberTest {
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new ChildMember(type, query).contains(null, null);
+        new ChildMember(type, query).contains(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ChildMember(type, query).startsWith(null, null);
+        new ChildMember(type, query).startsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ChildMember(type, query).endsWith(null, null);
+        new ChildMember(type, query).endsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new ChildMember(type, query).date(null);
+        new ChildMember(type, query).date();
     }
 
     @Test(expected = ODataApplicationException.class)

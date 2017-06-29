@@ -1,9 +1,14 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.elasticsearch.index.query.QueryBuilder;
 
+import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
+import static org.elasticsearch.index.query.QueryBuilders.wildcardQuery;
 
 /**
  * Base common class for any expression member.
@@ -69,27 +74,43 @@ public abstract class BaseMember implements ExpressionMember {
     }
 
     @Override
-    public ExpressionMember contains(ExpressionMember left, ExpressionMember right)
+    public ExpressionMember contains(ExpressionMember expressionMember)
             throws ODataApplicationException {
         return throwNotImplemented();
     }
 
     @Override
-    public ExpressionMember startsWith(ExpressionMember left, ExpressionMember right)
+    public ExpressionMember startsWith(ExpressionMember expressionMember)
             throws ODataApplicationException {
         return throwNotImplemented();
     }
 
     @Override
-    public ExpressionMember endsWith(ExpressionMember left, ExpressionMember right)
+    public ExpressionMember endsWith(ExpressionMember expressionMember)
             throws ODataApplicationException {
         return throwNotImplemented();
     }
 
     @Override
-    public ExpressionMember date(ExpressionMember expressionMember)
+    public ExpressionMember date()
             throws ODataApplicationException {
         return throwNotImplemented();
+    }
+
+    protected QueryBuilder buildContainsQuery(AnnotatedMember member, Object value)  {
+        return wildcardQuery(addKeywordIfNeeded(member.getField(), member.getAnnotations()),
+                ElasticConstants.WILDCARD_CHAR + value
+                        + ElasticConstants.WILDCARD_CHAR);
+    }
+
+    protected QueryBuilder buildStartsWithQuery(AnnotatedMember member, String value)  {
+        return prefixQuery(addKeywordIfNeeded(member.getField(), member.getAnnotations()),
+                value);
+    }
+
+    protected QueryBuilder buildEndsWithQuery(AnnotatedMember member, String value)  {
+        return wildcardQuery(addKeywordIfNeeded(member.getField(), member.getAnnotations()),
+                ElasticConstants.WILDCARD_CHAR + value);
     }
 
 }

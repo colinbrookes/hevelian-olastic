@@ -36,6 +36,29 @@ public class ElasticSearchExpressionRelationsTest extends ElasticSearchExpressio
                 assertEquals("book", actualType);
         }
 
+        @Test
+        public void visitMember_lambdaAnyContains_correctESQuery() throws Exception {
+                String rawODataPath = "/author";
+                String rawQueryPath = "$filter=book/any(b:b/character/any(c:contains(c/name,'name')))";
+                UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+                ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                        .accept(new ElasticSearchExpressionVisitor());
+                String query = ((ExpressionResult) result).getQueryBuilder().toString();
+
+                JSONObject queryObj = new JSONObject(query);
+                JSONObject rootObj = queryObj.getJSONObject("has_child");
+                String bookType = (String) rootObj.get("type");
+                assertEquals("book", bookType);
+                JSONObject characterObj = rootObj.getJSONObject("query").getJSONObject("has_child");
+                String characterType = (String) characterObj.get("type");
+                assertEquals("character", characterType);
+                JSONObject queryObject = characterObj.getJSONObject("query");
+                JSONObject wildcard = queryObject.getJSONObject("wildcard");
+                assertEquals("*name*",
+                        wildcard.getJSONObject("name.keyword").getString("wildcard"));
+                assertNotNull(wildcard);
+        }
+
         @Test(expected = ODataApplicationException.class)
         public void visitMember_lambdaAll_notImplementedException() throws Exception {
                 String rawODataPath = "/author";
@@ -113,6 +136,32 @@ public class ElasticSearchExpressionRelationsTest extends ElasticSearchExpressio
                 assertEquals(5,  pageNumberValue);
         }
 
+        @Test
+        public void visitMember_lambdaAnyByNestedComplexTypeAnalyzedContains_correctESQuery() throws Exception {
+                String rawODataPath = "/book";
+                String rawQueryPath = "$filter=info/pages/any(p:p/analyzedWords/any(w:contains(w,'w')) and p/analyzedPageName eq 'page name' or p/pageNumber eq 5)";
+                UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+                ExpressionMember result = uriInfo.getFilterOption().getExpression().accept(new ElasticSearchExpressionVisitor());
+                String query = ((ExpressionResult)result).getQueryBuilder().toString();
+
+                JSONObject queryObj = new JSONObject(query);
+                JSONObject rootObj = queryObj.getJSONObject("nested");
+                String pagesPath = (String)rootObj.get("path");
+                JSONObject pagesQueryObject = rootObj.getJSONObject("query");
+                JSONArray shouldQueryObj = pagesQueryObject.getJSONObject("bool").getJSONArray("should");
+                JSONArray mustQueryObj = ((JSONObject)shouldQueryObj.get(0)).getJSONObject("bool").getJSONArray("must");
+                JSONObject wordsTerm = ((JSONObject)mustQueryObj.get(0)).getJSONObject("wildcard");
+                JSONObject pageNameTerm = ((JSONObject)mustQueryObj.get(1)).getJSONObject("term");
+                JSONObject pageNumberTerm = ((JSONObject)shouldQueryObj.get(1)).getJSONObject("term");
+                String wordsTermValue = wordsTerm.getJSONObject("info.pages.analyzedWords.keyword").getString("wildcard");
+                String pageTermValue = pageNameTerm.getJSONObject("info.pages.analyzedPageName.keyword").getString("value");
+                int pageNumberValue = pageNumberTerm.getJSONObject("info.pages.pageNumber").getInt("value");
+
+                assertEquals("info.pages", pagesPath);
+                assertEquals("*w*", wordsTermValue);
+                assertEquals("page name", pageTermValue);
+                assertEquals(5,  pageNumberValue);
+        }
 
         @Test
         public void visitMember_ParentsProperty_correctESQuery() throws Exception {
@@ -151,7 +200,49 @@ public class ElasticSearchExpressionRelationsTest extends ElasticSearchExpressio
                 String query = ((ExpressionResult) result).getQueryBuilder().toString();
                 String value = "'Duma'";
                 String field = "name";
-                checkFilterGrandParentEqualsQuery(query, field, value, "book", "author");
+                checkFilterGrandParentEqualsQuery(query, field, value, "book", "author", "term", "value");
+        }
+
+        @Test
+        public void visitMember_GrandParentPropertyContains_correctESQuery() throws Exception {
+
+                String rawODataPath = "/character";
+                String rawQueryPath = "$filter=contains(book/author/name,'Du')";
+                UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+                ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                        .accept(new ElasticSearchExpressionVisitor());
+                String query = ((ExpressionResult) result).getQueryBuilder().toString();
+                String value = "'*Du*'";
+                String field = "name";
+                checkFilterGrandParentEqualsQuery(query, field, value, "book", "author", "wildcard", "wildcard");
+        }
+
+        @Test
+        public void visitMember_GrandParentPropertyStartsWith_correctESQuery() throws Exception {
+
+                String rawODataPath = "/character";
+                String rawQueryPath = "$filter=startswith(book/author/name,'Du')";
+                UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+                ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                        .accept(new ElasticSearchExpressionVisitor());
+                String query = ((ExpressionResult) result).getQueryBuilder().toString();
+                String value = "'Du'";
+                String field = "name";
+                checkFilterGrandParentEqualsQuery(query, field, value, "book", "author", "prefix", "value");
+        }
+
+        @Test
+        public void visitMember_GrandParentPropertyEndsWith_correctESQuery() throws Exception {
+
+                String rawODataPath = "/character";
+                String rawQueryPath = "$filter=endswith(book/author/name,'Du')";
+                UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+                ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                        .accept(new ElasticSearchExpressionVisitor());
+                String query = ((ExpressionResult) result).getQueryBuilder().toString();
+                String value = "'*Du'";
+                String field = "name";
+                checkFilterGrandParentEqualsQuery(query, field, value, "book", "author", "wildcard", "wildcard");
         }
 
 }

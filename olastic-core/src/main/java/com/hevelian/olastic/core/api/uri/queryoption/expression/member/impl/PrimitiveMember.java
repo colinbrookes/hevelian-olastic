@@ -58,6 +58,31 @@ public class PrimitiveMember extends AnnotatedMember {
                 rangeQuery(getField()).lt(((LiteralMember) expressionMember).getValue()));
     }
 
+    @Override
+    public ExpressionResult contains(ExpressionMember right) {
+        LiteralMember literal = (LiteralMember) right;
+        return new ExpressionResult(buildContainsQuery(this, literal.getValue()));
+    }
+
+    @Override
+    public ExpressionResult startsWith(ExpressionMember right) {
+        LiteralMember literal = (LiteralMember) right;
+        return new ExpressionResult(buildStartsWithQuery(this, (String)literal.getValue()));
+    }
+
+    @Override
+    public ExpressionResult endsWith(ExpressionMember right) {
+        LiteralMember literal = (LiteralMember) right;
+        return new ExpressionResult(buildEndsWithQuery(this, (String)literal.getValue()));
+    }
+
+    @Override
+    public ExpressionMember date() {
+        // Elasticsearch doesn't distinguish between search by the date and
+        // search by the timestamp, so no conversion is needed
+        return this;
+    }
+
     /**
      * Gets query for equals and not equals operations.
      * 

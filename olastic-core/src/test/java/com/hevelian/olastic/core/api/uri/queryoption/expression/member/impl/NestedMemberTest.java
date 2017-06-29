@@ -68,22 +68,22 @@ public class NestedMemberTest {
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new NestedMember(type, query).contains(null, null);
+        new NestedMember(type, query).contains(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new NestedMember(type, query).startsWith(null, null);
+        new NestedMember(type, query).startsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new NestedMember(type, query).endsWith(null, null);
+        new NestedMember(type, query).endsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new NestedMember(type, query).date(null);
+        new NestedMember(type, query).date();
     }
 
     @Test(expected = ODataApplicationException.class)

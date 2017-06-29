@@ -96,26 +96,6 @@ public class PrimitiveMemberTest {
     }
 
     @Test(expected = ODataApplicationException.class)
-    public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, annotations).contains(null, null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, annotations).startsWith(null, null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, annotations).endsWith(null, null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new PrimitiveMember(field, annotations).date(null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
     public void and_ExceptionIsThrown() throws ODataApplicationException {
         new PrimitiveMember(field, annotations).and(null);
     }

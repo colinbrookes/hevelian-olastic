@@ -141,6 +141,9 @@ public class MemberHandler {
             Binary binaryExpression = (Binary) expression;
             setPath(binaryExpression.getLeftOperand());
             setPath(binaryExpression.getRightOperand());
+        } else if (expression instanceof Method) {
+            Method method = (Method) expression;
+            method.getParameters().forEach(param->setPath(param));
         }
     }
 

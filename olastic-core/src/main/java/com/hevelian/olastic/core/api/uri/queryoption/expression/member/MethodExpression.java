@@ -11,38 +11,34 @@ public interface MethodExpression {
     /**
      * Checks if current member contains other one.
      *
-     * @param left  method  parameter - column
      * @param right method parameter - literal
      * @return result of the expression
      * @throws ODataApplicationException odata app exception
      */
-    ExpressionMember contains(ExpressionMember left, ExpressionMember right) throws ODataApplicationException;
+    ExpressionMember contains(ExpressionMember right) throws ODataApplicationException;
 
     /**
      * Checks if current member starts with other one.
      *
-     * @param left  method  parameter - column
-     * @param right method parameter - literal
+     * @param expressionMember method parameter - literal
      * @return result of the expression
      * @throws ODataApplicationException odata app exception
      */
-    ExpressionMember startsWith(ExpressionMember left, ExpressionMember right) throws ODataApplicationException;
+    ExpressionMember startsWith(ExpressionMember expressionMember) throws ODataApplicationException;
     /**
      * Checks if current member ends with other one.
      *
-     * @param left  method  parameter - column
-     * @param right method parameter - literal
+     * @param expressionMember method parameter - literal
      * @return result of the expression
      * @throws ODataApplicationException odata app exception
      */
-    ExpressionMember endsWith(ExpressionMember left, ExpressionMember right) throws ODataApplicationException;
+    ExpressionMember endsWith(ExpressionMember expressionMember) throws ODataApplicationException;
 
     /**
      * Converts date time offset to date.
      *
-     * @param expressionMember date column
      * @return result of the expression
      * @throws ODataApplicationException odata app exception
      */
-    ExpressionMember date(ExpressionMember expressionMember) throws ODataApplicationException;
+    ExpressionMember date() throws ODataApplicationException;
 }

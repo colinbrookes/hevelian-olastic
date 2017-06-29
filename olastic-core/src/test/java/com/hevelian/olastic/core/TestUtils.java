@@ -109,7 +109,7 @@ public class TestUtils {
      * @param field field name
      * @param value Expected value enclosed in ''
      */
-    public static void checkFilterGrandParentEqualsQuery(String query, String field, String value, String parent, String grandParent) {
+    public static void checkFilterGrandParentEqualsQuery(String query, String field, String value, String parent, String grandParent, String queryKey, String valueKey) {
         JSONObject childObj = new JSONObject(query).getJSONObject("has_parent");
         String childType = (String)childObj.get("parent_type");
         assertEquals(parent, childType);
@@ -117,12 +117,12 @@ public class TestUtils {
         String subChildType = (String)subChildObj.get("parent_type");
         assertEquals(grandParent, subChildType);
         JSONObject rootObj;
-        rootObj = subChildObj.getJSONObject("query").getJSONObject("term");
+        rootObj = subChildObj.getJSONObject("query").getJSONObject(queryKey);
 
 
         String fieldName = field + ".keyword";
         JSONObject valueObject = rootObj.getJSONObject(fieldName);
-        String actualValue = (String)valueObject.get("value");
+        String actualValue = (String)valueObject.get(valueKey);
         assertEquals(value.substring(1,value.length()-1), actualValue);
     }
 

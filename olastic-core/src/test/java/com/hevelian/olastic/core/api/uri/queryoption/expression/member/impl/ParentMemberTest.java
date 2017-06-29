@@ -139,26 +139,6 @@ public class ParentMemberTest {
     }
 
     @Test(expected = ODataApplicationException.class)
-    public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, annotations).contains(null, null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, annotations).startsWith(null, null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, annotations).endsWith(null, null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
-    public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentMember(parentTypes, field, annotations).date(null);
-    }
-
-    @Test(expected = ODataApplicationException.class)
     public void and_ExceptionIsThrown() throws ODataApplicationException {
         new ParentMember(parentTypes, field, annotations).and(null);
     }

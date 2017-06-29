@@ -2,9 +2,7 @@ package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MemberHandler;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MethodExpression;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.LiteralMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.MethodMember;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -69,16 +67,15 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
     public ExpressionMember visitMethodCall(MethodKind methodCall,
             List<ExpressionMember> parameters)
             throws ExpressionVisitException, ODataApplicationException {
-        MethodExpression expressionMethod = new MethodMember();
         switch (methodCall) {
         case CONTAINS:
-            return expressionMethod.contains(parameters.get(0), parameters.get(1));
+            return parameters.get(0).contains(parameters.get(1));
         case STARTSWITH:
-            return expressionMethod.startsWith(parameters.get(0), parameters.get(1));
+            return parameters.get(0).startsWith(parameters.get(1));
         case ENDSWITH:
-            return expressionMethod.endsWith(parameters.get(0), parameters.get(1));
+            return parameters.get(0).endsWith(parameters.get(1));
         case DATE:
-            return expressionMethod.date(parameters.get(0));
+            return parameters.get(0).date();
         default:
             return throwNotImplemented(
                     String.format("Method call %s is not implemented", methodCall));
