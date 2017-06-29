@@ -95,7 +95,13 @@ public class ParentMember extends AnnotatedMember {
         // search by the timestamp, so no conversion is needed
         return this;
     }
-    protected ExpressionResult buildParentQuery(QueryBuilder query) {
+
+    /**
+     * Builds parent ES query using provided query.
+     * @param query query
+     * @return parent query
+     */
+    public ExpressionResult buildParentQuery(QueryBuilder query) {
         ListIterator<String> iterator = parentTypes.listIterator(parentTypes.size());
         QueryBuilder resultQuery = query;
         while (iterator.hasPrevious()) {
