@@ -90,7 +90,7 @@ public class PrimitiveMember extends AnnotatedMember {
      *            member with value
      * @return appropriate query
      */
-    private QueryBuilder getEqQuery(ExpressionMember expressionMember) throws ODataApplicationException{
+    protected QueryBuilder getEqQuery(ExpressionMember expressionMember) throws ODataApplicationException{
         Object value = ((LiteralMember) expressionMember).getValue();
         if (getField().equals(ID_FIELD_NAME)) {
             if (value == null) {
