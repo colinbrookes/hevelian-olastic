@@ -1,17 +1,14 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.elasticsearch.index.query.QueryBuilder;
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 
 import java.util.List;
-import java.util.Locale;
 
-import static com.hevelian.olastic.core.elastic.ElasticConstants.ID_FIELD_NAME;
-import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.server.api.ODataApplicationException;
+
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 
 /**
  * Wraps raw olingo primitive.
@@ -67,13 +64,13 @@ public class PrimitiveMember extends AnnotatedMember {
     @Override
     public ExpressionResult startsWith(ExpressionMember right) {
         LiteralMember literal = (LiteralMember) right;
-        return new ExpressionResult(buildStartsWithQuery(this, (String)literal.getValue()));
+        return new ExpressionResult(buildStartsWithQuery(this, (String) literal.getValue()));
     }
 
     @Override
     public ExpressionResult endsWith(ExpressionMember right) {
         LiteralMember literal = (LiteralMember) right;
-        return new ExpressionResult(buildEndsWithQuery(this, (String)literal.getValue()));
+        return new ExpressionResult(buildEndsWithQuery(this, (String) literal.getValue()));
     }
 
     @Override
@@ -81,30 +78,5 @@ public class PrimitiveMember extends AnnotatedMember {
         // Elasticsearch doesn't distinguish between search by the date and
         // search by the timestamp, so no conversion is needed
         return this;
-    }
-
-    /**
-     * Gets query for equals and not equals operations.
-     * 
-     * @param expressionMember
-     *            member with value
-     * @return appropriate query
-     */
-    protected QueryBuilder getEqQuery(ExpressionMember expressionMember) throws ODataApplicationException{
-        Object value = ((LiteralMember) expressionMember).getValue();
-        if (getField().equals(ID_FIELD_NAME)) {
-            if (value == null) {
-                throw new ODataApplicationException("Id value can not be null", HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                        Locale.ROOT);
-            }
-            return idsQuery().addIds(value.toString());
-        } else {
-            String fieldName = addKeywordIfNeeded(getField(), getAnnotations());
-            if (value == null) {
-                return boolQuery().mustNot(existsQuery(fieldName));
-            } else {
-                return termQuery(fieldName, value);
-            }
-        }
     }
 }

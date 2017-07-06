@@ -48,10 +48,9 @@ public class LiteralMember extends BaseMember {
                 values.add(string.replace("\"", ""));
             }
             return values;
-        } else if (tokenizer.next(TokenKind.NULL)){
+        } else if (tokenizer.next(TokenKind.NULL)) {
             return null;
-        }
-        else {
+        } else {
             return value;
         }
     }

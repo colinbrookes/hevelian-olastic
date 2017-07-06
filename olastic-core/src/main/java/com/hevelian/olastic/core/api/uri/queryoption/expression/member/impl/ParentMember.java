@@ -1,15 +1,17 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.elasticsearch.index.query.QueryBuilder;
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.hasParentQuery;
+import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 
 import java.util.List;
 import java.util.ListIterator;
 
-import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.elasticsearch.index.query.QueryBuilder;
+
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 
 /**
  * Wraps the data needed for building parent query.
@@ -20,24 +22,19 @@ public class ParentMember extends AnnotatedMember {
 
     private List<String> parentTypes;
 
-    public ParentMember(List<String> parentTypes, String field,  List<EdmAnnotation> annotations) {
+    public ParentMember(List<String> parentTypes, String field, List<EdmAnnotation> annotations) {
         super(field, annotations);
         this.parentTypes = parentTypes;
     }
 
     @Override
     public ExpressionResult eq(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = termQuery(addKeywordIfNeeded(getField(), getAnnotations()),
-                ((LiteralMember) expressionMember).getValue());
-        return buildParentQuery(query);
+        return buildParentQuery(getEqQuery(expressionMember));
     }
 
     @Override
     public ExpressionResult ne(ExpressionMember expressionMember) throws ODataApplicationException {
-        QueryBuilder query = boolQuery()
-                .mustNot(termQuery(addKeywordIfNeeded(getField(), getAnnotations()),
-                        ((LiteralMember) expressionMember).getValue()));
-        return buildParentQuery(query);
+        return buildParentQuery(boolQuery().mustNot(getEqQuery(expressionMember)));
     }
 
     @Override
@@ -78,14 +75,14 @@ public class ParentMember extends AnnotatedMember {
     @Override
     public ExpressionResult startsWith(ExpressionMember right) {
         LiteralMember literal = (LiteralMember) right;
-        QueryBuilder query =  buildStartsWithQuery(this, (String)literal.getValue());
+        QueryBuilder query = buildStartsWithQuery(this, (String) literal.getValue());
         return buildParentQuery(query);
     }
 
     @Override
     public ExpressionResult endsWith(ExpressionMember right) {
         LiteralMember literal = (LiteralMember) right;
-        QueryBuilder query = buildEndsWithQuery(this, (String)literal.getValue());
+        QueryBuilder query = buildEndsWithQuery(this, (String) literal.getValue());
         return buildParentQuery(query);
     }
 
@@ -98,7 +95,9 @@ public class ParentMember extends AnnotatedMember {
 
     /**
      * Builds parent ES query using provided query.
-     * @param query query
+     * 
+     * @param query
+     *            query
      * @return parent query
      */
     public ExpressionResult buildParentQuery(QueryBuilder query) {
