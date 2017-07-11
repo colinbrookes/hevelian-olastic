@@ -24,10 +24,6 @@ public class ChildMember extends BaseMember {
 
     @Override
     public ExpressionResult any() throws ODataApplicationException {
-        return buildChildQuery();
-    }
-
-    private ExpressionResult buildChildQuery() {
         return new ExpressionResult(hasChildQuery(childType, query, ScoreMode.None));
     }
 

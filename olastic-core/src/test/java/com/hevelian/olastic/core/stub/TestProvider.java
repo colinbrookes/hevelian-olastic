@@ -18,7 +18,8 @@ import java.util.List;
  */
 public class TestProvider extends ElasticCsdlEdmProvider {
 
-    private static List<CsdlAnnotation> analyzedAnnotations = Arrays.asList(new AnnotationProvider().getAnnotation(AnnotationProvider.ANALYZED_TERM_NAME));
+    private static List<CsdlAnnotation> analyzedAnnotations = Arrays
+            .asList(new AnnotationProvider().getAnnotation(AnnotationProvider.ANALYZED_TERM_NAME));
     public static final String NAMESPACE = "OData.Test";
     public static final String CONTAINER_NAME = "Container";
     public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE,
@@ -178,7 +179,8 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                     .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
             CsdlProperty birthDate = new ElasticCsdlProperty().setName("birthDate")
                     .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName());
-            CsdlProperty name = new ElasticCsdlProperty().setName("name").setAnnotations(analyzedAnnotations)
+            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+                    .setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(AUTHOR_TYPE);
@@ -191,9 +193,11 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(ADDRESS_FQN)) {
 
-            CsdlProperty address = new ElasticCsdlProperty().setName("address").setAnnotations(analyzedAnnotations)
+            CsdlProperty address = new ElasticCsdlProperty().setName("address")
+                    .setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-            CsdlProperty city = new ElasticCsdlProperty().setName("_city").setAnnotations(analyzedAnnotations)
+            CsdlProperty city = new ElasticCsdlProperty().setName("_city")
+                    .setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             CsdlPropertyRef cityPropertyRef = new CsdlPropertyRef();
@@ -214,10 +218,10 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(BOOK_FQN)) {
 
-            CsdlProperty title = new ElasticCsdlProperty().setName("title").setAnnotations(analyzedAnnotations)
+            CsdlProperty title = new ElasticCsdlProperty().setName("title")
+                    .setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-            CsdlProperty info = new ElasticCsdlProperty().setName("info")
-                    .setType(BOOK_INFO_FQN);
+            CsdlProperty info = new ElasticCsdlProperty().setName("info").setType(BOOK_INFO_FQN);
 
             entityType.setName(BOOK_TYPE);
             entityType.setEType(BOOK_TYPE);
@@ -230,7 +234,8 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             return entityType;
         } else if (entityTypeName.equals(CHARACTER_FQN)) {
 
-            CsdlProperty name = new ElasticCsdlProperty().setName("name").setAnnotations(analyzedAnnotations)
+            CsdlProperty name = new ElasticCsdlProperty().setName("name")
+                    .setAnnotations(analyzedAnnotations)
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(CHARACTER_TYPE);
@@ -305,8 +310,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
         if (complexTypeName.equals(BOOK_INFO_FQN)) {
             ElasticCsdlComplexType complexType = new ElasticCsdlComplexType();
             List<CsdlProperty> complexTypeProperties = new ArrayList<>();
-            CsdlProperty pages = new ElasticCsdlProperty().setName("pages")
-                    .setType(BOOK_PAGES_FQN)
+            CsdlProperty pages = new ElasticCsdlProperty().setName("pages").setType(BOOK_PAGES_FQN)
                     .setCollection(true);
             complexTypeProperties.add(pages);
             complexType.setName(BOOK_INFO_TYPE);
@@ -330,8 +334,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                     .setCollection(true);
             CsdlProperty analyzedWords = new ElasticCsdlProperty().setName("analyzedWords")
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                    .setAnnotations(analyzedAnnotations)
-                    .setCollection(true);
+                    .setAnnotations(analyzedAnnotations).setCollection(true);
             complexTypeProperties.add(pageNumber);
             complexTypeProperties.add(pageName);
             complexTypeProperties.add(analyzedPageName);

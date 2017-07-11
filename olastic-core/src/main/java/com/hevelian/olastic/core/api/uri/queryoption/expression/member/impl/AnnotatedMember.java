@@ -40,6 +40,8 @@ public abstract class AnnotatedMember extends BaseMember {
      * @param expressionMember
      *            member with value
      * @return appropriate query
+     * @throws ODataApplicationException
+     *             if any error occurred during creating query
      */
     protected QueryBuilder getEqQuery(ExpressionMember expressionMember)
             throws ODataApplicationException {

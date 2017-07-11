@@ -1,5 +1,8 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -7,14 +10,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Tests for {@link ExpressionResult} class.
+ * 
  * @author Taras Kohut
  */
 public class ExpressionResultTest {
-    QueryBuilder matchAllQuery = QueryBuilders.matchAllQuery();
+    private QueryBuilder matchAllQuery = QueryBuilders.matchAllQuery();
 
     @Test
     public void getQueryBuilder() throws Exception {
@@ -31,8 +33,8 @@ public class ExpressionResultTest {
         JSONObject queryObj = new JSONObject(result.getQueryBuilder().toString());
         JSONObject rootObj = queryObj.getJSONObject("bool");
         JSONArray mustArr = rootObj.getJSONArray("must");
-        JSONObject leftMatchAll = ((JSONObject)mustArr.get(0)).getJSONObject("match_all");
-        JSONObject rightMatchAll = ((JSONObject)mustArr.get(1)).getJSONObject("match_all");
+        JSONObject leftMatchAll = ((JSONObject) mustArr.get(0)).getJSONObject("match_all");
+        JSONObject rightMatchAll = ((JSONObject) mustArr.get(1)).getJSONObject("match_all");
         assertNotNull(leftMatchAll);
         assertNotNull(rightMatchAll);
     }
@@ -46,8 +48,8 @@ public class ExpressionResultTest {
         JSONObject queryObj = new JSONObject(result.getQueryBuilder().toString());
         JSONObject rootObj = queryObj.getJSONObject("bool");
         JSONArray mustArr = rootObj.getJSONArray("should");
-        JSONObject leftMatchAll = ((JSONObject)mustArr.get(0)).getJSONObject("match_all");
-        JSONObject rightMatchAll = ((JSONObject)mustArr.get(1)).getJSONObject("match_all");
+        JSONObject leftMatchAll = ((JSONObject) mustArr.get(0)).getJSONObject("match_all");
+        JSONObject rightMatchAll = ((JSONObject) mustArr.get(1)).getJSONObject("match_all");
         assertNotNull(leftMatchAll);
         assertNotNull(rightMatchAll);
     }
@@ -60,7 +62,7 @@ public class ExpressionResultTest {
         JSONObject queryObj = new JSONObject(result.getQueryBuilder().toString());
         JSONObject rootObj = queryObj.getJSONObject("bool");
         JSONArray mustArr = rootObj.getJSONArray("must_not");
-        JSONObject matchAllObj = ((JSONObject)mustArr.get(0)).getJSONObject("match_all");
+        JSONObject matchAllObj = ((JSONObject) mustArr.get(0)).getJSONObject("match_all");
         assertNotNull(matchAllObj);
     }
 

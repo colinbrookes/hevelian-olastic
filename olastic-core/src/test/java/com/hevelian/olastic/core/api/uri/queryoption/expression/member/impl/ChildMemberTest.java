@@ -1,20 +1,22 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Tests for {@link ChildMember} class.
+ * 
  * @author Taras Kohut
  */
 public class ChildMemberTest {
-    String type = "someType";
-    QueryBuilder query = QueryBuilders.matchAllQuery();
+    private String type = "someType";
+    private QueryBuilder query = QueryBuilders.matchAllQuery();
 
     @Test
     public void any_matchAllQuery_TypeAndQueryAreCorrect() throws Exception {
@@ -23,7 +25,7 @@ public class ChildMemberTest {
 
         JSONObject queryObj = new JSONObject(result.getQueryBuilder().toString());
         JSONObject rootObj = queryObj.getJSONObject("has_child");
-        String actualType = (String)rootObj.get("type");
+        String actualType = (String) rootObj.get("type");
         JSONObject queryObject = rootObj.getJSONObject("query");
         JSONObject matchAll = queryObject.getJSONObject("match_all");
         assertNotNull(matchAll);

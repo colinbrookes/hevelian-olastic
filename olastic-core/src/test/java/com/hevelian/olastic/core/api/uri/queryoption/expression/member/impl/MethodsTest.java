@@ -1,17 +1,18 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import com.hevelian.olastic.core.elastic.ElasticConstants;
+import static com.hevelian.olastic.core.TestUtils.getAnalyzedAnnotation;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static com.hevelian.olastic.core.TestUtils.getAnalyzedAnnotation;
-import static org.junit.Assert.assertEquals;
+import com.hevelian.olastic.core.elastic.ElasticConstants;
 
 /**
  * Tests for Built-in odata Query Functions.
@@ -19,10 +20,10 @@ import static org.junit.Assert.assertEquals;
  * @author Taras Kohut
  */
 public class MethodsTest {
-    String field = "someField";
-    String value = "'value'";
-    EdmType edmString = new EdmString();
-    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
+    private String field = "someField";
+    private String value = "'value'";
+    private EdmType edmString = new EdmString();
+    private List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
 
     @Test
     public void contains_PrimitiveAndLiteral_QueryIsCorrect() throws Exception {

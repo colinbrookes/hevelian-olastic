@@ -1,5 +1,14 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
+import static com.hevelian.olastic.core.TestUtils.checkFilterEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterNotEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterRangeQuery;
+import static com.hevelian.olastic.core.TestUtils.getAnalyzedAnnotation;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmInt32;
@@ -7,23 +16,20 @@ import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static com.hevelian.olastic.core.TestUtils.*;
-import static org.junit.Assert.assertEquals;
-
 /**
  * Tests for {@link PrimitiveMember} class.
+ * 
  * @author Taras Kohut
  */
 public class PrimitiveMemberTest {
-    String field = "someField";
-    String value = "'value'";
-    String intValue = "10";
-    EdmType edmString = new EdmString();
-    EdmType edmInt = new EdmInt32();
-    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
+    private String field = "someField";
+    private String value = "'value'";
+    private String intValue = "10";
+
+    private EdmType edmString = new EdmString();
+    private EdmType edmInt = new EdmInt32();
+    private List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
+
     @Test
     public void eq_PrimitiveAndLiteral_CorrectESQuery() throws Exception {
         PrimitiveMember left = new PrimitiveMember(field, annotations);

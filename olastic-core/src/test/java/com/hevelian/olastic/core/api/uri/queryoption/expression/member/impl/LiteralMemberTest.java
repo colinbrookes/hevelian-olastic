@@ -16,20 +16,21 @@ import static com.hevelian.olastic.core.TestUtils.*;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests for  {@link LiteralMember} class.
+ * Tests for {@link LiteralMember} class.
+ * 
  * @author Taras Kohut
  */
 public class LiteralMemberTest {
 
-    String field = "someField";
-    String value = "'value'";
+    private String field = "someField";
+    private String value = "'value'";
+    private String intValue = "10";
 
-    String intValue = "10";
-    EdmType edmString = new EdmString();
-    List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
-    List<EdmAnnotation> emptyAnnotations = Collections.emptyList();
-    EdmType edmInt = new EdmInt32();
-    List<String> parentTypes = Arrays.asList("parentType");
+    private EdmType edmString = new EdmString();
+    private List<EdmAnnotation> annotations = Arrays.asList(getAnalyzedAnnotation());
+    private List<EdmAnnotation> emptyAnnotations = Collections.emptyList();
+    private EdmType edmInt = new EdmInt32();
+    private List<String> parentTypes = Arrays.asList("parentType");
 
     @Test
     public void getValue_String_CorrectValue() throws Exception {
@@ -46,17 +47,19 @@ public class LiteralMemberTest {
     @Test
     public void eq_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
-        ParentMember right = new ParentMember(parentTypes, field, annotations);
-        ExpressionResult result = (ExpressionResult)left.eq(right);
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, annotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(parentTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.eq(right);
 
-        checkFilterParentEqualsQuery(result.getQueryBuilder().toString(), parentTypes.get(0), field, value);
+        checkFilterParentEqualsQuery(result.getQueryBuilder().toString(), parentTypes.get(0), field,
+                value);
     }
 
     @Test
     public void eq_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
         PrimitiveMember right = new PrimitiveMember(field, annotations);
-        ExpressionResult result = (ExpressionResult)left.eq(right);
+        ExpressionResult result = (ExpressionResult) left.eq(right);
 
         checkFilterEqualsQuery(result.getQueryBuilder().toString(), field, value);
     }
@@ -65,42 +68,45 @@ public class LiteralMemberTest {
     public void eq_SeveralTypes_CorrectParentQuery() throws Exception {
         List<String> severalTypes = Arrays.asList("Author", "Book", "Character");
         LiteralMember left = new LiteralMember(value, edmString);
-        ParentMember right = new ParentMember(severalTypes, field, annotations);
-        ExpressionResult result = (ExpressionResult)left.eq(right);
-        JSONObject firstChild = new JSONObject(result.getQueryBuilder().toString()).getJSONObject("has_parent");
-        String firstActualType = (String)firstChild.get("parent_type");
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, annotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(severalTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.eq(right);
+        JSONObject firstChild = new JSONObject(result.getQueryBuilder().toString())
+                .getJSONObject("has_parent");
+        String firstActualType = (String) firstChild.get("parent_type");
         assertEquals(severalTypes.get(0), firstActualType);
 
         JSONObject secondChild = firstChild.getJSONObject("query").getJSONObject("has_parent");
-        String secondActualType = (String)secondChild.get("parent_type");
+        String secondActualType = (String) secondChild.get("parent_type");
         assertEquals(severalTypes.get(1), secondActualType);
 
         JSONObject thirdChild = secondChild.getJSONObject("query").getJSONObject("has_parent");
-        String thirdActualType = (String)thirdChild.get("parent_type");
+        String thirdActualType = (String) thirdChild.get("parent_type");
         assertEquals(severalTypes.get(2), thirdActualType);
 
         JSONObject rootObj = thirdChild.getJSONObject("query").getJSONObject("term");
         String fieldName = field + ".keyword";
         JSONObject valueObject = rootObj.getJSONObject(fieldName);
-        String actualValue = (String)valueObject.get("value");
-        assertEquals(value.substring(1,value.length()-1), actualValue);
+        String actualValue = (String) valueObject.get("value");
+        assertEquals(value.substring(1, value.length() - 1), actualValue);
     }
-
 
     @Test
     public void ne_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
-        ParentMember right = new ParentMember(parentTypes, field, annotations);
-        ExpressionResult result = (ExpressionResult)left.ne(right);
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, annotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(parentTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.ne(right);
 
-        checkFilterParentNotEqualsQuery(result.getQueryBuilder().toString(), parentTypes.get(0), field, value);
+        checkFilterParentNotEqualsQuery(result.getQueryBuilder().toString(), parentTypes.get(0),
+                field, value);
     }
 
     @Test
     public void ne_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(value, edmString);
         PrimitiveMember right = new PrimitiveMember(field, annotations);
-        ExpressionResult result = (ExpressionResult)left.ne(right);
+        ExpressionResult result = (ExpressionResult) left.ne(right);
 
         checkFilterNotEqualsQuery(result.getQueryBuilder().toString(), field, value);
     }
@@ -108,64 +114,72 @@ public class LiteralMemberTest {
     @Test
     public void ge_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.ge(right);
-        checkParentRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "to", intValue);
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, emptyAnnotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(parentTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.ge(right);
+        checkParentRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "to",
+                intValue);
     }
 
     @Test
     public void ge_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
         PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.ge(right);
-        checkFilterRangeQuery(result.getQueryBuilder().toString(), "le", field,  intValue);
+        ExpressionResult result = (ExpressionResult) left.ge(right);
+        checkFilterRangeQuery(result.getQueryBuilder().toString(), "le", field, intValue);
     }
 
     @Test
     public void gtLiteralAndParentCorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.gt(right);
-        checkParentRangeQuery(result.getQueryBuilder().toString(), true, false, "range", field, "to", intValue);
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, emptyAnnotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(parentTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.gt(right);
+        checkParentRangeQuery(result.getQueryBuilder().toString(), true, false, "range", field,
+                "to", intValue);
     }
 
     @Test
     public void gtLiteralAndPrimitiveCorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
         PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.gt(right);
+        ExpressionResult result = (ExpressionResult) left.gt(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "lt", field, intValue);
     }
 
     @Test
     public void le_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.le(right);
-        checkParentRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field, "from", intValue);
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, emptyAnnotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(parentTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.le(right);
+        checkParentRangeQuery(result.getQueryBuilder().toString(), true, true, "range", field,
+                "from", intValue);
     }
 
     @Test
     public void le_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
         PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.le(right);
+        ExpressionResult result = (ExpressionResult) left.le(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "ge", field, intValue);
     }
 
     @Test
     public void lt_LiteralAndParent_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
-        ParentMember right = new ParentMember(parentTypes, field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.lt(right);
-        checkParentRangeQuery(result.getQueryBuilder().toString(), false, true, "range", field, "from", intValue);
+        PrimitiveMember primitiveMember = new PrimitiveMember(field, emptyAnnotations);
+        ParentPrimitiveMember right = new ParentPrimitiveMember(parentTypes, primitiveMember);
+        ExpressionResult result = (ExpressionResult) left.lt(right);
+        checkParentRangeQuery(result.getQueryBuilder().toString(), false, true, "range", field,
+                "from", intValue);
     }
 
     @Test
     public void lt_LiteralAndPrimitive_CorrectESQuery() throws Exception {
         LiteralMember left = new LiteralMember(intValue, edmInt);
         PrimitiveMember right = new PrimitiveMember(field, emptyAnnotations);
-        ExpressionResult result = (ExpressionResult)left.lt(right);
+        ExpressionResult result = (ExpressionResult) left.lt(right);
         checkFilterRangeQuery(result.getQueryBuilder().toString(), "gt", field, intValue);
     }
 
@@ -215,13 +229,14 @@ public class LiteralMemberTest {
     }
 
     private void checkParentRangeQuery(String query, boolean includeLower, boolean includeUpper,
-                                 String rootKey, String field, String valueKey, Object expValue) throws ODataApplicationException {
+            String rootKey, String field, String valueKey, Object expValue)
+            throws ODataApplicationException {
         JSONObject parentObj = new JSONObject(query).getJSONObject("has_parent");
-        String actualType = (String)parentObj.get("parent_type");
+        String actualType = (String) parentObj.get("parent_type");
         assertEquals(parentTypes.get(0), actualType);
         JSONObject rootObj = parentObj.getJSONObject("query").getJSONObject(rootKey);
         JSONObject valueObject = rootObj.getJSONObject(field);
-        String actualValue = (String)valueObject.get(valueKey);
+        String actualValue = (String) valueObject.get(valueKey);
         assertEquals(expValue, actualValue);
         assertEquals(valueObject.get("include_lower"), includeLower);
         assertEquals(valueObject.get("include_upper"), includeUpper);
