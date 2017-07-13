@@ -6,15 +6,15 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 
 /**
- * Wraps the data for parent nested query building.
+ * Wraps the nested or child query info parent types query.
  *
  * @author Ruslan Didyk
  */
-public class ParentNestedMember extends ParentMember {
+public class ParentWrapperMember extends ParentMember {
 
     private QueryBuilder query;
 
-    public ParentNestedMember(List<String> parentTypes, QueryBuilder query) {
+    public ParentWrapperMember(List<String> parentTypes, QueryBuilder query) {
         super(parentTypes);
         this.query = query;
     }

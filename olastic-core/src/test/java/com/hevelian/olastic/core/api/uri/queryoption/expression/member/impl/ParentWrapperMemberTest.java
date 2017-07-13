@@ -12,16 +12,16 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 /**
- * Tests for {@link ParentNestedMember} class.
+ * Tests for {@link ParentWrapperMember} class.
  * 
  * @author Ruslan Didyk
  */
-public class ParentNestedMemberTest {
+public class ParentWrapperMemberTest {
 
     private List<String> parentTypes;
     private QueryBuilder query;
 
-    public ParentNestedMemberTest() throws ODataApplicationException {
+    public ParentWrapperMemberTest() throws ODataApplicationException {
         this.parentTypes = Arrays.asList("author");
         this.query = new NestedMember("_dimension", QueryBuilders.termQuery("name", "Validity"))
                 .any().getQueryBuilder();
@@ -29,7 +29,7 @@ public class ParentNestedMemberTest {
 
     @Test
     public void any_NestedQuery_TypeAndQueryAreCorrect() throws Exception {
-        ParentNestedMember nestedMember = new ParentNestedMember(parentTypes, query);
+        ParentWrapperMember nestedMember = new ParentWrapperMember(parentTypes, query);
         ExpressionResult result = nestedMember.any();
         String query = result.getQueryBuilder().toString();
 
@@ -47,72 +47,72 @@ public class ParentNestedMemberTest {
 
     @Test(expected = ODataApplicationException.class)
     public void eq_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).eq(null);
+        new ParentWrapperMember(parentTypes, query).eq(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void ne_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).ne(null);
+        new ParentWrapperMember(parentTypes, query).ne(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void le_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).le(null);
+        new ParentWrapperMember(parentTypes, query).le(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void lt_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).lt(null);
+        new ParentWrapperMember(parentTypes, query).lt(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void ge_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).ge(null);
+        new ParentWrapperMember(parentTypes, query).ge(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void gt_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).gt(null);
+        new ParentWrapperMember(parentTypes, query).gt(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void all_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).all();
+        new ParentWrapperMember(parentTypes, query).all();
     }
 
     @Test(expected = ODataApplicationException.class)
     public void contains_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).contains(null);
+        new ParentWrapperMember(parentTypes, query).contains(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void startsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).startsWith(null);
+        new ParentWrapperMember(parentTypes, query).startsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void endsWith_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).endsWith(null);
+        new ParentWrapperMember(parentTypes, query).endsWith(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void date_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).date();
+        new ParentWrapperMember(parentTypes, query).date();
     }
 
     @Test(expected = ODataApplicationException.class)
     public void and_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).and(null);
+        new ParentWrapperMember(parentTypes, query).and(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void or_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).or(null);
+        new ParentWrapperMember(parentTypes, query).or(null);
     }
 
     @Test(expected = ODataApplicationException.class)
     public void not_ExceptionIsThrown() throws ODataApplicationException {
-        new ParentNestedMember(parentTypes, query).not();
+        new ParentWrapperMember(parentTypes, query).not();
     }
 
 }

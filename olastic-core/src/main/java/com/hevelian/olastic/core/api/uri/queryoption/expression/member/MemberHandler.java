@@ -35,7 +35,7 @@ import org.apache.olingo.server.core.uri.UriInfoImpl;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ChildMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.NestedMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ParentNestedMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ParentWrapperMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ParentPrimitiveMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.PrimitiveMember;
 import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
@@ -58,7 +58,7 @@ public class MemberHandler {
      */
     private String pathToMember;
     private Map<String, UriResource> collectionResourceCache;
-    ExpressionVisitor<?> visitor;
+    private ExpressionVisitor<?> visitor;
 
     /**
      * Initializes member handler using raw olingo expression member.
@@ -152,27 +152,28 @@ public class MemberHandler {
         boolean isNavigationLambdaVar = firstPart instanceof UriResourcePartTyped
                 && ((UriResourcePartTyped) firstPart).getType() instanceof EdmEntityType;
         if (firstPart instanceof UriResourceNavigation || isNavigationLambdaVar) {
-            boolean anyComplexProperty = resourceParts.stream()
+            boolean isParentNestedLambdaVar = resourceParts.stream()
                     .anyMatch(part -> part instanceof UriResourceComplexProperty);
-            // navigation property collection
-            // author?$filter=book/any(b:b/character/any(c:c/name eq 'Oliver'))
-            if (!anyComplexProperty) {
-                // pre-last resource - the one before lambda; it's always a
-                // collection type
-                ExpressionResult lambdaResult = (ExpressionResult) lambda.getExpression()
-                        .accept(visitor);
-                UriResourceNavigation preLastNavResource = (UriResourceNavigation) resourceParts
-                        .get(resourceParts.size() - 2);
-                ElasticEdmEntityType entityType = (ElasticEdmEntityType) preLastNavResource
-                        .getProperty().getType();
-                return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
-            }
-            // navigation parent nested collection
-            // book?$filter=author/_dimension/any(d:d/name eq 'Validity')
-            else {
+            List<String> navigationTypes = collectNavigationTypes();
+            if (isParentNestedLambdaVar) {
+                // navigation parent nested collection
+                // book?$filter=author/_dimension/any(d:d/name eq 'Validity')
                 ExpressionResult lambdaResult = handleLambdaAny(expression);
-                return new ParentNestedMember(collectNavigationTypes(),
-                        lambdaResult.getQueryBuilder()).any();
+                return new ParentWrapperMember(navigationTypes, lambdaResult.getQueryBuilder())
+                        .any();
+            } else {
+                if (resourceParts.size() > 2) {
+                    // navigation parent to another child
+                    // book?$filter=author/address/any(a:a/city eq 'New York'))
+                    List<String> parentTypes = navigationTypes.subList(0, navigationTypes.size() - 1);
+                    return new ParentWrapperMember(parentTypes,
+                            handleChildLambda(lambda).getQueryBuilder()).any();
+                } else {
+                    // navigation child property collection
+                    // author?$filter=book/any(b:b/character/any(c:c/name eq
+                    // 'Oliver'))
+                    return handleChildLambda(lambda);
+                }
             }
         } else {
             // complex or primitive type collection
@@ -180,11 +181,22 @@ public class MemberHandler {
         }
     }
 
+    private ExpressionResult handleChildLambda(UriResourceLambdaAny lambda)
+            throws ExpressionVisitException, ODataApplicationException {
+        ExpressionResult lambdaResult = (ExpressionResult) lambda.getExpression().accept(visitor);
+        // pre-last resource - before lambda; it's always a collection type
+        UriResourceNavigation preLastNavResource = (UriResourceNavigation) resourceParts
+                .get(resourceParts.size() - 2);
+        ElasticEdmEntityType entityType = (ElasticEdmEntityType) preLastNavResource.getProperty()
+                .getType();
+        return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
+    }
+
     private ExpressionResult handleLambdaAny(Expression lambdaExpression)
             throws ODataApplicationException, ExpressionVisitException {
         setPath(lambdaExpression);
         // if any lambda uses primitive property
-        // (//Books?$filter=property/any(p:p eq 'value'))
+        // Books?$filter=property/any(p:p eq 'value')
         // than parent path already contains path and property name
         // that's why we need to retrieve only nested path
         String nestedPath = isPreLastResourcePrimitive()

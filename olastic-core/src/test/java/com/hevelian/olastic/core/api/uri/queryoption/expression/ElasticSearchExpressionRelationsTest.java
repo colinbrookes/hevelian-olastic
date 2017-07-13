@@ -1,18 +1,19 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
+import static com.hevelian.olastic.core.TestUtils.checkFilterGrandChildEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterGrandParentEqualsQuery;
+import static com.hevelian.olastic.core.TestUtils.checkFilterParentEqualsQuery;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static com.hevelian.olastic.core.TestUtils.checkFilterGrandParentEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterParentEqualsQuery;
-import static com.hevelian.olastic.core.TestUtils.checkFilterGrandChildEqualsQuery;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
 
 /**
  * @author Taras Kohut
@@ -361,6 +362,113 @@ public class ElasticSearchExpressionRelationsTest extends ElasticSearchExpressio
         JSONObject secondTermValue = must.getJSONObject(1).getJSONObject("term")
                 .getJSONObject("_dimension.state");
         assertEquals("true", secondTermValue.get("value"));
+    }
+
+    @Test
+    public void visitMember_ParentChildLambdaAnyByComplexType_correctESQuery() throws Exception {
+        String rawODataPath = "/address";
+        String rawQueryPath = "$filter=author/book/any(b:b/_dimension/any(d:(d/name eq 'Validity' and d/state eq 'true')))";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
+
+        JSONObject parent = new JSONObject(query).getJSONObject("has_parent");
+        String actualParentType = (String) parent.get("parent_type");
+        assertEquals("author", actualParentType);
+
+        JSONObject childObj = parent.getJSONObject("query").getJSONObject("has_child");
+        String actualChildType = (String) childObj.get("type");
+        assertEquals("book", actualChildType);
+
+        JSONObject rootObj = childObj.getJSONObject("query").getJSONObject("nested");
+        String actualNestedType = (String) rootObj.get("path");
+        assertEquals("_dimension", actualNestedType);
+        JSONObject queryObject = rootObj.getJSONObject("query");
+        JSONArray must = queryObject.getJSONObject("bool").getJSONArray("must");
+        JSONObject firstTermValue = must.getJSONObject(0).getJSONObject("term")
+                .getJSONObject("_dimension.name");
+        assertEquals("Validity", firstTermValue.get("value"));
+        JSONObject secondTermValue = must.getJSONObject(1).getJSONObject("term")
+                .getJSONObject("_dimension.state");
+        assertEquals("true", secondTermValue.get("value"));
+    }
+
+    @Test
+    public void visitMember_ParentGrandChildLambdaAnyByComplexType_correctESQuery()
+            throws Exception {
+        String rawODataPath = "/author";
+        String rawQueryPath = "$filter=book/any(b:b/character/any(c:c/_dimension/any(d:(d/name eq 'Validity' and d/state eq 'true'))))";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
+
+        JSONObject childObj = new JSONObject(query).getJSONObject("has_child");
+        String actualChildType = (String) childObj.get("type");
+        assertEquals("book", actualChildType);
+
+        JSONObject grandChildObj = childObj.getJSONObject("query").getJSONObject("has_child");
+        String actualGrandParentType = (String) grandChildObj.get("type");
+        assertEquals("character", actualGrandParentType);
+
+        JSONObject rootObj = grandChildObj.getJSONObject("query").getJSONObject("nested");
+        String actualNestedType = (String) rootObj.get("path");
+        assertEquals("_dimension", actualNestedType);
+        JSONObject queryObject = rootObj.getJSONObject("query");
+        JSONArray must = queryObject.getJSONObject("bool").getJSONArray("must");
+        JSONObject firstTermValue = must.getJSONObject(0).getJSONObject("term")
+                .getJSONObject("_dimension.name");
+        assertEquals("Validity", firstTermValue.get("value"));
+        JSONObject secondTermValue = must.getJSONObject(1).getJSONObject("term")
+                .getJSONObject("_dimension.state");
+        assertEquals("true", secondTermValue.get("value"));
+    }
+
+    @Test
+    public void visitMember_ParentChildProperty_correctESQuery() throws Exception {
+        String rawODataPath = "/address";
+        String rawQueryPath = "$filter=author/book/any(b:b/title eq 'Piter Pen')";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
+
+        JSONObject parent = new JSONObject(query).getJSONObject("has_parent");
+        String actualParentType = (String) parent.get("parent_type");
+        assertEquals("author", actualParentType);
+
+        JSONObject childObj = parent.getJSONObject("query").getJSONObject("has_child");
+        String actualChildType = (String) childObj.get("type");
+        assertEquals("book", actualChildType);
+
+        JSONObject term = childObj.getJSONObject("query").getJSONObject("term");
+        assertEquals("Piter Pen", term.getJSONObject("title.keyword").get("value"));
+    }
+
+    @Test
+    public void visitMember_ParentGrandChildProperty_correctESQuery() throws Exception {
+        String rawODataPath = "/address";
+        String rawQueryPath = "$filter=author/book/any(b:b/character/any(c:c/name eq 'Piter'))";
+        UriInfo uriInfo = buildUriInfo(defaultMetadata, defaultOData, rawODataPath, rawQueryPath);
+        ExpressionMember result = uriInfo.getFilterOption().getExpression()
+                .accept(new ElasticSearchExpressionVisitor());
+        String query = ((ExpressionResult) result).getQueryBuilder().toString();
+
+        JSONObject parent = new JSONObject(query).getJSONObject("has_parent");
+        String actualParentType = (String) parent.get("parent_type");
+        assertEquals("author", actualParentType);
+
+        JSONObject childObj = parent.getJSONObject("query").getJSONObject("has_child");
+        String actualChildType = (String) childObj.get("type");
+        assertEquals("book", actualChildType);
+
+        JSONObject grandChildObj = childObj.getJSONObject("query").getJSONObject("has_child");
+        String actualGrandParentType = (String) grandChildObj.get("type");
+        assertEquals("character", actualGrandParentType);
+
+        JSONObject term = grandChildObj.getJSONObject("query").getJSONObject("term");
+        assertEquals("Piter", term.getJSONObject("name.keyword").get("value"));
     }
 
 }
