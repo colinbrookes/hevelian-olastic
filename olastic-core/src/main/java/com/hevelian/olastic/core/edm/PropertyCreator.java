@@ -1,5 +1,6 @@
 package com.hevelian.olastic.core.edm;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,6 +21,7 @@ import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmSingle;
 
 /**
  * Contains property creation logic.
@@ -68,6 +70,10 @@ public class PropertyCreator {
                 // number value (1,0), but when it searches then normal boolean
                 // value will be retrieved
                 modifiedValue = (Long) value != 0;
+            } else if (property.getType() instanceof EdmSingle && value instanceof Double) {
+                // Because Elasticsearch returns 'float' values as 'double'
+                // Link: https://github.com/elastic/elasticsearch/issues/25792
+                modifiedValue = new Float(((Double) value).doubleValue());
             }
             return createPrimitiveProperty(name, modifiedValue);
         } else {
