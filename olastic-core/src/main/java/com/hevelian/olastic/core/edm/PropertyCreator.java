@@ -1,6 +1,5 @@
 package com.hevelian.olastic.core.edm;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
