@@ -165,7 +165,8 @@ public class MemberHandler {
                 if (resourceParts.size() > 2) {
                     // navigation parent to another child
                     // book?$filter=author/address/any(a:a/city eq 'New York'))
-                    List<String> parentTypes = navigationTypes.subList(0, navigationTypes.size() - 1);
+                    List<String> parentTypes = navigationTypes.subList(0,
+                            navigationTypes.size() - 1);
                     return new ParentWrapperMember(parentTypes,
                             handleChildLambda(lambda).getQueryBuilder()).any();
                 } else {
@@ -179,17 +180,6 @@ public class MemberHandler {
             // complex or primitive type collection
             return handleLambdaAny(expression);
         }
-    }
-
-    private ExpressionResult handleChildLambda(UriResourceLambdaAny lambda)
-            throws ExpressionVisitException, ODataApplicationException {
-        ExpressionResult lambdaResult = (ExpressionResult) lambda.getExpression().accept(visitor);
-        // pre-last resource - before lambda; it's always a collection type
-        UriResourceNavigation preLastNavResource = (UriResourceNavigation) resourceParts
-                .get(resourceParts.size() - 2);
-        ElasticEdmEntityType entityType = (ElasticEdmEntityType) preLastNavResource.getProperty()
-                .getType();
-        return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
     }
 
     private ExpressionResult handleLambdaAny(Expression lambdaExpression)
@@ -206,7 +196,17 @@ public class MemberHandler {
         ExpressionResult expressionResult = (ExpressionResult) lambdaExpression.accept(visitor);
         return isPreLastResourcePrimitive() ? expressionResult
                 : new NestedMember(nestedPath, expressionResult.getQueryBuilder()).any();
+    }
 
+    private ExpressionResult handleChildLambda(UriResourceLambdaAny lambda)
+            throws ExpressionVisitException, ODataApplicationException {
+        ExpressionResult lambdaResult = (ExpressionResult) lambda.getExpression().accept(visitor);
+        // pre-last resource - before lambda; it's always a collection type
+        UriResourceNavigation preLastNavResource = (UriResourceNavigation) resourceParts
+                .get(resourceParts.size() - 2);
+        ElasticEdmEntityType entityType = (ElasticEdmEntityType) preLastNavResource.getProperty()
+                .getType();
+        return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
     }
 
     private boolean isPreLastResourcePrimitive() {
@@ -246,30 +246,27 @@ public class MemberHandler {
             PrimitiveMember primitiveMember = new PrimitiveMember(
                     ((ElasticEdmProperty) lastProperty).getEField(), lastProperty.getAnnotations());
             return new ParentPrimitiveMember(collectNavigationTypes(), primitiveMember);
-        }
-        // filtering by complex type collection
-        // Books?$filter=nested/any(n:n/state eq true)
-        else if (firstPart instanceof UriResourceLambdaVariable
+        } else if (firstPart instanceof UriResourceLambdaVariable
                 && ((UriResourcePartTyped) firstPart).getType().getKind() == EdmTypeKind.COMPLEX) {
+            // filtering by complex type collection
+            // Books?$filter=nested/any(n:n/state eq true)
             EdmProperty lastProperty = ((UriResourceProperty) lastPart).getProperty();
             String parentPathPrefix = pathToMember != null ? pathToMember + NESTED_PATH_SEPARATOR
                     : "";
             String nestedPath = parentPathPrefix + lastProperty.getName();
             return new PrimitiveMember(nestedPath, lastProperty.getAnnotations());
-        }
-        // filtering by primitive type collection
-        // Books?$filter=nested/property/any(p:p/tags/any(t:t eq 'Tag'))
-        else if (firstPart instanceof UriResourceLambdaVariable
+        } else if (firstPart instanceof UriResourceLambdaVariable
                 && ((UriResourcePartTyped) firstPart).getType()
                         .getKind() == EdmTypeKind.PRIMITIVE) {
+            // filtering by primitive type collection
+            // Books?$filter=nested/property/any(p:p/tags/any(t:t eq 'Tag'))
             String nestedPath = pathToMember != null ? pathToMember : "";
             UriResource parentResource = collectionResourceCache.get(pathToMember);
 
             return new PrimitiveMember(nestedPath, getAnnotations(parentResource));
-        }
-        // simple primitive expression or expression inside lambda for
-        // retrieving children
-        else {
+        } else {
+            // simple primitive expression or expression inside lambda for
+            // retrieving children
             EdmProperty lastProperty = ((UriResourceProperty) lastPart).getProperty();
             return new PrimitiveMember(((ElasticEdmProperty) lastProperty).getEField(),
                     lastProperty.getAnnotations());

@@ -1,11 +1,17 @@
 package com.hevelian.olastic.core.edm;
 
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
-import org.apache.olingo.commons.api.edm.*;
+import java.util.Iterator;
+
+import org.apache.olingo.commons.api.edm.EdmBindingTarget;
+import org.apache.olingo.commons.api.edm.EdmEntityContainer;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.EdmException;
+import org.apache.olingo.commons.api.edm.EdmNavigationPropertyBinding;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.core.edm.EdmEntitySetImpl;
 import org.apache.olingo.commons.core.edm.Target;
 
-import java.util.Iterator;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEntitySet;
 
 /**
  * Custom implementation of {@link EdmEntityType}.
@@ -17,6 +23,16 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
     private ElasticCsdlEntitySet csdlEntitySet;
     private ElasticEdmProvider provider;
 
+    /**
+     * Initialize fields.
+     * 
+     * @param provider
+     *            the EDM provider
+     * @param container
+     *            the EDM entity container
+     * @param entitySet
+     *            the EDM entity set
+     */
     public ElasticEdmEntitySet(ElasticEdmProvider provider, EdmEntityContainer container,
             ElasticCsdlEntitySet entitySet) {
         super(provider, container, entitySet);
@@ -30,7 +46,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
      * @return index name
      */
     public String getEIndex() {
-        return csdlEntitySet.getEIndex();
+        return csdlEntitySet.getESIndex();
     }
 
     /**
@@ -39,13 +55,13 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
      * @return type name
      */
     public String getEType() {
-        return csdlEntitySet.getEType();
+        return csdlEntitySet.getESType();
     }
 
     @Override
     public ElasticEdmEntityType getEntityType() {
         EdmEntityType entityType = provider.getEntityType(new FullQualifiedName(
-                csdlEntitySet.getTypeFQN().getNamespace(), csdlEntitySet.getEType()));
+                csdlEntitySet.getTypeFQN().getNamespace(), csdlEntitySet.getESType()));
         return entityType != null ? (ElasticEdmEntityType) entityType
                 : (ElasticEdmEntityType) provider.getEntityType(csdlEntitySet.getTypeFQN());
     }
@@ -53,19 +69,21 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
     /**
      * Sets index to entity set.
      * 
-     * @param eIndex ES index
+     * @param esIntex
+     *            ES index
      */
-    public void setEIndex(String eIndex) {
-        csdlEntitySet.setEIndex(eIndex);
+    public void setEIndex(String esIntex) {
+        csdlEntitySet.setESIndex(esIntex);
     }
 
     /**
      * Sets type to entity set.
      * 
-     * @param eType ES type
+     * @param esType
+     *            ES type
      */
-    public void setEType(String eType) {
-        csdlEntitySet.setEType(eType);
+    public void setEType(String esType) {
+        csdlEntitySet.setESType(esType);
     }
 
     /**

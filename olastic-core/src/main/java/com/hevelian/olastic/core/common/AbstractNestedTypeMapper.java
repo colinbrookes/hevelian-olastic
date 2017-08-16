@@ -1,21 +1,27 @@
 package com.hevelian.olastic.core.common;
 
-import com.carrotsearch.hppc.cursors.ObjectCursor;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexProperty;
-import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
-import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
-import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
+import static com.hevelian.olastic.core.elastic.ElasticConstants.FIELD_DATATYPE_PROPERTY;
+import static com.hevelian.olastic.core.elastic.ElasticConstants.PROPERTIES_PROPERTY;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.elasticsearch.index.mapper.ObjectMapper;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static com.hevelian.olastic.core.elastic.ElasticConstants.FIELD_DATATYPE_PROPERTY;
-import static com.hevelian.olastic.core.elastic.ElasticConstants.PROPERTIES_PROPERTY;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexProperty;
+import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
+import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
+import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 
 /**
  * Class for mapping Elasticsearch nested types to Edm complex types.
@@ -56,9 +62,9 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
         Map<ElasticCsdlComplexType, Set<CsdlProperty>> complexMappings = new HashMap<>();
         for (ObjectCursor<String> key : mappingMetaDataProvider.getAllMappings(index).keys()) {
             String type = key.value;
-            ParsedMapWrapper eTypeProperties = getTypeProperties(index, type);
-            for (String field : eTypeProperties.map.keySet()) {
-                ParsedMapWrapper fieldMap = eTypeProperties.mapValue(field);
+            ParsedMapWrapper typeProperties = getTypeProperties(index, type);
+            for (String field : typeProperties.getMap().keySet()) {
+                ParsedMapWrapper fieldMap = typeProperties.mapValue(field);
                 if (isNested(fieldMap.stringValue(FIELD_DATATYPE_PROPERTY))) {
                     ParsedMapWrapper properties = fieldMap.mapValue(PROPERTIES_PROPERTY);
                     createComplexTypes(index, type, field, properties).entrySet().stream()
@@ -91,31 +97,32 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
     private Map<ElasticCsdlComplexType, Set<CsdlProperty>> createComplexTypes(String index,
             String type, String nested, ParsedMapWrapper properties) {
         Map<ElasticCsdlComplexType, Set<CsdlProperty>> complexMappings = new HashMap<>();
-        ElasticCsdlComplexType complexType = new ElasticCsdlComplexType().setEIndex(index)
-                .setEType(type).setENestedType(nested);
+        ElasticCsdlComplexType complexType = new ElasticCsdlComplexType().setESIndex(index)
+                .setESType(type).setENestedType(nested);
         complexType.setName(
-                getComplexTypeName(type, csdlMapper.eFieldToCsdlProperty(index, type, nested)));
+                getComplexTypeName(type, csdlMapper.esFieldToCsdlProperty(index, type, nested)));
 
         Set<CsdlProperty> complexTypeProperties = new HashSet<>();
-        for (String nestedFieldName : properties.map.keySet()) {
+        for (String nestedFieldName : properties.getMap().keySet()) {
             ParsedMapWrapper nestedFieldMap = properties.mapValue(nestedFieldName);
             String nestedFieldType = nestedFieldMap.stringValue(FIELD_DATATYPE_PROPERTY);
-            String mappedNestedName = csdlMapper.eFieldToCsdlProperty(index, type, nestedFieldName);
+            String mappedNestedName = csdlMapper.esFieldToCsdlProperty(index, type,
+                    nestedFieldName);
             ElasticCsdlComplexProperty complexProperty = new ElasticCsdlComplexProperty()
-                    .setEIndex(index).setEType(type);
+                    .setESIndex(index).setESType(type);
             if (isNested(nestedFieldType)) {
-                complexProperty.setENestedType(nestedFieldName)
+                complexProperty.setESNestedType(nestedFieldName)
                         .setType(getComplexType(index, type, mappedNestedName));
                 createComplexTypes(index, type, nestedFieldName,
                         nestedFieldMap.mapValue(PROPERTIES_PROPERTY)).entrySet().stream()
                                 .forEach(entry -> getAndPut(complexMappings, entry.getKey(),
                                         entry.getValue()));
             } else {
-                complexProperty.setENestedType(nested)
+                complexProperty.setESNestedType(nested)
                         .setType(primitiveTypeMapper.map(nestedFieldType).getFullQualifiedName());
             }
             complexTypeProperties.add(complexProperty.setName(mappedNestedName)
-                    .setCollection(csdlMapper.eFieldIsCollection(index, type, nestedFieldName)));
+                    .setCollection(csdlMapper.esFieldIsCollection(index, type, nestedFieldName)));
         }
         getAndPut(complexMappings, complexType, complexTypeProperties);
         return complexMappings;
@@ -133,7 +140,7 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
 
     @Override
     public FullQualifiedName getComplexType(String index, String type, String field) {
-        return new FullQualifiedName(csdlMapper.eIndexToCsdlNamespace(index),
+        return new FullQualifiedName(csdlMapper.esIndexToCsdlNamespace(index),
                 getComplexTypeName(type, field));
     }
 

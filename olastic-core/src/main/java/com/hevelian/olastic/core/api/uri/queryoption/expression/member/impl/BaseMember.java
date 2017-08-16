@@ -97,15 +97,42 @@ public abstract class BaseMember implements ExpressionMember {
         return throwNotImplemented();
     }
 
+    /**
+     * Builds contains query based on {@link AnnotatedMember} and value.
+     * 
+     * @param member
+     *            annotated member with field and annotations
+     * @param value
+     *            contains value
+     * @return query builder instance
+     */
     protected QueryBuilder buildContainsQuery(AnnotatedMember member, Object value) {
         return wildcardQuery(addKeywordIfNeeded(member.getField(), member.getAnnotations()),
                 WILDCARD_CHAR + value + WILDCARD_CHAR);
     }
 
+    /**
+     * Builds starts with query based on {@link AnnotatedMember} and value.
+     * 
+     * @param member
+     *            annotated member with field and annotations
+     * @param value
+     *            starts with value
+     * @return query builder instance
+     */
     protected QueryBuilder buildStartsWithQuery(AnnotatedMember member, String value) {
         return prefixQuery(addKeywordIfNeeded(member.getField(), member.getAnnotations()), value);
     }
 
+    /**
+     * Builds ends with query based on {@link AnnotatedMember} and value.
+     * 
+     * @param member
+     *            annotated member with field and annotations
+     * @param value
+     *            ends with value
+     * @return query builder instance
+     */
     protected QueryBuilder buildEndsWithQuery(AnnotatedMember member, String value) {
         return wildcardQuery(addKeywordIfNeeded(member.getField(), member.getAnnotations()),
                 WILDCARD_CHAR + value);

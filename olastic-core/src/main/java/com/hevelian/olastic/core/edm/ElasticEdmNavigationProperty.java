@@ -36,13 +36,13 @@ public class ElasticEdmNavigationProperty extends EdmNavigationPropertyImpl {
     public EdmEntityType getType() {
         if (typeImpl == null) {
             FullQualifiedName navigationFQN = null;
-            if (navigationProperty.getEType() == null) {
+            if (navigationProperty.getESType() == null) {
                 // in case custom entity types
                 navigationFQN = navigationProperty.getTypeFQN();
             } else {
                 navigationFQN = new FullQualifiedName(
                         navigationProperty.getTypeFQN().getNamespace(),
-                        navigationProperty.getEType());
+                        navigationProperty.getESType());
             }
             typeImpl = edm.getEntityType(navigationFQN);
             if (typeImpl == null) {

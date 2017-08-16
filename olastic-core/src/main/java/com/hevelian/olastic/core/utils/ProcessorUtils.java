@@ -22,7 +22,7 @@ public final class ProcessorUtils {
     }
 
     /**
-     * Generates id string, for example: record(2)
+     * Generates id string, for example: record(2).
      * 
      * @param entitySetName
      *            name of entity set
@@ -35,7 +35,7 @@ public final class ProcessorUtils {
             URI uri;
             Object escapedId = id;
             if (id instanceof String) {
-                escapedId = URLEncoder.encode((String)id, StandardCharsets.UTF_8.name());
+                escapedId = URLEncoder.encode((String) id, StandardCharsets.UTF_8.name());
             }
             uri = new URI(entitySetName + "(" + escapedId + ")");
             return uri;
@@ -51,7 +51,8 @@ public final class ProcessorUtils {
      * 
      * @param msg
      *            message to show
-     * @param <T> type
+     * @param <T>
+     *            type
      * @return just for the signature
      * @throws ODataApplicationException
      *             created exception
@@ -64,7 +65,9 @@ public final class ProcessorUtils {
     /**
      * Method throws exception with HTTP.501 status code and with default
      * message.
-     * @param <T> type
+     * 
+     * @param <T>
+     *            type
      * @return just for the signature
      * @throws ODataApplicationException
      *             created exception

@@ -1,5 +1,31 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
+import static com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider.ANALYZED_TERM_NAME;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.edm.provider.CsdlTerm;
+import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.index.mapper.ObjectMapper;
+import org.elasticsearch.index.mapper.TextFieldMapper;
+
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider;
@@ -11,41 +37,27 @@ import com.hevelian.olastic.core.elastic.ElasticConstants;
 import com.hevelian.olastic.core.elastic.mappings.DefaultElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.*;
-import org.apache.olingo.commons.api.ex.ODataException;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.index.mapper.ObjectMapper;
-import org.elasticsearch.index.mapper.TextFieldMapper;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider.ANALYZED_TERM_NAME;
 
 /**
- * {@link CsdlEdmProvider} implementation that generates the service/metadata
- * documents based on the Elasticsearch mappings.
+ * {@link CsdlAbstractEdmProvider} implementation that generates the
+ * service/metadata documents based on the Elasticsearch mappings.
  *
  * @author yuflyud
  * @author rdidyk
  */
 public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
-    private AnnotationProvider annotationProvider;
+    private static final int DATETIME_PRECISION = 3;
     private static final FullQualifiedName DEFAULT_CONTAINER_NAME = new FullQualifiedName("OData",
             "ODataService");
-
+    
+    /** Elasticsearch to Csdl mapper. */
+    protected final ElasticToCsdlMapper csdlMapper;
+    private AnnotationProvider annotationProvider;
     private final PrimitiveTypeMapper primitiveTypeMapper;
     private final NestedTypeMapper nestedTypeMapper;
     private final MappingMetaDataProvider mappingMetaDataProvider;
-    protected final ElasticToCsdlMapper csdlMapper;
-
     private FullQualifiedName containerName;
+
 
     /**
      * Initializes mapping metadata provider with default
@@ -110,13 +122,13 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     @Override
     public ElasticCsdlEntityType getEntityType(FullQualifiedName entityTypeName)
             throws ODataException {
-        String eIndex = namespaceToIndex(entityTypeName.getNamespace());
+        String esIndex = namespaceToIndex(entityTypeName.getNamespace());
         // If there is no index mapping for provided namespace - return null, no
         // entity type is found.
-        if (eIndex != null) {
-            List<ElasticCsdlEntityType> entityTypes = getEntityTypes(eIndex);
+        if (esIndex != null) {
+            List<ElasticCsdlEntityType> entityTypes = getEntityTypes(esIndex);
             for (ElasticCsdlEntityType entityType : entityTypes) {
-                if (entityType.getEType().equals(entityTypeName.getName())) {
+                if (entityType.getESType().equals(entityTypeName.getName())) {
                     return entityType;
                 }
             }
@@ -130,10 +142,14 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * mappings. <br>
      * If no 'id' property found in mappings then the 'id' is added and used as
      * the OData key property.
-     * @param index ES index
-     * @param type ES type
+     * 
+     * @param index
+     *            ES index
+     * @param type
+     *            ES type
      * @return CSDL entity type
-     * @throws ODataException OData exception
+     * @throws ODataException
+     *             OData exception
      */
     public ElasticCsdlEntityType createEntityType(String index, String type) throws ODataException {
         MappingMetaData typeMappings = mappingMetaDataProvider.getMappingForType(index, type);
@@ -141,9 +157,9 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
             throw new ODataException(String.format("No mappings found for type '%s'", type));
         }
         ElasticCsdlEntityType entityType = new ElasticCsdlEntityType();
-        entityType.setEIndex(index);
-        entityType.setEType(type);
-        FullQualifiedName entityTypeName = csdlMapper.eTypeToEntityType(index, type);
+        entityType.setESIndex(index);
+        entityType.setESType(type);
+        FullQualifiedName entityTypeName = csdlMapper.esTypeToEntityType(index, type);
         entityType.setName(entityTypeName.getName());
         // Retrieve type fields from Elasticsearch
         entityType.setProperties(getProperties(index, type, typeMappings));
@@ -173,30 +189,31 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param metaData
      *            ES mapping metadata object.
      * @return list of properties
-     * @throws ODataException OData exception
+     * @throws ODataException
+     *             OData exception
      */
     protected List<CsdlProperty> getProperties(String index, String type, MappingMetaData metaData)
             throws ODataException {
         try {
-            ParsedMapWrapper eTypeProperties = new ParsedMapWrapper(metaData.sourceAsMap())
+            ParsedMapWrapper esTypeProperties = new ParsedMapWrapper(metaData.sourceAsMap())
                     .mapValue(ElasticConstants.PROPERTIES_PROPERTY);
             List<CsdlProperty> properties = new ArrayList<>();
-            for (String eFieldName : eTypeProperties.map.keySet()) {
-                String name = csdlMapper.eFieldToCsdlProperty(index, type, eFieldName);
-                ParsedMapWrapper fieldMap = eTypeProperties.mapValue(eFieldName);
-                String eFieldType = fieldMap.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
-                FullQualifiedName typeFQN = ObjectMapper.NESTED_CONTENT_TYPE.equals(eFieldType)
+            for (String esFieldName : esTypeProperties.getMap().keySet()) {
+                String name = csdlMapper.esFieldToCsdlProperty(index, type, esFieldName);
+                ParsedMapWrapper fieldMap = esTypeProperties.mapValue(esFieldName);
+                String esFieldType = fieldMap.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
+                FullQualifiedName typeFQN = ObjectMapper.NESTED_CONTENT_TYPE.equals(esFieldType)
                         ? getNestedTypeMapper().getComplexType(index, type, name)
-                        : primitiveTypeMapper.map(eFieldType).getFullQualifiedName();
-                List<CsdlAnnotation> annotations = TextFieldMapper.CONTENT_TYPE.equals(eFieldType)
+                        : primitiveTypeMapper.map(esFieldType).getFullQualifiedName();
+                List<CsdlAnnotation> annotations = TextFieldMapper.CONTENT_TYPE.equals(esFieldType)
                         ? Arrays.asList(getAnnotationProvider().getAnnotation(ANALYZED_TERM_NAME))
                         : new ArrayList<>();
                 Integer precision = EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName()
-                        .equals(typeFQN) ? 3 : null;
-                properties.add(new ElasticCsdlProperty().setEIndex(index).setEType(type)
-                        .setEField(eFieldName).setName(name).setType(typeFQN)
+                        .equals(typeFQN) ? DATETIME_PRECISION : null;
+                properties.add(new ElasticCsdlProperty().setESIndex(index).setESType(type)
+                        .setESField(esFieldName).setName(name).setType(typeFQN)
                         .setAnnotations(annotations).setPrecision(precision)
-                        .setCollection(csdlMapper.eFieldIsCollection(index, type, eFieldName)));
+                        .setCollection(csdlMapper.esFieldIsCollection(index, type, esFieldName)));
             }
             return properties;
         } catch (IOException e) {
@@ -216,32 +233,32 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     protected List<ElasticCsdlNavigationProperty> getNavigationProperties(String index,
             String type) {
         List<ElasticCsdlNavigationProperty> navigationProperties = new ArrayList<>();
-        ImmutableOpenMap<String, FieldMappingMetaData> eFieldMappings = mappingMetaDataProvider
+        ImmutableOpenMap<String, FieldMappingMetaData> esFieldMappings = mappingMetaDataProvider
                 .getMappingsForField(index, ElasticConstants.PARENT_PROPERTY);
-        for (ObjectObjectCursor<String, FieldMappingMetaData> e : eFieldMappings) {
-            ParsedMapWrapper eParent = new ParsedMapWrapper(e.value.sourceAsMap())
+        for (ObjectObjectCursor<String, FieldMappingMetaData> e : esFieldMappings) {
+            ParsedMapWrapper esParent = new ParsedMapWrapper(e.value.sourceAsMap())
                     .mapValue(ElasticConstants.PARENT_PROPERTY);
-            if (eParent.map == null) {
+            if (esParent.getMap() == null) {
                 continue;
             }
-            String eParentType = eParent.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
+            String esParentType = esParent.stringValue(ElasticConstants.FIELD_DATATYPE_PROPERTY);
             // Create Child Relations
-            if (type.equals(eParentType)) {
+            if (type.equals(esParentType)) {
                 ElasticCsdlNavigationProperty navProp = new ElasticCsdlNavigationProperty()
-                        .setEIndex(index).setEType(e.key);
-                navProp.setName(csdlMapper.eChildRelationToNavPropName(index, e.key, type))
-                        .setType(csdlMapper.eTypeToEntityType(index, e.key)).setCollection(true)
-                        .setPartner(csdlMapper.eParentRelationToNavPropName(index, type, e.key));
+                        .setESIndex(index).setESType(e.key);
+                navProp.setName(csdlMapper.esChildRelationToNavPropName(index, e.key, type))
+                        .setType(csdlMapper.esTypeToEntityType(index, e.key)).setCollection(true)
+                        .setPartner(csdlMapper.esParentRelationToNavPropName(index, type, e.key));
                 navigationProperties.add(navProp);
             }
             // Create Parent Relation
             if (type.equals(e.key)) {
                 ElasticCsdlNavigationProperty navProp = new ElasticCsdlNavigationProperty()
-                        .setEIndex(index).setEType(eParentType);
-                navProp.setName(csdlMapper.eParentRelationToNavPropName(index, eParentType, type))
-                        .setType(csdlMapper.eTypeToEntityType(index, eParentType))
-                        .setNullable(false).setPartner(
-                                csdlMapper.eChildRelationToNavPropName(index, e.key, eParentType));
+                        .setESIndex(index).setESType(esParentType);
+                navProp.setName(csdlMapper.esParentRelationToNavPropName(index, esParentType, type))
+                        .setType(csdlMapper.esTypeToEntityType(index, esParentType))
+                        .setNullable(false).setPartner(csdlMapper
+                                .esChildRelationToNavPropName(index, e.key, esParentType));
                 navigationProperties.add(navProp);
             }
         }
@@ -330,7 +347,8 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param index
      *            schema index name
      * @return Entity Container
-     * @throws ODataException OData exception
+     * @throws ODataException
+     *             OData exception
      */
     protected CsdlEntityContainer getEntityContainerForSchema(String index) throws ODataException {
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
@@ -365,18 +383,18 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      */
     protected ElasticCsdlEntitySet createEntitySet(String index, String type) {
         ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
-        entitySet.setEIndex(index);
-        entitySet.setEType(type);
-        entitySet.setName(csdlMapper.eTypeToEntitySet(index, type));
-        FullQualifiedName entityType = csdlMapper.eTypeToEntityType(index, type);
+        entitySet.setESIndex(index);
+        entitySet.setESType(type);
+        entitySet.setName(csdlMapper.esTypeToEntitySet(index, type));
+        FullQualifiedName entityType = csdlMapper.esTypeToEntityType(index, type);
         entitySet.setType(entityType);
 
         // define navigation property bindings
         List<CsdlNavigationPropertyBinding> navigationBindings = new ArrayList<>();
         for (ElasticCsdlNavigationProperty property : getNavigationProperties(index, type)) {
             CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
-            navPropBinding.setTarget(csdlMapper.eTypeToEntitySet(
-                    namespaceToIndex(property.getTypeFQN().getNamespace()), property.getEType()));
+            navPropBinding.setTarget(csdlMapper.esTypeToEntitySet(
+                    namespaceToIndex(property.getTypeFQN().getNamespace()), property.getESType()));
             navPropBinding.setPath(property.getName());
             navigationBindings.add(navPropBinding);
         }

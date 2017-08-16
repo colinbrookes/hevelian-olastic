@@ -11,7 +11,7 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
  * 
  * @author yuflyud
  */
-// TODO describe more the behavior in case the index/type is not found.
+// TODO: describe more the behavior in case the index/type is not found.
 public interface MappingMetaDataProvider {
     /**
      * Return all the mappings for all the types inside a single index.

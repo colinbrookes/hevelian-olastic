@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -51,19 +52,7 @@ public class PropertyCreator {
             Object modifiedValue = value;
             if (property.getType() instanceof EdmDate
                     || property.getType() instanceof EdmDateTimeOffset) {
-                if (value != null) {
-                    // For Date values we return Calendar instance because of
-                    // bug in Date when milliseconds are less then 1582 year.
-                    // Olingo parses Calendar object without any issues.
-                    if (value instanceof Long) {
-                        Instant instant = Instant.ofEpochMilli((long) value);
-                        ZoneId zoneId = ZoneId.from(ZoneOffset.UTC);
-                        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
-                        modifiedValue = GregorianCalendar.from(dateTime.atZone(zoneId));
-                    } else {
-                        modifiedValue = DatatypeConverter.parseDateTime(value.toString());
-                    }
-                }
+                modifiedValue = value != null ? convertDateValue(value) : null;
             } else if (property.getType() instanceof EdmBoolean && value instanceof Long) {
                 // When Elasticsearch aggregates data it return's boolean as
                 // number value (1,0), but when it searches then normal boolean
@@ -77,6 +66,27 @@ public class PropertyCreator {
             return createPrimitiveProperty(name, modifiedValue);
         } else {
             return createPrimitiveProperty(name, value);
+        }
+    }
+
+    /**
+     * Converts date object to {@link Calendar} instance depending on it type.
+     * 
+     * @param value
+     *            date value
+     * @return calendar instance
+     */
+    protected Calendar convertDateValue(Object value) {
+        // For Date values we return Calendar instance because of
+        // bug in Date when milliseconds are less then 1582 year.
+        // Olingo parses Calendar object without any issues.
+        if (value instanceof Long) {
+            Instant instant = Instant.ofEpochMilli((long) value);
+            ZoneId zoneId = ZoneId.from(ZoneOffset.UTC);
+            LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
+            return GregorianCalendar.from(dateTime.atZone(zoneId));
+        } else {
+            return DatatypeConverter.parseDateTime(value.toString());
         }
     }
 

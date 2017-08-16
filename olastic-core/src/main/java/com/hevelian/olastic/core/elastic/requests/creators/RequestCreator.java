@@ -1,5 +1,44 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
+import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.olingo.commons.api.edm.EdmBindingTarget;
+import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriInfoResource;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.apache.olingo.server.api.uri.UriResourceKind;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
+import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
+import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
+import org.apache.olingo.server.api.uri.queryoption.SearchOption;
+import org.apache.olingo.server.api.uri.queryoption.SkipOption;
+import org.apache.olingo.server.api.uri.queryoption.TopOption;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
+import org.apache.olingo.server.api.uri.queryoption.expression.Member;
+import org.apache.olingo.server.api.uri.queryoption.search.SearchBinary;
+import org.apache.olingo.server.api.uri.queryoption.search.SearchBinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.search.SearchExpression;
+import org.apache.olingo.server.api.uri.queryoption.search.SearchUnary;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+
 import com.hevelian.olastic.core.api.uri.queryoption.expression.ElasticSearchExpressionVisitor;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.ExpressionResult;
@@ -12,36 +51,9 @@ import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.elastic.queries.Query;
 import com.hevelian.olastic.core.elastic.requests.BaseRequest;
 import com.hevelian.olastic.core.utils.ApplyOptionUtils;
-import lombok.AccessLevel;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
-import org.apache.olingo.commons.api.edm.EdmBindingTarget;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmProperty;
-import org.apache.olingo.commons.api.ex.ODataRuntimeException;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.*;
-import org.apache.olingo.server.api.uri.queryoption.*;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
-import org.apache.olingo.server.api.uri.queryoption.expression.Member;
-import org.apache.olingo.server.api.uri.queryoption.search.SearchBinary;
-import org.apache.olingo.server.api.uri.queryoption.search.SearchBinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.search.SearchExpression;
-import org.apache.olingo.server.api.uri.queryoption.search.SearchUnary;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 
 /**
  * Base request creator with common logic to create Elasticsearch query.
@@ -49,11 +61,10 @@ import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
  * @author rdidyk
  */
 @AllArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Getter
 public abstract class RequestCreator {
 
-    ESQueryBuilder<?> queryBuilder;
+    private final ESQueryBuilder<?> queryBuilder;
 
     /**
      * Constructor to initialize default ES query builder.
@@ -72,7 +83,8 @@ public abstract class RequestCreator {
      * @param uriInfo
      *            URI info
      * @return base request
-     * @throws ODataApplicationException OData app exception
+     * @throws ODataApplicationException
+     *             OData app exception
      */
     public BaseRequest getBaseRequestInfo(UriInfo uriInfo) throws ODataApplicationException {
         List<UriResource> resourceParts = uriInfo.getUriResourceParts();
@@ -102,7 +114,7 @@ public abstract class RequestCreator {
                 new Query(responseEntitySet.getEIndex(),
                         new String[] { responseEntitySet.getEType() }, queryBuilder.build(), null),
                 responseEntitySet, null);
-        // TODO pass pagination info here, and reuse in child (in request
+        // TODO: pass pagination info here, and reuse in child (in request
         // creators)
     }
 
@@ -112,7 +124,8 @@ public abstract class RequestCreator {
      * @param uriInfo
      *            URI info
      * @return first entity set
-     * @throws ODataApplicationException OData app exception
+     * @throws ODataApplicationException
+     *             OData app exception
      */
     protected EdmEntitySet getFirstResourceEntitySet(UriInfo uriInfo)
             throws ODataApplicationException {
@@ -246,7 +259,9 @@ public abstract class RequestCreator {
 
     /**
      * Returns pagination data.
-     * @param uriInfo uri info 
+     * 
+     * @param uriInfo
+     *            uri info
      * @return pagination
      */
     protected Pagination getPagination(UriInfo uriInfo) {
@@ -259,28 +274,39 @@ public abstract class RequestCreator {
         OrderByOption orderByOption = uriInfo.getOrderByOption();
         List<Sort> orderBy = new ArrayList<>();
         if (orderByOption != null) {
-            List<OrderByItem> orderItemList = orderByOption.getOrders();
-            for (OrderByItem orderByItem : orderItemList) {
-                Expression expression = orderByItem.getExpression();
-                if (expression instanceof Member) {
-                    UriInfoResource resourcePath = ((Member) expression).getResourcePath();
-                    UriResource oUriResource = resourcePath.getUriResourceParts().get(0);
-                    if (oUriResource instanceof UriResourcePrimitiveProperty) {
-                        EdmProperty edmProperty = ((UriResourcePrimitiveProperty) oUriResource)
-                                .getProperty();
-                        String property = edmProperty.getName();
-                        if (edmProperty instanceof ElasticEdmProperty) {
-                            ElasticEdmProperty entityTypeProperty = (ElasticEdmProperty) edmProperty;
-                            property = addKeywordIfNeeded(entityTypeProperty.getEField(),
-                                    entityTypeProperty.getAnnotations());
-                        }
-                        orderBy.add(new Sort(property, orderByItem.isDescending()
-                                ? Sort.Direction.DESC : Sort.Direction.ASC));
-                    }
-                }
-            }
+            orderBy.addAll(orderByOption.getOrders().stream().map(this::toSort)
+                    .filter(sort -> sort != null).collect(Collectors.toList()));
         }
         return new Pagination(topNumber, skipNumber, orderBy);
+    }
+
+    /**
+     * Converts {@link OrderByItem} to {@link Sort} needed for
+     * {@link Pagination}.
+     * 
+     * @param orderByItem
+     *            order by item
+     * @return sort instance, or null in case order by item wasn't specific type
+     */
+    protected Sort toSort(OrderByItem orderByItem) {
+        Expression expression = orderByItem.getExpression();
+        if (expression instanceof Member) {
+            UriInfoResource resourcePath = ((Member) expression).getResourcePath();
+            UriResource uriResource = resourcePath.getUriResourceParts().get(0);
+            if (uriResource instanceof UriResourcePrimitiveProperty) {
+                EdmProperty edmProperty = ((UriResourcePrimitiveProperty) uriResource)
+                        .getProperty();
+                String property = edmProperty.getName();
+                if (edmProperty instanceof ElasticEdmProperty) {
+                    ElasticEdmProperty entityTypeProperty = (ElasticEdmProperty) edmProperty;
+                    property = addKeywordIfNeeded(entityTypeProperty.getEField(),
+                            entityTypeProperty.getAnnotations());
+                }
+                return new Sort(property,
+                        orderByItem.isDescending() ? Sort.Direction.DESC : Sort.Direction.ASC);
+            }
+        }
+        return null;
     }
 
     /**

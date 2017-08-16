@@ -7,9 +7,7 @@ import java.util.ListIterator;
 
 import org.elasticsearch.index.query.QueryBuilder;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Wraps the data for parent query building.
@@ -17,10 +15,9 @@ import lombok.experimental.FieldDefaults;
  * @author Ruslan Didyk
  */
 @AllArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public abstract class ParentMember extends BaseMember {
 
-    List<String> parentTypes;
+    private final List<String> parentTypes;
 
     /**
      * Builds parent ES query using provided query.

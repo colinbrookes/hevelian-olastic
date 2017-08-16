@@ -18,6 +18,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class PrimitiveTypeMapper {
 
+    /**
+     * Maps elasticsearch field type to the EMD type.
+     * 
+     * @param elasticType
+     *            field type
+     * @return the EDM primitive type kind
+     */
     public EdmPrimitiveTypeKind map(String elasticType) {
         EdmPrimitiveTypeKind result;
         if (TextFieldMapper.CONTENT_TYPE.equals(elasticType)

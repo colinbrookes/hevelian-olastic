@@ -13,6 +13,8 @@ import com.hevelian.olastic.core.elastic.queries.Query;
  * Interface to provide behavior for all multiple request implementations.
  * 
  * @author Taras Kohut
+ * @param <T>
+ *            query class instance
  */
 public interface ESMultiRequest<T extends Query> {
     /**

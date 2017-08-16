@@ -12,38 +12,45 @@ import com.google.common.base.Objects;
 public class ElasticCsdlComplexType extends CsdlComplexType
         implements ElasticCsdlEdmItem<ElasticCsdlComplexType> {
 
-    private String eIndex;
-    private String eType;
-    private String eNestedType;
+    private String esIndex;
+    private String esType;
+    private String esNestedType;
 
     @Override
-    public String getEType() {
-        return eType;
+    public String getESType() {
+        return esType;
     }
 
     @Override
-    public String getEIndex() {
-        return eIndex;
+    public String getESIndex() {
+        return esIndex;
     }
 
-    public String geteNestedType() {
-        return eNestedType;
+    public String getENestedType() {
+        return esNestedType;
     }
 
     @Override
-    public ElasticCsdlComplexType setEIndex(String eIndex) {
-        this.eIndex = eIndex;
+    public ElasticCsdlComplexType setESIndex(String esIndex) {
+        this.esIndex = esIndex;
         return this;
     }
 
     @Override
-    public ElasticCsdlComplexType setEType(String eType) {
-        this.eType = eType;
+    public ElasticCsdlComplexType setESType(String esType) {
+        this.esType = esType;
         return this;
     }
 
-    public ElasticCsdlComplexType setENestedType(String eNestedType) {
-        this.eNestedType = eNestedType;
+    /**
+     * Sets elasticsearch nested type name.
+     * 
+     * @param esNestedType
+     *            nested type name
+     * @return current instance
+     */
+    public ElasticCsdlComplexType setENestedType(String esNestedType) {
+        this.esNestedType = esNestedType;
         return this;
     }
 

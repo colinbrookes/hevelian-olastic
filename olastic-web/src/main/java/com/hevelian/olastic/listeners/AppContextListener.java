@@ -11,6 +11,12 @@ import com.hevelian.olastic.config.ESConfigImpl;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Application context listener to get Elasticsearch properties from context and
+ * initialize {@link ESConfig}.
+ * 
+ * @author rdidyk
+ */
 @Log4j2
 public class AppContextListener implements ServletContextListener {
 

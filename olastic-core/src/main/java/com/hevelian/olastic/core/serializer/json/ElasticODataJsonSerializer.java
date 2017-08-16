@@ -130,6 +130,15 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
         }
     }
 
+    /**
+     * Checks context URL.
+     * 
+     * @param contextURL
+     *            context URL
+     * @return context URL
+     * @throws SerializerException
+     *             if any error occurred
+     */
     protected ContextURL checkContextURL(ContextURL contextURL) throws SerializerException {
         if (isODataMetadataNone) {
             return null;
@@ -140,6 +149,16 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
         return contextURL;
     }
 
+    /**
+     * Writes context URL into json.
+     * 
+     * @param contextURL
+     *            context URL
+     * @param json
+     *            json generator
+     * @throws IOException
+     *             if any error occurred
+     */
     protected void writeContextURL(ContextURL contextURL, JsonGenerator json) throws IOException {
         if (!isODataMetadataNone && contextURL != null) {
             json.writeStringField(Constants.JSON_CONTEXT,
@@ -147,6 +166,16 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
         }
     }
 
+    /**
+     * Writes metadata eTag into json.
+     * 
+     * @param metadata
+     *            service metadata
+     * @param json
+     *            json generator
+     * @throws IOException
+     *             if any error occurred
+     */
     protected void writeMetadataETag(ServiceMetadata metadata, JsonGenerator json)
             throws IOException {
         if (!isODataMetadataNone && metadata != null
@@ -157,6 +186,16 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
         }
     }
 
+    /**
+     * Writes operations into json.
+     * 
+     * @param operations
+     *            operations list
+     * @param json
+     *            json generator
+     * @throws IOException
+     *             if any error occurred
+     */
     protected void writeOperations(final List<Operation> operations, final JsonGenerator json)
             throws IOException {
         if (isODataMetadataFull) {
@@ -169,6 +208,32 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
         }
     }
 
+    /**
+     * Writes primitive property into json.
+     * 
+     * @param type
+     *            the EDM type
+     * @param property
+     *            property instance
+     * @param isNullable
+     *            is nullable
+     * @param maxLength
+     *            max length
+     * @param precision
+     *            precision
+     * @param scale
+     *            scale
+     * @param isUnicode
+     *            is unicode
+     * @param json
+     *            json generator
+     * @throws EdmPrimitiveTypeException
+     *             if any error occurred
+     * @throws IOException
+     *             if any error occurred
+     * @throws SerializerException
+     *             if any error occurred
+     */
     protected void writePrimitive(EdmPrimitiveType type, Property property, Boolean isNullable,
             Integer maxLength, Integer precision, Integer scale, Boolean isUnicode,
             JsonGenerator json) throws EdmPrimitiveTypeException, IOException, SerializerException {
@@ -186,4 +251,5 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
                     SerializerException.MessageKeys.INCONSISTENT_PROPERTY_TYPE, property.getName());
         }
     }
+
 }

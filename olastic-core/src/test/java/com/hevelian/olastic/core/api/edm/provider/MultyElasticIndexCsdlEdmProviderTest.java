@@ -182,9 +182,9 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         assertEquals(2, csdlProperties.size());
         for (CsdlProperty property : csdlProperties) {
             assertTrue(property instanceof ElasticCsdlProperty);
-            assertEquals(AUTHORS_INDEX, ((ElasticCsdlProperty) property).getEIndex());
-            assertEquals(AUTHOR_TYPE, ((ElasticCsdlProperty) property).getEType());
-            assertEquals(property.getName(), ((ElasticCsdlProperty) property).getEField());
+            assertEquals(AUTHORS_INDEX, ((ElasticCsdlProperty) property).getESIndex());
+            assertEquals(AUTHOR_TYPE, ((ElasticCsdlProperty) property).getESType());
+            assertEquals(property.getName(), ((ElasticCsdlProperty) property).getESField());
             assertNotNull(property.getTypeAsFQNObject());
         }
     }
@@ -268,9 +268,9 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         MultyElasticIndexCsdlEdmProvider edmProvider = spy(
                 new MultyElasticIndexCsdlEdmProvider(metaDataProvider, indices));
         ElasticCsdlEntityType type1 = mock(ElasticCsdlEntityType.class);
-        when(type1.getEType()).thenReturn(BOOK_TYPE);
+        when(type1.getESType()).thenReturn(BOOK_TYPE);
         ElasticCsdlEntityType type2 = mock(ElasticCsdlEntityType.class);
-        when(type2.getEType()).thenReturn(AUTHOR_TYPE);
+        when(type2.getESType()).thenReturn(AUTHOR_TYPE);
         doReturn(Arrays.asList(type1, type2)).when(edmProvider).getEntityTypes(AUTHORS_INDEX);
         assertEquals(type2, edmProvider.getEntityType(AUTHOR_FQN));
     }
@@ -295,8 +295,8 @@ public class MultyElasticIndexCsdlEdmProviderTest {
                 ElasticConstants.PARENT_PROPERTY);
         ElasticCsdlEntityType entityType = edmProvider.createEntityType(AUTHORS_INDEX, AUTHOR_TYPE);
         assertTrue(entityType instanceof ElasticCsdlEntityType);
-        assertEquals(AUTHORS_INDEX, ((ElasticCsdlEntityType) entityType).getEIndex());
-        assertEquals(AUTHOR_TYPE, ((ElasticCsdlEntityType) entityType).getEType());
+        assertEquals(AUTHORS_INDEX, ((ElasticCsdlEntityType) entityType).getESIndex());
+        assertEquals(AUTHOR_TYPE, ((ElasticCsdlEntityType) entityType).getESType());
         List<CsdlProperty> properties = entityType.getProperties();
         assertEquals(3, properties.size());
         CsdlProperty idProperty = properties.get(2);
@@ -310,8 +310,8 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         ElasticCsdlNavigationProperty bookProperty = (ElasticCsdlNavigationProperty) navigationProperties
                 .get(0);
         assertEquals(BOOK_TYPE, bookProperty.getName());
-        assertEquals(BOOK_TYPE, bookProperty.getEType());
-        assertEquals(AUTHORS_INDEX, bookProperty.getEIndex());
+        assertEquals(BOOK_TYPE, bookProperty.getESType());
+        assertEquals(AUTHORS_INDEX, bookProperty.getESIndex());
         assertEquals(BOOK_FQN, bookProperty.getTypeFQN());
         assertEquals(AUTHOR_TYPE, bookProperty.getPartner());
     }
@@ -329,8 +329,8 @@ public class MultyElasticIndexCsdlEdmProviderTest {
                 AUTHOR_TYPE);
         ElasticCsdlEntityType entityType = edmProvider.createEntityType(AUTHORS_INDEX, AUTHOR_TYPE);
         assertTrue(entityType instanceof ElasticCsdlEntityType);
-        assertEquals(AUTHORS_INDEX, ((ElasticCsdlEntityType) entityType).getEIndex());
-        assertEquals(AUTHOR_TYPE, ((ElasticCsdlEntityType) entityType).getEType());
+        assertEquals(AUTHORS_INDEX, ((ElasticCsdlEntityType) entityType).getESIndex());
+        assertEquals(AUTHOR_TYPE, ((ElasticCsdlEntityType) entityType).getESType());
         List<CsdlProperty> properties = entityType.getProperties();
         assertEquals(1, properties.size());
         CsdlProperty idProperty = properties.get(0);
@@ -357,8 +357,8 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         doReturn(getParentChildMappings()).when(metaDataProvider).getMappingsForField(AUTHORS_INDEX,
                 ElasticConstants.PARENT_PROPERTY);
         ElasticCsdlEntitySet entitySet = edmProvider.createEntitySet(AUTHORS_INDEX, AUTHOR_TYPE);
-        assertEquals(AUTHORS_INDEX, entitySet.getEIndex());
-        assertEquals(AUTHOR_TYPE, entitySet.getEType());
+        assertEquals(AUTHORS_INDEX, entitySet.getESIndex());
+        assertEquals(AUTHOR_TYPE, entitySet.getESType());
         assertEquals(AUTHOR_TYPE, entitySet.getName());
         List<CsdlNavigationPropertyBinding> propertyBindings = entitySet
                 .getNavigationPropertyBindings();
@@ -444,14 +444,14 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         Builder<String, MappingMetaData> mappingsBuilder = ImmutableOpenMap.builder();
         mappingsBuilder.put(BOOK_TYPE, null);
         when(metaDataProvider.getAllMappings(AUTHORS_INDEX)).thenReturn(mappingsBuilder.build());
-        doAnswer(answer -> new ElasticCsdlEntityType().setEIndex(answer.getArgument(0))
+        doAnswer(answer -> new ElasticCsdlEntityType().setESIndex(answer.getArgument(0))
                 .setName(answer.getArgument(1))).when(edmProvider).createEntityType(AUTHORS_INDEX,
                         BOOK_TYPE);
         List<ElasticCsdlEntityType> enityTypes = edmProvider.getEntityTypes(AUTHORS_INDEX);
         assertEquals(1, enityTypes.size());
         ElasticCsdlEntityType entityType = enityTypes.get(0);
-        assertEquals(AUTHORS_INDEX, entityType.getEIndex());
-        assertEquals(BOOK_TYPE, entityType.getEType());
+        assertEquals(AUTHORS_INDEX, entityType.getESIndex());
+        assertEquals(BOOK_TYPE, entityType.getESType());
         assertEquals(BOOK_TYPE, entityType.getName());
     }
 

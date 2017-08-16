@@ -23,6 +23,16 @@ public class ElasticServiceMetadata implements ServiceMetadata {
     private final List<EdmxReference> references;
     private final ServiceMetadataETagSupport serviceMetadataETagSupport;
 
+    /**
+     * Initialize fields.
+     * 
+     * @param edmProvider
+     *            the EDM provider
+     * @param references
+     *            the EDMX references
+     * @param serviceMetadataETagSupport
+     *            service metadata support
+     */
     public ElasticServiceMetadata(ElasticCsdlEdmProvider edmProvider,
             List<EdmxReference> references, ServiceMetadataETagSupport serviceMetadataETagSupport) {
         this.edm = new ElasticEdmProvider(edmProvider);

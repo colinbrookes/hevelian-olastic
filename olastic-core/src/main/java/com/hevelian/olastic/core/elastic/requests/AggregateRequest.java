@@ -8,9 +8,7 @@ import com.hevelian.olastic.core.elastic.ESClient;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Aggregate request with aggregate query and count alias.
@@ -18,9 +16,8 @@ import lombok.experimental.FieldDefaults;
  * @author rdidyk
  */
 @Getter
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AggregateRequest extends BaseRequest {
-    String countAlias;
+    private final String countAlias;
 
     /**
      * Constructor to initialize query and entity.

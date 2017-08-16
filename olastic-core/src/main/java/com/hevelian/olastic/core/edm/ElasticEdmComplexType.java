@@ -3,7 +3,6 @@ package com.hevelian.olastic.core.edm;
 import java.util.Map.Entry;
 
 import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.EdmComplexType;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.EdmType;
@@ -13,7 +12,7 @@ import org.apache.olingo.commons.core.edm.EdmComplexTypeImpl;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlComplexType;
 
 /**
- * Custom implementation of {@link EdmComplexType}.
+ * Custom implementation of {@link EdmComplexTypeImpl}.
  * 
  * @author rdidyk
  */
@@ -43,7 +42,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      * @return index name
      */
     public String getEIndex() {
-        return csdlComplexType.getEIndex();
+        return csdlComplexType.getESIndex();
     }
 
     /**
@@ -52,7 +51,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      * @return type name
      */
     public String getEType() {
-        return csdlComplexType.getEType();
+        return csdlComplexType.getESType();
     }
 
     /**
@@ -61,7 +60,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      * @return type name
      */
     public String getENestedType() {
-        return csdlComplexType.geteNestedType();
+        return csdlComplexType.getENestedType();
     }
 
     /**

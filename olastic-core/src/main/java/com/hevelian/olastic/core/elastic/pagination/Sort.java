@@ -73,10 +73,10 @@ public class Sort {
          * 
          * @param value
          *            direction value
+         * @return direction based on value
          * @throws IllegalArgumentException
          *             in case the given value cannot be parsed into an enum
          *             value.
-         * @return direction based on value
          */
         public static Direction fromString(String value) {
             for (Direction direction : values()) {

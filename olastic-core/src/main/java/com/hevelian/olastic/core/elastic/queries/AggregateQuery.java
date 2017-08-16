@@ -1,16 +1,15 @@
 package com.hevelian.olastic.core.elastic.queries;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.experimental.FieldDefaults;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import lombok.Getter;
+import lombok.NonNull;
 
 /**
  * Aggregate query with simple and pipeline aggregations.
@@ -18,12 +17,11 @@ import java.util.List;
  * @author rdidyk
  */
 @Getter
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AggregateQuery extends Query {
 
     @NonNull
-    List<AggregationBuilder> aggregations;
-    List<PipelineAggregationBuilder> pipelineAggregations;
+    private final List<AggregationBuilder> aggregations;
+    private final List<PipelineAggregationBuilder> pipelineAggregations;
 
     /**
      * Constructor to initialize parameters.

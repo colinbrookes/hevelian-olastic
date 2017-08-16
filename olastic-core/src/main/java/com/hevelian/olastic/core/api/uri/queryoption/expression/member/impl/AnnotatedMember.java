@@ -1,16 +1,5 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.FieldDefaults;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.elasticsearch.index.query.QueryBuilder;
-
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-
 import static com.hevelian.olastic.core.elastic.ElasticConstants.ID_FIELD_NAME;
 import static com.hevelian.olastic.core.elastic.utils.ElasticUtils.addKeywordIfNeeded;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
@@ -21,18 +10,27 @@ import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.elasticsearch.index.query.QueryBuilder;
+
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Represents expression member with type.
  *
  * @author Taras Kohut
  */
 @AllArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Getter
 public abstract class AnnotatedMember extends BaseMember {
 
-    String field;
-    List<EdmAnnotation> annotations;
+    private final String field;
+    private final List<EdmAnnotation> annotations;
 
     /**
      * Gets query for equals and not equals operations.

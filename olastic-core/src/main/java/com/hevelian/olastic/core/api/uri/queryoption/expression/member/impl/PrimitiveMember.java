@@ -17,6 +17,14 @@ import com.hevelian.olastic.core.api.uri.queryoption.expression.member.Expressio
  */
 public class PrimitiveMember extends AnnotatedMember {
 
+    /**
+     * Initialize fields.
+     * 
+     * @param field
+     *            field name
+     * @param annotations
+     *            annotations list
+     */
     public PrimitiveMember(String field, List<EdmAnnotation> annotations) {
         super(field, annotations);
     }

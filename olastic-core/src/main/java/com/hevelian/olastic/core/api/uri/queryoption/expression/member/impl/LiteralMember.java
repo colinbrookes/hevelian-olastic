@@ -19,11 +19,21 @@ import java.util.List;
  */
 public class LiteralMember extends BaseMember {
 
+    private static final String SINGLE_QUOTE = "'";
     private String value;
     private EdmType edmType;
 
+    /**
+     * Initialize fields.
+     * 
+     * @param value
+     *            literal value
+     * @param edmType
+     *            the EDM type
+     */
     public LiteralMember(String value, EdmType edmType) {
-        if (edmType instanceof EdmString && (!value.startsWith("'") || !value.endsWith("'"))) {
+        if (edmType instanceof EdmString
+                && (!value.startsWith(SINGLE_QUOTE) || !value.endsWith(SINGLE_QUOTE))) {
             throw new IllegalArgumentException(
                     "String values should be enclosed in single quotation marks");
         }
@@ -33,14 +43,14 @@ public class LiteralMember extends BaseMember {
 
     /**
      * Checks the edm type of the string value, and creates concrete type from
-     * this value
+     * this value.
      *
      * @return converted value
      */
     public Object getValue() {
         UriTokenizer tokenizer = new UriTokenizer(value);
         if (tokenizer.next(UriTokenizer.TokenKind.StringValue) && edmType instanceof EdmString) {
-            return value.substring(1, value.length() - 1).replaceAll("''", "'");
+            return value.substring(1, value.length() - 1).replaceAll("''", SINGLE_QUOTE);
         } else if (tokenizer.next(TokenKind.jsonArrayOrObject) && edmType == null) {
             String arrayAsString = value.substring(1, value.length() - 1);
             List<String> values = new ArrayList<>();

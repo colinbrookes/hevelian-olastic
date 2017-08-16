@@ -1,20 +1,26 @@
 package com.hevelian.olastic.core.elastic.builders;
 
-import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.*;
+import org.apache.olingo.server.api.uri.UriParameter;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.apache.olingo.server.api.uri.UriResourceKind;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.UriResourcePartTyped;
 import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 
 /**
  * Non-final builder class to create to Elasticsearch with possibility to
@@ -27,8 +33,11 @@ import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented
  */
 public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
 
+    /** Query builder. */
     protected BoolQueryBuilder query;
+    /** Parent child query builder. */
     protected QueryBuilder parentChildQuery;
+    /** Filter query builders. */
     protected List<QueryBuilder> filters;
 
     /**
@@ -55,19 +64,19 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
             throws ODataApplicationException {
         ElasticEdmEntityType type = (ElasticEdmEntityType) ((UriResourcePartTyped) segment)
                 .getType();
-        String eType = type.getEType();
+        String esType = type.getEType();
         List<String> ids = collectIds(segment);
         if (nextSegment == null) {
-            addIdQuery(eType, ids);
+            addIdQuery(esType, ids);
         } else {
             if (nextSegment.getKind() == UriResourceKind.primitiveProperty) {
-                addIdQuery(eType, ids);
+                addIdQuery(esType, ids);
             } else {
                 if (((UriResourceNavigationPropertyImpl) nextSegment).getProperty()
                         .isCollection()) {
-                    addParentQuery(eType, ids);
+                    addParentQuery(esType, ids);
                 } else {
-                    addChildQuery(eType, ids);
+                    addChildQuery(esType, ids);
                 }
             }
         }
@@ -80,7 +89,8 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
      * @param segment
      *            uri resource part
      * @return ids list
-     * @throws ODataApplicationException odata app exception
+     * @throws ODataApplicationException
+     *             odata app exception
      */
     protected List<String> collectIds(UriResource segment) throws ODataApplicationException {
         List<UriParameter> keyPredicates;

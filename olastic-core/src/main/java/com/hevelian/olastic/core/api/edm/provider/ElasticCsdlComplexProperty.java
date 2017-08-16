@@ -12,44 +12,51 @@ import com.google.common.base.Objects;
 public class ElasticCsdlComplexProperty extends CsdlProperty
         implements ElasticCsdlEdmItem<ElasticCsdlComplexProperty> {
 
-    private String eIndex;
-    private String eType;
-    private String eNestedType;
+    private String esIndex;
+    private String esType;
+    private String esNestedType;
 
     @Override
-    public String getEIndex() {
-        return eIndex;
+    public String getESIndex() {
+        return esIndex;
     }
 
     @Override
-    public String getEType() {
-        return eType;
+    public String getESType() {
+        return esType;
     }
 
-    public String getENestedType() {
-        return eNestedType;
+    public String getESNestedType() {
+        return esNestedType;
     }
 
     @Override
-    public ElasticCsdlComplexProperty setEIndex(String eIndex) {
-        this.eIndex = eIndex;
+    public ElasticCsdlComplexProperty setESIndex(String esIndex) {
+        this.esIndex = esIndex;
         return this;
     }
 
     @Override
-    public ElasticCsdlComplexProperty setEType(String eType) {
-        this.eType = eType;
+    public ElasticCsdlComplexProperty setESType(String esType) {
+        this.esType = esType;
         return this;
     }
 
-    public ElasticCsdlComplexProperty setENestedType(String eNestedType) {
-        this.eNestedType = eNestedType;
+    /**
+     * Sets elasticsearch nested type name.
+     * 
+     * @param esNestedType
+     *            nested type name
+     * @return current instance
+     */
+    public ElasticCsdlComplexProperty setESNestedType(String esNestedType) {
+        this.esNestedType = esNestedType;
         return this;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(eIndex, eNestedType, getName());
+        return Objects.hashCode(esIndex, esNestedType, getName());
     }
 
     @Override
@@ -64,8 +71,8 @@ public class ElasticCsdlComplexProperty extends CsdlProperty
             return false;
         }
         ElasticCsdlComplexProperty other = (ElasticCsdlComplexProperty) obj;
-        return Objects.equal(this.eIndex, other.eIndex)
-                && Objects.equal(this.eNestedType, other.eNestedType)
+        return Objects.equal(this.esIndex, other.esIndex)
+                && Objects.equal(this.esNestedType, other.esNestedType)
                 && Objects.equal(this.getName(), other.getName());
     }
 

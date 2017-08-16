@@ -1,13 +1,13 @@
 package com.hevelian.olastic.core.elastic.requests.creators;
 
-import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
-import com.hevelian.olastic.core.elastic.requests.ESRequest;
-import com.hevelian.olastic.core.elastic.requests.SearchRequest;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 
+import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
+
 /**
- * Contains logic needed for creating ES {@link SearchRequest}.
+ * Contains logic needed for creating ES request.
  *
  * @author Taras Kohut
  */
@@ -21,7 +21,9 @@ public abstract class SingleRequestCreator extends RequestCreator {
 
     /**
      * Constructor to initialize ES query builder.
-     * @param queryBuilder Es query builder instance
+     * 
+     * @param queryBuilder
+     *            Es query builder instance
      */
     public SingleRequestCreator(ESQueryBuilder<?> queryBuilder) {
         super(queryBuilder);

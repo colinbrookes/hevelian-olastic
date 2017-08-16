@@ -86,7 +86,7 @@ public class SingleElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
 
     @Override
     protected List<String> getSchemaNamespaces() {
-        return Arrays.asList(csdlMapper.eIndexToCsdlNamespace(index));
+        return Arrays.asList(csdlMapper.esIndexToCsdlNamespace(index));
     }
 
     @Override

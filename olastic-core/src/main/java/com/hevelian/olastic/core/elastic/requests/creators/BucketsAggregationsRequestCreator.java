@@ -158,6 +158,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
      *            groupBy instance
      * @return list of properties
      * @throws ODataApplicationException
+     *             if any error occurred
      */
     private static List<String> getProperties(GroupBy groupBy) throws ODataApplicationException {
         List<String> groupByProperties = new ArrayList<>();

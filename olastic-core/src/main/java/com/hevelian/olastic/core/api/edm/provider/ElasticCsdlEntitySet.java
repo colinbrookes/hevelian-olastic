@@ -10,35 +10,35 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 public class ElasticCsdlEntitySet extends CsdlEntitySet
         implements ElasticCsdlEdmItem<ElasticCsdlEntitySet> {
 
-    private String eIndex;
-    private String eType;
+    private String esIndex;
+    private String esType;
 
     @Override
-    public String getEType() {
-        return eType;
+    public String getESType() {
+        return esType;
     }
 
     @Override
-    public String getEIndex() {
-        return eIndex;
+    public String getESIndex() {
+        return esIndex;
     }
 
     @Override
-    public ElasticCsdlEntitySet setEIndex(String eIndex) {
-        this.eIndex = eIndex;
+    public ElasticCsdlEntitySet setESIndex(String esIndex) {
+        this.esIndex = esIndex;
         return this;
     }
 
     @Override
-    public ElasticCsdlEntitySet setEType(String eType) {
-        this.eType = eType;
+    public ElasticCsdlEntitySet setESType(String esType) {
+        this.esType = esType;
         return this;
     }
 
     @Override
     public CsdlEntitySet setName(String name) {
-        if (eType == null) {
-            setEType(name);
+        if (esType == null) {
+            setESType(name);
         }
         return super.setName(name);
     }

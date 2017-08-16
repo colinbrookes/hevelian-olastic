@@ -35,9 +35,9 @@ import lombok.extern.log4j.Log4j2;
  * @author rdidyk
  */
 @Log4j2
-public class ESClient {
+public final class ESClient {
 
-    private static ESClient INSTANCE;
+    private static ESClient instance;
 
     private Client client;
 
@@ -52,10 +52,10 @@ public class ESClient {
      *         exception will be thrown
      */
     public static ESClient getInstance() {
-        if (INSTANCE == null) {
+        if (instance == null) {
             throw new IllegalStateException("Elasticsearch Client is not initialized.");
         }
-        return INSTANCE;
+        return instance;
     }
 
     /**
@@ -67,10 +67,10 @@ public class ESClient {
      *            Elasticsearch client instance
      */
     public static void init(Client client) {
-        if (INSTANCE == null) {
+        if (instance == null) {
             synchronized (ESClient.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new ESClient(client);
+                if (instance == null) {
+                    instance = new ESClient(client);
                 } else {
                     throw new IllegalStateException(
                             "Elasticsearch query executor client is already initialized.");

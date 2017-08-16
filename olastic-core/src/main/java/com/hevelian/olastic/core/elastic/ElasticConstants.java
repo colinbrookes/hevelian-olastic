@@ -21,7 +21,9 @@ public final class ElasticConstants {
     public static final String KEYWORD_SUFFIX = "keyword";
     /** Field suffix delimiter. */
     public static final String SUFFIX_DELIMITER = ".";
+    /** Nested path separator. */
     public static final String NESTED_PATH_SEPARATOR = ".";
+    /** Wildcard character. */
     public static final String WILDCARD_CHAR = "*";
     /**
      * The _all field is a special catch-all field which concatenates the values

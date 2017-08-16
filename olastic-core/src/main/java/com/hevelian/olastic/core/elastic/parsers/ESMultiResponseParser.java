@@ -32,6 +32,7 @@ public interface ESMultiResponseParser<T, V> {
      * @throws ODataApplicationException
      *             if any error occurred during parsing response
      */
-    InstanceData<T, V> parse(MultiSearchResponse response, List<ElasticEdmEntitySet> responseEntitySets, ElasticEdmEntitySet returnEntitySet)
+    InstanceData<T, V> parse(MultiSearchResponse response,
+            List<ElasticEdmEntitySet> responseEntitySets, ElasticEdmEntitySet returnEntitySet)
             throws ODataApplicationException;
 }

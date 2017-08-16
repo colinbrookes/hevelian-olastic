@@ -48,7 +48,7 @@ public interface ESResponseParser<T, V> {
      * @throws ODataApplicationException
      *             if any error occurred during parsing response
      */
-    InstanceData<T, V> parse(SearchResponse response, List<ElasticEdmEntitySet> responseEntitySets, ElasticEdmEntitySet returnEntitySet)
-            throws ODataApplicationException;
+    InstanceData<T, V> parse(SearchResponse response, List<ElasticEdmEntitySet> responseEntitySets,
+            ElasticEdmEntitySet returnEntitySet) throws ODataApplicationException;
 
 }

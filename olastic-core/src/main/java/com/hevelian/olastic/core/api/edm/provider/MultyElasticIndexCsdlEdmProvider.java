@@ -1,10 +1,14 @@
 package com.hevelian.olastic.core.api.edm.provider;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.hevelian.olastic.core.common.NestedTypeMapper;
 import com.hevelian.olastic.core.elastic.mappings.ElasticToCsdlMapper;
 import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
-
-import java.util.*;
 
 /**
  * Implementation of {@link ElasticCsdlEdmProvider} to work with Elasticsearch
@@ -94,7 +98,7 @@ public class MultyElasticIndexCsdlEdmProvider extends ElasticCsdlEdmProvider {
     protected void initializeNamespaces(Set<String> indices) {
         this.namespaces = new ArrayList<>(indices.size());
         for (String index : indices) {
-            String namespace = csdlMapper.eIndexToCsdlNamespace(index);
+            String namespace = csdlMapper.esIndexToCsdlNamespace(index);
             namespaces.add(namespace);
             namespaceToIndexMap.put(namespace, index);
         }

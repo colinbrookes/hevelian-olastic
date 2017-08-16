@@ -23,7 +23,7 @@ public interface ElasticToCsdlMapper {
      *            name of the field
      * @return name of the corresponding field
      */
-    String eFieldToCsdlProperty(String index, String type, String field);
+    String esFieldToCsdlProperty(String index, String type, String field);
 
     /**
      * Map Elasticsearch field to CSDL property isCollection value. By default
@@ -37,7 +37,7 @@ public interface ElasticToCsdlMapper {
      *            name of the field
      * @return name of the corresponding field
      */
-    boolean eFieldIsCollection(String index, String type, String field);
+    boolean esFieldIsCollection(String index, String type, String field);
 
     /**
      * Map Elasticsearch type name to CSDL entity type. By default returns the
@@ -49,7 +49,7 @@ public interface ElasticToCsdlMapper {
      *            name of the type within the index
      * @return the corresponding entity type
      */
-    FullQualifiedName eTypeToEntityType(String index, String type);
+    FullQualifiedName esTypeToEntityType(String index, String type);
 
     /**
      * Map Elasticsearch index name to CSDL namespace. By default returns the
@@ -59,7 +59,7 @@ public interface ElasticToCsdlMapper {
      *            name of the index
      * @return the corresponding namespace
      */
-    String eIndexToCsdlNamespace(String index);
+    String esIndexToCsdlNamespace(String index);
 
     /**
      * Map Elasticsearch type name to CSDL entity set name. By default returns
@@ -71,7 +71,7 @@ public interface ElasticToCsdlMapper {
      *            name of the type within the index
      * @return name of the corresponding entity set
      */
-    String eTypeToEntitySet(String index, String type);
+    String esTypeToEntitySet(String index, String type);
 
     /**
      * Convert a child relationship of Elasticsearch to a navigation property
@@ -86,7 +86,7 @@ public interface ElasticToCsdlMapper {
      * @return Navigation property name for child relationship. Default
      *         implementation returns the corresponding child entity type's name
      */
-    String eChildRelationToNavPropName(String index, String child, String parent);
+    String esChildRelationToNavPropName(String index, String child, String parent);
 
     /**
      * Convert a parent relationship of Elasticsearch to a navigation property
@@ -102,6 +102,6 @@ public interface ElasticToCsdlMapper {
      *         implementation returns the corresponding parent entity type's
      *         name
      */
-    String eParentRelationToNavPropName(String index, String parent, String child);
+    String esParentRelationToNavPropName(String index, String parent, String child);
 
 }

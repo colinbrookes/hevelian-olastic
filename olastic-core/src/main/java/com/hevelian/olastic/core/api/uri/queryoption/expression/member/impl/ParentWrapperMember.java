@@ -14,6 +14,14 @@ public class ParentWrapperMember extends ParentMember {
 
     private QueryBuilder query;
 
+    /**
+     * Initialize fields.
+     * 
+     * @param parentTypes
+     *            list of parent type names
+     * @param query
+     *            inner query
+     */
     public ParentWrapperMember(List<String> parentTypes, QueryBuilder query) {
         super(parentTypes);
         this.query = query;

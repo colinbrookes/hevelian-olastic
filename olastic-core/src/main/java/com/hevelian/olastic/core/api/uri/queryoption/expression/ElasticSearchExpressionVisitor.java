@@ -1,19 +1,27 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression;
 
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MemberHandler;
-import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.LiteralMember;
-import org.apache.olingo.commons.api.edm.EdmEnumType;
-import org.apache.olingo.commons.api.edm.EdmType;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.queryoption.expression.*;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import org.apache.olingo.commons.api.edm.EdmEnumType;
+import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
+import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
+import org.apache.olingo.server.api.uri.queryoption.expression.Member;
+import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.MemberHandler;
+import com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl.LiteralMember;
 
 /**
  * Implementation of expression visitor for building elasticsearch queries from
@@ -30,26 +38,36 @@ public class ElasticSearchExpressionVisitor implements ExpressionVisitor<Express
     @Override
     public ExpressionMember visitBinaryOperator(BinaryOperatorKind operator, ExpressionMember left,
             ExpressionMember right) throws ExpressionVisitException, ODataApplicationException {
+        ExpressionMember expressionMember = null;
         switch (operator) {
         case AND:
-            return left.and(right);
+            expressionMember = left.and(right);
+            break;
         case OR:
-            return left.or(right);
+            expressionMember = left.or(right);
+            break;
         case EQ:
-            return left.eq(right);
+            expressionMember = left.eq(right);
+            break;
         case NE:
-            return left.ne(right);
+            expressionMember = left.ne(right);
+            break;
         case GE:
-            return left.ge(right);
+            expressionMember = left.ge(right);
+            break;
         case GT:
-            return left.gt(right);
+            expressionMember = left.gt(right);
+            break;
         case LE:
-            return left.le(right);
+            expressionMember = left.le(right);
+            break;
         case LT:
-            return left.lt(right);
+            expressionMember = left.lt(right);
+            break;
         default:
             return throwNotImplemented("Unsupported binary operator");
         }
+        return expressionMember;
     }
 
     @Override

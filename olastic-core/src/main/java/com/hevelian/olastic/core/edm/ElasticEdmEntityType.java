@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -21,7 +20,7 @@ import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlNavigationProperty;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlProperty;
 
 /**
- * Custom implementation of {@link EdmEntityType}.
+ * Custom implementation of {@link EdmEntityTypeImpl}.
  * 
  * @author rdidyk
  */
@@ -52,7 +51,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * @return index name
      */
     public String getEIndex() {
-        return csdlEntityType.getEIndex();
+        return csdlEntityType.getESIndex();
     }
 
     /**
@@ -61,26 +60,32 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * @return type name
      */
     public String getEType() {
-        return csdlEntityType.getEType();
+        return csdlEntityType.getESType();
     }
 
     /**
      * Get's CSDL property name by Elasticsearch field name.
      * 
-     * @param eFieldName
+     * @param esFieldName
      *            Elasticsearch field name
      * @return found property
      */
-    public ElasticEdmProperty findPropertyByEField(String eFieldName) {
+    public ElasticEdmProperty findPropertyByEField(String esFieldName) {
         for (Entry<String, ElasticEdmProperty> entry : getEProperties().entrySet()) {
             ElasticEdmProperty property = entry.getValue();
-            if (property.getEField().equals(eFieldName)) {
+            if (property.getEField().equals(esFieldName)) {
                 return property;
             }
         }
         return null;
     }
 
+    /**
+     * Gets Elasticsearch properties map.
+     * 
+     * @return properties map, with key - property name and value -
+     *         {@link ElasticEdmProperty} instance
+     */
     public Map<String, ElasticEdmProperty> getEProperties() {
         if (propertiesCash == null) {
             Map<String, ElasticEdmProperty> localPorperties = new LinkedHashMap<>();
@@ -105,6 +110,12 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
         return properties;
     }
 
+    /**
+     * Gets Elasticsearch navigation properties map.
+     * 
+     * @return properties map, with key - property name and value -
+     *         {@link ElasticEdmNavigationProperty} instance
+     */
     public Map<String, ElasticEdmNavigationProperty> getENavigationProperties() {
         if (navigationPropertiesCash == null) {
             Map<String, ElasticEdmNavigationProperty> localNavigationProperties = new LinkedHashMap<>();

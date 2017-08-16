@@ -10,28 +10,28 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 public class ElasticCsdlNavigationProperty extends CsdlNavigationProperty
         implements ElasticCsdlEdmItem<ElasticCsdlNavigationProperty> {
 
-    private String eIndex;
-    private String eType;
+    private String esIndex;
+    private String esType;
 
     @Override
-    public String getEType() {
-        return eType;
+    public String getESType() {
+        return esType;
     }
 
     @Override
-    public String getEIndex() {
-        return eIndex;
+    public String getESIndex() {
+        return esIndex;
     }
 
     @Override
-    public ElasticCsdlNavigationProperty setEIndex(String eIndex) {
-        this.eIndex = eIndex;
+    public ElasticCsdlNavigationProperty setESIndex(String esIndex) {
+        this.esIndex = esIndex;
         return this;
     }
 
     @Override
-    public ElasticCsdlNavigationProperty setEType(String eType) {
-        this.eType = eType;
+    public ElasticCsdlNavigationProperty setESType(String esType) {
+        this.esType = esType;
         return this;
     }
 

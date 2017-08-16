@@ -28,6 +28,12 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
     private HashMap<String, Object> cache = new HashMap<>();
     private final Client client;
 
+    /**
+     * Initialize field.
+     * 
+     * @param client
+     *            Elasticsearch client
+     */
     public DefaultMetaDataProvider(Client client) {
         this.client = client;
     }
@@ -53,8 +59,8 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
             cache.put(makeKey(index, type), mapping);
         }
 
-        return ((GetMappingsResponse) (mapping)).getMappings().isEmpty() ? null
-                : ((GetMappingsResponse) (mapping)).getMappings().get(index).get(type);
+        return ((GetMappingsResponse) mapping).getMappings().isEmpty() ? null
+                : ((GetMappingsResponse) mapping).getMappings().get(index).get(type);
     }
 
     @Override
@@ -68,7 +74,7 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
         }
 
         ImmutableOpenMap.Builder<String, FieldMappingMetaData> mappingsMapBuilder = new ImmutableOpenMap.Builder<>();
-        // TODO this workaround was implemented because of this ES 5.x issue
+        // TODO: this workaround was implemented because of this ES 5.x issue
         // https://github.com/elastic/elasticsearch/issues/22209
         // revert this when the issue is fixed
         try {
@@ -76,14 +82,13 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
                     .toArray();
             for (Object mapping : mappings) {
                 MappingMetaData mappingMetaData = (MappingMetaData) mapping;
-                String type = mappingMetaData.type();
-                XContentBuilder xContentBuilder = XContentFactory.contentBuilder(XContentType.JSON);
+                XContentBuilder contentBuilder = XContentFactory.contentBuilder(XContentType.JSON);
                 Object fieldMapping = mappingMetaData.getSourceAsMap().get(field);
-                xContentBuilder.startObject();
-                xContentBuilder.field(field, fieldMapping);
-                xContentBuilder.endObject();
-                mappingsMapBuilder.put(type,
-                        new FieldMappingMetaData(field, xContentBuilder.bytes()));
+                contentBuilder.startObject();
+                contentBuilder.field(field, fieldMapping);
+                contentBuilder.endObject();
+                mappingsMapBuilder.put(mappingMetaData.type(),
+                        new FieldMappingMetaData(field, contentBuilder.bytes()));
             }
         } catch (IOException e) {
             log.debug(e);

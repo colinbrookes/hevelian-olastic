@@ -172,7 +172,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
         propertyRef.setName("_id");
 
         ElasticCsdlEntityType entityType = new ElasticCsdlEntityType();
-        entityType.setEIndex(AUTHORS_INDEX);
+        entityType.setESIndex(AUTHORS_INDEX);
         if (entityTypeName.equals(AUTHOR_FQN)) {
 
             CsdlProperty age = new ElasticCsdlProperty().setName("age")
@@ -184,7 +184,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(AUTHOR_TYPE);
-            entityType.setEType(AUTHOR_TYPE);
+            entityType.setESType(AUTHOR_TYPE);
             entityType.setProperties(Arrays.asList(id, birthDate, age, name, dimensionProperty));
             entityType.setKey(Collections.singletonList(propertyRef));
 
@@ -208,7 +208,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             addressCompositeKey.add(cityPropertyRef);
 
             entityType.setName(ADDRESS_TYPE);
-            entityType.setEType(ADDRESS_TYPE);
+            entityType.setESType(ADDRESS_TYPE);
             entityType.setProperties(Arrays.asList(id, address, city, dimensionProperty));
 
             entityType.setKey(addressCompositeKey);
@@ -224,7 +224,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
             CsdlProperty info = new ElasticCsdlProperty().setName("info").setType(BOOK_INFO_FQN);
 
             entityType.setName(BOOK_TYPE);
-            entityType.setEType(BOOK_TYPE);
+            entityType.setESType(BOOK_TYPE);
             entityType.setProperties(Arrays.asList(id, title, dimensionProperty, info));
             entityType.setKey(Collections.singletonList(propertyRef));
 
@@ -239,7 +239,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                     .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
             entityType.setName(CHARACTER_TYPE);
-            entityType.setEType(CHARACTER_TYPE);
+            entityType.setESType(CHARACTER_TYPE);
             entityType.setProperties(Arrays.asList(id, name, dimensionProperty));
             entityType.setKey(Collections.singletonList(propertyRef));
 
@@ -255,10 +255,10 @@ public class TestProvider extends ElasticCsdlEdmProvider {
     public ElasticCsdlEntitySet getEntitySet(FullQualifiedName entityContainer,
             String entitySetName) throws ODataException {
         ElasticCsdlEntitySet entitySet = new ElasticCsdlEntitySet();
-        entitySet.setEIndex(AUTHORS_INDEX);
+        entitySet.setESIndex(AUTHORS_INDEX);
         if (entityContainer.equals(CONTAINER)) {
             if (entitySetName.equals(AUTHOR_TYPE)) {
-                entitySet.setEType(AUTHOR_TYPE).setName(AUTHOR_TYPE).setType(AUTHOR_FQN);
+                entitySet.setESType(AUTHOR_TYPE).setName(AUTHOR_TYPE).setType(AUTHOR_FQN);
                 entitySet.setNavigationPropertyBindings(Arrays.asList(
                         new CsdlNavigationPropertyBinding().setPath(ADDRESS_TYPE)
                                 .setTarget(ADDRESS_TYPE),
@@ -266,7 +266,7 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                                 .setTarget(BOOK_TYPE)));
                 return entitySet;
             } else if (entitySetName.equals(BOOK_TYPE)) {
-                entitySet.setEType(BOOK_TYPE).setName(BOOK_TYPE).setType(BOOK_FQN);
+                entitySet.setESType(BOOK_TYPE).setName(BOOK_TYPE).setType(BOOK_FQN);
                 entitySet.setNavigationPropertyBindings(Arrays.asList(
                         new CsdlNavigationPropertyBinding().setPath(CHARACTER_TYPE)
                                 .setTarget(CHARACTER_TYPE),
@@ -274,13 +274,13 @@ public class TestProvider extends ElasticCsdlEdmProvider {
                                 .setTarget(AUTHOR_TYPE)));
                 return entitySet;
             } else if (entitySetName.equals(ADDRESS_TYPE)) {
-                entitySet.setEType(ADDRESS_TYPE).setName(ADDRESS_TYPE).setType(ADDRESS_FQN);
+                entitySet.setESType(ADDRESS_TYPE).setName(ADDRESS_TYPE).setType(ADDRESS_FQN);
                 entitySet.setNavigationPropertyBindings(
                         Arrays.asList(new CsdlNavigationPropertyBinding().setPath(AUTHOR_TYPE)
                                 .setTarget(AUTHOR_TYPE)));
                 return entitySet;
             } else if (entitySetName.equals(CHARACTER_TYPE)) {
-                entitySet.setEType(CHARACTER_TYPE).setName(CHARACTER_TYPE).setType(CHARACTER_FQN);
+                entitySet.setESType(CHARACTER_TYPE).setName(CHARACTER_TYPE).setType(CHARACTER_FQN);
                 entitySet.setNavigationPropertyBindings(
                         Arrays.asList(new CsdlNavigationPropertyBinding().setPath(BOOK_TYPE)
                                 .setTarget(BOOK_TYPE)));

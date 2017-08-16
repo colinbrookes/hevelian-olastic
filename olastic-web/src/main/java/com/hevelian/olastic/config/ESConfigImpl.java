@@ -21,7 +21,7 @@ import com.hevelian.olastic.core.elastic.ESClient;
  * @author rdidyk
  */
 public class ESConfigImpl implements ESConfig {
-
+    /** Elasticsearch client. */
     protected final Client client;
 
     /**

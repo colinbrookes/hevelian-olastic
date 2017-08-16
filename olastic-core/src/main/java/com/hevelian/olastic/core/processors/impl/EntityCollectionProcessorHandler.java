@@ -22,20 +22,21 @@ import static com.hevelian.olastic.core.utils.ApplyOptionUtils.getGroupByItems;
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
 
 /**
- * <p>Custom Elastic processor for handling all request to retrieve data from
+ * <p>
+ * Custom Elastic processor for handling all request to retrieve data from
  * collection of entities.
  * </p>
- * Supported items for now:
- * 1. one 'groupby' for multiple fields;
- * 2. metrics aggregations;
- * 3. one 'groupby' for multiple fields with metrics aggregations;
+ * Supported items for now: 1. one 'groupby' for multiple fields; 2. metrics
+ * aggregations; 3. one 'groupby' for multiple fields with metrics aggregations;
  * 4. simple entity collections.
  *
  * @author rdidyk
  */
 public class EntityCollectionProcessorHandler implements EntityCollectionProcessor, ESProcessor {
 
+    /** OData instance. */
     protected ElasticOData odata;
+    /** Service metadata. */
     protected ElasticServiceMetadata serviceMetadata;
 
     @Override
@@ -77,15 +78,15 @@ public class EntityCollectionProcessorHandler implements EntityCollectionProcess
         // Metrics aggregations only
         if (groupBy == null && !aggregations.isEmpty()) {
             return new MetricsAggregationsProccessor();
-        } // Buckets aggregation only
-        else if (groupBy != null && aggregations.isEmpty()) {
+        } else if (groupBy != null && aggregations.isEmpty()) {
+            // Buckets aggregation only
             return new BucketsAggegationsProcessor();
-        } // Pipeline aggregation
-        else if (groupBy != null && !aggregations.isEmpty()) {
+        } else if (groupBy != null && !aggregations.isEmpty()) {
+            // Pipeline aggregation
             return throwNotImplemented(
                     "Aggregation for grouped and aggregated data is not implemented.");
         } else {
-            // TODO Implement support of another items.
+            // TODO: Implement support of another items.
             return new EntityCollectionProcessorImpl();
         }
     }

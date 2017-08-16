@@ -24,25 +24,27 @@ public final class SerializeUtils {
      * @return property type
      */
     public static FullQualifiedName getPropertyType(Object value) {
+        FullQualifiedName fqn = null;
         if (value instanceof String) {
-            return EdmPrimitiveTypeKind.String.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.String.getFullQualifiedName();
         } else if (value instanceof Byte) {
-            return EdmPrimitiveTypeKind.Byte.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Byte.getFullQualifiedName();
         } else if (value instanceof Short) {
-            return EdmPrimitiveTypeKind.Int16.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Int16.getFullQualifiedName();
         } else if (value instanceof Integer) {
-            return EdmPrimitiveTypeKind.Int32.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Int32.getFullQualifiedName();
         } else if (value instanceof Long) {
-            return EdmPrimitiveTypeKind.Int64.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Int64.getFullQualifiedName();
         } else if (value instanceof Double) {
-            return EdmPrimitiveTypeKind.Double.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Double.getFullQualifiedName();
         } else if (value instanceof Boolean) {
-            return EdmPrimitiveTypeKind.Boolean.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Boolean.getFullQualifiedName();
         } else if (value instanceof Date) {
-            return EdmPrimitiveTypeKind.Date.getFullQualifiedName();
+            fqn = EdmPrimitiveTypeKind.Date.getFullQualifiedName();
         } else {
             throw new ODataRuntimeException("Property type is not supported.");
         }
+        return fqn;
     }
 
 }

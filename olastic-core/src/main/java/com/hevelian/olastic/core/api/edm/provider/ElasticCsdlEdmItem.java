@@ -16,31 +16,31 @@ public interface ElasticCsdlEdmItem<T extends ElasticCsdlEdmItem<T>> {
      * 
      * @return type name
      */
-    String getEType();
+    String getESType();
 
     /**
      * Return's Elasticsearch index name.
      * 
      * @return index name
      */
-    String getEIndex();
+    String getESIndex();
 
     /**
      * Set's Elasticsearch index name.
      * 
-     * @param eIndex
+     * @param esIndex
      *            index name
      * @return current instance
      */
-    T setEIndex(String eIndex);
+    T setESIndex(String esIndex);
 
     /**
      * Set's Elasticsearch type name.
      * 
-     * @param eType
+     * @param esType
      *            type name
      * @return current instance
      */
-    T setEType(String eType);
+    T setESType(String esType);
 
 }

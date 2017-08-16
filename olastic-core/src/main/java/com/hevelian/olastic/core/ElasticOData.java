@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.etag.ServiceMetadataETagSupport;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -18,18 +17,20 @@ import com.hevelian.olastic.core.serializer.json.ElasticODataJsonSerializer;
 import com.hevelian.olastic.core.serializer.xml.ElasticODataXmlSerializer;
 
 /**
- * Custom implementation of {@link OData} to override behavior of creating
+ * Custom implementation of {@link ODataImpl} to override behavior of creating
  * entities and provide other side mappings from CSDL to ELasticsearch.
  * 
  * @author rdidyk
  */
-public class ElasticOData extends ODataImpl {
+public final class ElasticOData extends ODataImpl {
 
     private ElasticOData() {
     }
 
     /**
-     * @return a new OData instance
+     * Creates new instance of {@link ElasticOData} instance.
+     * 
+     * @return new OData instance
      */
     public static ElasticOData newInstance() {
         return new ElasticOData();

@@ -6,10 +6,9 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.queries.Query;
 import com.hevelian.olastic.core.elastic.requests.ESMultiRequest;
-import com.hevelian.olastic.core.elastic.requests.MultiSearchRequest;
 
 /**
- * Contains logic needed for creating ES {@link MultiSearchRequest}.
+ * Contains logic needed for creating ES request.
  *
  * @author Taras Kohut
  */
@@ -23,7 +22,9 @@ public abstract class MultiRequestCreator extends RequestCreator {
 
     /**
      * Constructor to initialize ES query builder.
-     * @param queryBuilder Es query builder instance
+     * 
+     * @param queryBuilder
+     *            Es query builder instance
      */
     public MultiRequestCreator(ESQueryBuilder<?> queryBuilder) {
         super(queryBuilder);

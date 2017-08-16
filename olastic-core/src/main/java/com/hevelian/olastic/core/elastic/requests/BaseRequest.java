@@ -1,17 +1,15 @@
 package com.hevelian.olastic.core.elastic.requests;
 
-import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.action.search.SearchResponse;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.pagination.Pagination;
 import com.hevelian.olastic.core.elastic.queries.Query;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Base request class.
@@ -20,12 +18,11 @@ import lombok.experimental.FieldDefaults;
  */
 @AllArgsConstructor
 @Getter
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class BaseRequest implements ESRequest {
 
-    Query query;
-    ElasticEdmEntitySet entitySet;
-    Pagination pagination;
+    private final Query query;
+    private final ElasticEdmEntitySet entitySet;
+    private final Pagination pagination;
 
     @Override
     public SearchResponse execute() throws ODataApplicationException {

@@ -1,5 +1,19 @@
 package com.hevelian.olastic.web;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ODataHttpHandler;
+import org.apache.olingo.server.api.ServiceMetadata;
+import org.elasticsearch.client.Client;
+
 import com.hevelian.olastic.config.ESConfig;
 import com.hevelian.olastic.core.ElasticOData;
 import com.hevelian.olastic.core.api.edm.provider.ElasticCsdlEdmProvider;
@@ -9,19 +23,6 @@ import com.hevelian.olastic.core.elastic.mappings.MappingMetaDataProvider;
 import com.hevelian.olastic.core.processors.impl.EntityCollectionProcessorHandler;
 import com.hevelian.olastic.core.processors.impl.EntityProcessorHandler;
 import com.hevelian.olastic.core.processors.impl.PrimitiveProcessorImpl;
-import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
-import org.apache.olingo.server.api.OData;
-import org.apache.olingo.server.api.ODataHttpHandler;
-import org.apache.olingo.server.api.ServiceMetadata;
-import org.elasticsearch.client.Client;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * OData servlet that currently connects to the local instance of the
@@ -33,7 +34,7 @@ import java.util.Set;
 public class ODataServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7048611704658443045L;
-
+    /** Elasticsearch client config. */
     protected ESConfig config;
 
     @Override
@@ -68,7 +69,7 @@ public class ODataServlet extends HttpServlet {
     }
 
     /**
-     * Create's {@link CsdlEdmProvider} provider.
+     * Create's {@link ElasticCsdlEdmProvider} provider.
      *
      * @return provider instance
      */
@@ -87,7 +88,7 @@ public class ODataServlet extends HttpServlet {
 
     /**
      * Registers additional custom processor implementations for handling OData
-     * requests
+     * requests.
      *
      * @param handler
      *            OData handler

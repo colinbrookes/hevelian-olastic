@@ -7,10 +7,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 
 import com.hevelian.olastic.core.api.uri.queryoption.expression.member.ExpressionMember;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Represents the result of expression.
@@ -18,11 +16,10 @@ import lombok.experimental.FieldDefaults;
  * @author Taras Kohut
  */
 @AllArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Getter
 public class ExpressionResult extends BaseMember {
 
-    QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder;
 
     @Override
     public ExpressionResult and(ExpressionMember expressionMember)

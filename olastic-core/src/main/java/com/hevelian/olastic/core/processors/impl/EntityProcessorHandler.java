@@ -23,7 +23,9 @@ import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented
  */
 public class EntityProcessorHandler implements ESProcessor, EntityProcessor {
 
+    /** OData instance. */
     protected ElasticOData odata;
+    /** Service metadata. */
     protected ElasticServiceMetadata serviceMetadata;
 
     @Override

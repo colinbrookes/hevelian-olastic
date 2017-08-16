@@ -15,6 +15,14 @@ public class ParentPrimitiveMember extends ParentMember {
 
     private PrimitiveMember primitiveMember;
 
+    /**
+     * Initialize fields.
+     * 
+     * @param parentTypes
+     *            list of parent type names
+     * @param primitiveMember
+     *            primitive member instance
+     */
     public ParentPrimitiveMember(List<String> parentTypes, PrimitiveMember primitiveMember) {
         super(parentTypes);
         this.primitiveMember = primitiveMember;

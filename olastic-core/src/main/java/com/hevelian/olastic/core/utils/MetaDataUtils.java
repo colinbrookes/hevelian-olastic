@@ -17,6 +17,18 @@ public final class MetaDataUtils {
     private MetaDataUtils() {
     }
 
+    /**
+     * Casts object to specified class.
+     * 
+     * @param object
+     *            object to cast
+     * @param clazz
+     *            class to cast
+     * @param <T>
+     *            class type
+     * @return casted instance, or exception will be thrown in case object is
+     *         not instance of specified class
+     */
     public static <T> T castToType(Object object, Class<T> clazz) {
         if (clazz.isInstance(object)) {
             return clazz.cast(object);

@@ -6,9 +6,7 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.elasticsearch.index.query.QueryBuilder;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 /**
  * Wraps the data for child query building.
@@ -16,11 +14,10 @@ import lombok.experimental.FieldDefaults;
  * @author Taras Kohut
  */
 @AllArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ChildMember extends BaseMember {
 
-    String childType;
-    QueryBuilder query;
+    private final String childType;
+    private final QueryBuilder query;
 
     @Override
     public ExpressionResult any() throws ODataApplicationException {

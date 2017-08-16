@@ -1,11 +1,5 @@
 package com.hevelian.olastic.core.processors;
 
-import com.hevelian.olastic.core.ElasticOData;
-import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
-import com.hevelian.olastic.core.elastic.requests.ESRequest;
-import com.hevelian.olastic.core.elastic.requests.SearchRequest;
-import com.hevelian.olastic.core.processors.data.InstanceData;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.ContextURL.Suffix;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -23,6 +17,12 @@ import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.elasticsearch.action.search.SearchResponse;
 
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
+import com.hevelian.olastic.core.elastic.requests.ESRequest;
+import com.hevelian.olastic.core.processors.data.InstanceData;
+
 /**
  * Abstract class with template method to provide behavior for all read
  * processors.
@@ -35,8 +35,11 @@ import org.elasticsearch.action.search.SearchResponse;
  */
 public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
 
+    /** OData instance. */
     protected ElasticOData odata;
+    /** Service metadata. */
     protected ElasticServiceMetadata serviceMetadata;
+    /** OData request. */
     protected ODataRequest request;
 
     @Override
@@ -69,8 +72,9 @@ public abstract class AbstractESReadProcessor<T, V> implements ESReadProcessor {
      *
      * @param uriInfo
      *            URI info for request
-     * @return created {@link SearchRequest} instance
-     * @throws ODataApplicationException OData app exception
+     * @return created {@link ESRequest} instance
+     * @throws ODataApplicationException
+     *             OData app exception
      */
     protected abstract ESRequest createRequest(UriInfo uriInfo) throws ODataApplicationException;
 

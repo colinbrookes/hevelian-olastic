@@ -28,10 +28,12 @@ public final class ElasticUtils {
     public static String addKeywordIfNeeded(String name, List<EdmAnnotation> annotations) {
         boolean isAnalyzed = false;
         Optional<EdmAnnotation> analyzedAnnotation = annotations.stream()
-                .filter(annotation -> annotation.getTerm().getName().equals(AnnotationProvider.ANALYZED_TERM_NAME))
+                .filter(annotation -> annotation.getTerm().getName()
+                        .equals(AnnotationProvider.ANALYZED_TERM_NAME))
                 .findFirst();
         if (analyzedAnnotation.isPresent()) {
-            isAnalyzed = (Boolean)(analyzedAnnotation.get().getExpression().asConstant().asPrimitive());
+            isAnalyzed = (Boolean) (analyzedAnnotation.get().getExpression().asConstant()
+                    .asPrimitive());
         }
         return isAnalyzed ? addKeyword(name) : name;
     }
