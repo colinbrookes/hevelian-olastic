@@ -13,8 +13,19 @@ before_install:
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
+addons:
+    coverity_scan:
+        project:
+          name: "Hevelian/hevelian-olastic"
+          description: "Generic implementation of the OData services for Elasticsearch based on Apache Olingo."
+        notification_email: junglist.ruslan@gmail.com
+        build_command_prepend: "mvn clean"
+        build_command: "mvn -DskipTests=true compile"
+        branch_pattern: master
+
 install: true
-script: mvn --settings .travis/settings.xml clean verify
+script: 
+  - "mvn clean verify --settings .travis/settings.xml"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
@@ -27,13 +38,4 @@ deploy:
     on:
       repo: Hevelian/hevelian-olastic
       jdk: oraclejdk8
-      
-addons:
-    coverity_scan:
-        project:
-          name: "Hevelian/hevelian-olastic"
-          description: "Generic implementation of the OData services for Elasticsearch based on Apache Olingo."
-        notification_email: junglist.ruslan@gmail.com
-        build_command_prepend: "mvn clean"
-        build_command:   "mvn -DskipTests=true compile"
-        branch_pattern: master
+
