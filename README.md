@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/Hevelian/hevelian-olastic.svg?branch=master)](https://travis-ci.org/Hevelian/hevelian-olastic)
 [![Codecov](https://img.shields.io/codecov/c/github/Hevelian/hevelian-olastic.svg)](https://codecov.io/github/Hevelian/hevelian-olastic?branch=master)
+[![Coverity Scan](https://img.shields.io/coverity/scan/13496.svg)](https://scan.coverity.com/projects/hevelian-hevelian-olastic)
 [![license](https://img.shields.io/github/license/Hevelian/hevelian-olastic.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Maven Central](https://img.shields.io/maven-central/v/com.hevelian.olastic/olastic-parent.svg)](https://maven-badges.herokuapp.com/maven-central/com.hevelian.olastic/olastic-parent)
 
