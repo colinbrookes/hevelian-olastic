@@ -6,7 +6,10 @@ before_install:
   - if [ ! -z "$GPG_SECRET_KEYS" ]; then echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --no-tty --no-use-agent --import; fi
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
 install: true
-script: mvn --settings .travis/settings.xml clean  verify
+script: mvn --settings .travis/settings.xml clean verify
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 deploy:
   -
