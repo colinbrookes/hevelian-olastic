@@ -11,7 +11,7 @@
 		<property name="tabWidth" value="4" />
 		<module name="AbbreviationAsWordInName">
 			<property name="ignoreFinal" value="false" />
-			<property name="allowedAbbreviationLength" value="3" />
+			<property name="allowedAbbreviationLength" value="4" />
 		</module>
 		<module name="AnnotationLocation">
 			<property name="id" value="AnnotationLocationMostCases" />
@@ -76,7 +76,7 @@
 		<module name="DescendantToken">
 			<property name="tokens" value="LITERAL_SWITCH" />
 			<property name="limitedTokens" value="LITERAL_SWITCH" />
-			<property name="maximumNumber" value="0" />
+			<property name="maximumNumber" value="1" />
 			<property name="minimumDepth" value="1" />
 		</module>
 		<module name="DescendantToken">
@@ -99,7 +99,7 @@
 			<property name="tokens" value="METHOD_DEF" />
 			<property name="limitedTokens" value="VARIABLE_DEF" />
 			<property name="maximumDepth" value="2" />
-			<property name="maximumNumber" value="10" />
+			<property name="maximumNumber" value="15" />
 		</module>
 		<module name="DescendantToken">
 			<property name="tokens" value="METHOD_DEF" />
@@ -116,7 +116,7 @@
 			<property name="tokens" value="CLASS_DEF" />
 			<property name="limitedTokens" value="VARIABLE_DEF" />
 			<property name="maximumDepth" value="2" />
-			<property name="maximumNumber" value="10" />
+			<property name="maximumNumber" value="50" />
 		</module>
 		<module name="EmptyBlock">
 			<property name="tokens"
@@ -337,7 +337,9 @@
 		<module name="UnnecessaryParentheses" />
 		<module name="UnusedImports" />
 		<module name="UpperEll" />
-		<module name="VariableDeclarationUsageDistance" />
+		<module name="VariableDeclarationUsageDistance">
+			<property name="allowedDistance" value="7" />
+		</module>
 		<module name="WhitespaceAfter" />
 		<module name="WhitespaceAround">
 			<property name="allowEmptyConstructors" value="true" />
@@ -352,32 +354,6 @@
 
 		<!-- Holder Checks -->
 		<module name="FileContentsHolder" />
-
-		<!-- Suppression Filters -->
-		<module name="SuppressionCommentFilter">
-			<property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)" />
-			<property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)" />
-			<property name="checkFormat" value="$1" />
-		</module>
-		<module name="SuppressionCommentFilter">
-			<property name="offCommentFormat" value="// BEGIN SUPRESS CATCH EXCEPTION" />
-			<property name="onCommentFormat" value="// END SUPRESS CATCH EXCEPTION" />
-			<property name="messageFormat" value=".*Exception.*" />
-			<metadata name="com.atlassw.tools.eclipse.checkstyle.comment"
-				value="SupressCatchExceptionWarning" />
-		</module>
-		<module name="SuppressionCommentFilter">
-			<property name="offCommentFormat" value="// BEGIN COMPLEX CODE" />
-			<property name="onCommentFormat" value="// END COMPLEX CODE" />
-			<metadata name="com.atlassw.tools.eclipse.checkstyle.comment"
-				value="High Complexity Code Warning Suppression" />
-		</module>
-		<module name="SuppressionCommentFilter">
-			<property name="offCommentFormat" value="// REUSED CLASS" />
-			<property name="onCommentFormat" value="// END REUSED CLASS" />
-			<metadata name="com.atlassw.tools.eclipse.checkstyle.comment"
-				value="High Complexity Code Warning Suppression" />
-		</module>
 	</module>
 	<module name="FileLength">
 		<property name="severity" value="warning" />
@@ -390,6 +366,31 @@
 		<property name="severity" value="ignore" />
 		<metadata name="net.sf.eclipsecs.core.lastEnabledSeverity"
 			value="inherit" />
+	</module>
+	<!-- Suppression Filters -->
+	<module name="SuppressionCommentFilter">
+		<property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)" />
+		<property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)" />
+		<property name="checkFormat" value="$1" />
+	</module>
+	<module name="SuppressionCommentFilter">
+		<property name="offCommentFormat" value="// BEGIN SUPRESS CATCH EXCEPTION" />
+		<property name="onCommentFormat" value="// END SUPRESS CATCH EXCEPTION" />
+		<property name="messageFormat" value=".*Exception.*" />
+		<metadata name="com.atlassw.tools.eclipse.checkstyle.comment"
+			value="SupressCatchExceptionWarning" />
+	</module>
+	<module name="SuppressionCommentFilter">
+		<property name="offCommentFormat" value="// BEGIN COMPLEX CODE" />
+		<property name="onCommentFormat" value="// END COMPLEX CODE" />
+		<metadata name="com.atlassw.tools.eclipse.checkstyle.comment"
+			value="High Complexity Code Warning Suppression" />
+	</module>
+	<module name="SuppressionCommentFilter">
+		<property name="offCommentFormat" value="// REUSED CLASS" />
+		<property name="onCommentFormat" value="// END REUSED CLASS" />
+		<metadata name="com.atlassw.tools.eclipse.checkstyle.comment"
+			value="High Complexity Code Warning Suppression" />
 	</module>
 	<module name="Translation" />
 	<module name="UniqueProperties">

@@ -1,10 +1,5 @@
-env:
-  global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   # via the "travis encrypt" command using the project repo's public key
-   - secure: "Basfx0mnfRKvfxWLlrNRylHXCajxrJoezJxNd0OOK5FJi8xLvFAI65dg6qemdSVQtWwz+gWiJ1mBKI0SW0/J8gOOFk1cPJfMKG7w+oMTCMPjXllEEX3dHmS89BPhxvBmbCWmI0MjM6YOCKKyABKl432pXD2FhznBb/qHEoamDjo3m8WJK0sizJJlUgSXXDwAVbHfQ+Va56yi3QUi8XLisQBDguiH1pkEo8OKoCrtZcoHd0SiqUfThuvST5PPznEgKz3IYwtTtvcBJjuIBMe9LEyV0JHPwaE3v7Ju+ZSuKQVIgHjj6PmpcO1cJSMKvEKcUqt6BtN+6IFtTpAyae4xJqNo1ECLecTQABipj4i3ld+jsXVO+pHvgFI/QqNBVYqRtr/DRsn6SBVRXmyalTqHL7iTnRtWNuAM8Qgd4RNaKpKbP8BVlGpIQvbjRcZ1A1Glb2LHUyj/xo+bOJETjPXBKAshSCmjdCdZ7746M9ZXN+MDR7BwPz0dOhNVz9QNRKSxcR+rHfMuohIzmhOuzGOFwELKtvWqpL1iEDF6P+fw3RQIj6zJLUx78ocXz2muYtYcl7iDLT1g0Ne8cE+ymKvWjXTBdeD1bxxG3U3B/fJk0P/uaNMFPEeEacJ5XhIpfDS/Gs8Aj+T1ZIwjK6aEgj/ol7YXT6dJ+PvFaHM/38UUMAQ="
-
 language: java
+dist: trusty
 jdk:
   - oraclejdk8
 
@@ -13,21 +8,12 @@ before_install:
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
-addons:
-    coverity_scan:
-        project:
-          name: "Hevelian/hevelian-olastic"
-          description: "Generic implementation of the OData services for Elasticsearch based on Apache Olingo."
-        notification_email: junglist.ruslan@gmail.com
-        build_command_prepend: "mvn clean"
-        build_command: "mvn -DskipTests=true compile"
-        branch_pattern: master
-
 install: true
-script: 
-  - "mvn clean verify --settings .travis/settings.xml"
+script:
+  - mvn clean verify --settings .travis/settings.xml
 
 after_success:
+  - mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=hevelian-olastic -Dsonar.login=${SONAR_TOKEN}
   - bash <(curl -s https://codecov.io/bash)
 
 deploy:
@@ -39,3 +25,7 @@ deploy:
       repo: Hevelian/hevelian-olastic
       jdk: oraclejdk8
 
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
