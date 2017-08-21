@@ -49,7 +49,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     private static final int DATETIME_PRECISION = 3;
     private static final FullQualifiedName DEFAULT_CONTAINER_NAME = new FullQualifiedName("OData",
             "ODataService");
-    
+
     /** Elasticsearch to Csdl mapper. */
     protected final ElasticToCsdlMapper csdlMapper;
     private AnnotationProvider annotationProvider;
@@ -57,7 +57,6 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
     private final NestedTypeMapper nestedTypeMapper;
     private final MappingMetaDataProvider mappingMetaDataProvider;
     private FullQualifiedName containerName;
-
 
     /**
      * Initializes mapping metadata provider with default
@@ -347,10 +346,8 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
      * @param index
      *            schema index name
      * @return Entity Container
-     * @throws ODataException
-     *             OData exception
      */
-    protected CsdlEntityContainer getEntityContainerForSchema(String index) throws ODataException {
+    protected CsdlEntityContainer getEntityContainerForSchema(String index) {
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
         entityContainer.setName(getContainerName().getName());
         entityContainer.getEntitySets().addAll(getEntitySets(index));

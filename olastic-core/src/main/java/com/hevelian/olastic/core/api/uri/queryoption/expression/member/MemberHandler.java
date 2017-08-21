@@ -206,7 +206,7 @@ public class MemberHandler {
                 .get(resourceParts.size() - 2);
         ElasticEdmEntityType entityType = (ElasticEdmEntityType) preLastNavResource.getProperty()
                 .getType();
-        return new ChildMember(entityType.getEType(), lambdaResult.getQueryBuilder()).any();
+        return new ChildMember(entityType.getESType(), lambdaResult.getQueryBuilder()).any();
     }
 
     private boolean isPreLastResourcePrimitive() {
@@ -276,7 +276,7 @@ public class MemberHandler {
     private List<String> collectNavigationTypes() {
         return resourceParts.stream().filter(UriResourceNavigation.class::isInstance)
                 .map(part -> ((ElasticEdmEntityType) ((UriResourceNavigation) part).getProperty()
-                        .getType()).getEType())
+                        .getType()).getESType())
                 .collect(Collectors.toList());
     }
 

@@ -41,7 +41,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      * 
      * @return index name
      */
-    public String getEIndex() {
+    public String getESIndex() {
         return csdlComplexType.getESIndex();
     }
 
@@ -50,7 +50,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      * 
      * @return type name
      */
-    public String getEType() {
+    public String getESType() {
         return csdlComplexType.getESType();
     }
 
@@ -59,7 +59,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
      * 
      * @return type name
      */
-    public String getENestedType() {
+    public String getESNestedType() {
         return csdlComplexType.getENestedType();
     }
 
@@ -74,7 +74,7 @@ public class ElasticEdmComplexType extends EdmComplexTypeImpl {
         for (Entry<String, EdmProperty> entry : getProperties().entrySet()) {
             EdmType type = entry.getValue().getType();
             if (type instanceof ElasticEdmComplexType
-                    && ((ElasticEdmComplexType) type).getENestedType().equals(nestedName)) {
+                    && ((ElasticEdmComplexType) type).getESNestedType().equals(nestedName)) {
                 return entry.getValue();
             }
         }

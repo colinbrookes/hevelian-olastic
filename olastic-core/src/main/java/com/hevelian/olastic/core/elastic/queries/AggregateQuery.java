@@ -37,7 +37,9 @@ public class AggregateQuery extends Query {
      */
     public AggregateQuery(String index, String[] types, QueryBuilder queryBuilder,
             AggregationBuilder aggregations) {
-        this(index, types, queryBuilder, Arrays.asList(aggregations), Collections.emptyList());
+        super(index, types, queryBuilder, null);
+        this.aggregations = Arrays.asList(aggregations);
+        this.pipelineAggregations = Collections.emptyList();
     }
 
     /**

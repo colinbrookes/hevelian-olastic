@@ -66,16 +66,12 @@ public final class ESClient {
      * @param client
      *            Elasticsearch client instance
      */
-    public static void init(Client client) {
+    public static synchronized void init(Client client) {
         if (instance == null) {
-            synchronized (ESClient.class) {
-                if (instance == null) {
-                    instance = new ESClient(client);
-                } else {
-                    throw new IllegalStateException(
-                            "Elasticsearch query executor client is already initialized.");
-                }
-            }
+            instance = new ESClient(client);
+        } else {
+            throw new IllegalStateException(
+                    "Elasticsearch query executor client is already initialized.");
         }
     }
 

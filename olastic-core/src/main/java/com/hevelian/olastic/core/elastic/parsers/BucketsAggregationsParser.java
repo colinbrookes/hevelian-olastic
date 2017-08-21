@@ -111,7 +111,7 @@ public class BucketsAggregationsParser
      */
     private static Map<String, Terms> collectTerms(Map<String, Aggregation> aggregations) {
         return aggregations.entrySet().stream().filter(e -> e.getValue() instanceof Terms)
-                .collect(Collectors.toMap(e -> e.getKey(), e -> (Terms) e.getValue()));
+                .collect(Collectors.toMap(Entry::getKey, e -> (Terms) e.getValue()));
     }
 
     /**

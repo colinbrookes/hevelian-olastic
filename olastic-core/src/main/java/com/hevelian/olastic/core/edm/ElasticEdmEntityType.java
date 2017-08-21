@@ -50,7 +50,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * 
      * @return index name
      */
-    public String getEIndex() {
+    public String getESIndex() {
         return csdlEntityType.getESIndex();
     }
 
@@ -59,7 +59,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * 
      * @return type name
      */
-    public String getEType() {
+    public String getESType() {
         return csdlEntityType.getESType();
     }
 
@@ -71,7 +71,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * @return found property
      */
     public ElasticEdmProperty findPropertyByEField(String esFieldName) {
-        for (Entry<String, ElasticEdmProperty> entry : getEProperties().entrySet()) {
+        for (Entry<String, ElasticEdmProperty> entry : getESProperties().entrySet()) {
             ElasticEdmProperty property = entry.getValue();
             if (property.getEField().equals(esFieldName)) {
                 return property;
@@ -86,7 +86,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * @return properties map, with key - property name and value -
      *         {@link ElasticEdmProperty} instance
      */
-    public Map<String, ElasticEdmProperty> getEProperties() {
+    public Map<String, ElasticEdmProperty> getESProperties() {
         if (propertiesCash == null) {
             Map<String, ElasticEdmProperty> localPorperties = new LinkedHashMap<>();
             List<CsdlProperty> typeProperties = csdlEntityType.getProperties();
@@ -104,7 +104,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
     @Override
     public Map<String, EdmProperty> getProperties() {
         Map<String, EdmProperty> properties = new HashMap<>();
-        for (Entry<String, ElasticEdmProperty> entry : getEProperties().entrySet()) {
+        for (Entry<String, ElasticEdmProperty> entry : getESProperties().entrySet()) {
             properties.put(entry.getKey(), entry.getValue());
         }
         return properties;
@@ -116,7 +116,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
      * @return properties map, with key - property name and value -
      *         {@link ElasticEdmNavigationProperty} instance
      */
-    public Map<String, ElasticEdmNavigationProperty> getENavigationProperties() {
+    public Map<String, ElasticEdmNavigationProperty> getESNavigationProperties() {
         if (navigationPropertiesCash == null) {
             Map<String, ElasticEdmNavigationProperty> localNavigationProperties = new LinkedHashMap<>();
             List<CsdlNavigationProperty> structuredTypeNavigationProperties = csdlEntityType
@@ -136,7 +136,7 @@ public class ElasticEdmEntityType extends EdmEntityTypeImpl {
     @Override
     public Map<String, EdmNavigationProperty> getNavigationProperties() {
         Map<String, EdmNavigationProperty> navigationProperties = new HashMap<>();
-        for (Entry<String, ElasticEdmNavigationProperty> entry : getENavigationProperties()
+        for (Entry<String, ElasticEdmNavigationProperty> entry : getESNavigationProperties()
                 .entrySet()) {
             navigationProperties.put(entry.getKey(), entry.getValue());
         }

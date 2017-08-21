@@ -1,9 +1,7 @@
 package com.hevelian.olastic.core.processors.impl;
 
-import com.hevelian.olastic.core.ElasticOData;
-import com.hevelian.olastic.core.ElasticServiceMetadata;
-import com.hevelian.olastic.core.processors.ESProcessor;
-import com.hevelian.olastic.core.processors.ESReadProcessor;
+import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
@@ -12,7 +10,10 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.uri.UriInfo;
 
-import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import com.hevelian.olastic.core.ElasticOData;
+import com.hevelian.olastic.core.ElasticServiceMetadata;
+import com.hevelian.olastic.core.processors.ESProcessor;
+import com.hevelian.olastic.core.processors.ESReadProcessor;
 
 /**
  * Custom Elastic processor for handling all request to retrieve data for single
@@ -37,7 +38,7 @@ public class EntityProcessorHandler implements ESProcessor, EntityProcessor {
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
             ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        ESReadProcessor collectionProcessor = getEntityReadProcessor(uriInfo);
+        ESReadProcessor collectionProcessor = new EntityProcessorImpl();
         collectionProcessor.init(odata, serviceMetadata);
         collectionProcessor.read(request, response, uriInfo, responseFormat);
     }
@@ -60,20 +61,6 @@ public class EntityProcessorHandler implements ESProcessor, EntityProcessor {
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
         throwNotImplemented();
-    }
-
-    /**
-     * Gets specific entity processor based on items from query options in URL.
-     *
-     * @param uriInfo
-     *            URI info
-     * @return processor to get data
-     * @throws ODataApplicationException
-     *             if any error occurred
-     */
-    protected ESReadProcessor getEntityReadProcessor(UriInfo uriInfo)
-            throws ODataApplicationException {
-        return new EntityProcessorImpl();
     }
 
 }

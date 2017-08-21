@@ -45,7 +45,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
      * 
      * @return index name
      */
-    public String getEIndex() {
+    public String getESIndex() {
         return csdlEntitySet.getESIndex();
     }
 
@@ -54,7 +54,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
      * 
      * @return type name
      */
-    public String getEType() {
+    public String getESType() {
         return csdlEntitySet.getESType();
     }
 
@@ -72,7 +72,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
      * @param esIntex
      *            ES index
      */
-    public void setEIndex(String esIntex) {
+    public void setESIndex(String esIntex) {
         csdlEntitySet.setESIndex(esIntex);
     }
 
@@ -82,7 +82,7 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
      * @param esType
      *            ES type
      */
-    public void setEType(String esType) {
+    public void setESType(String esType) {
         csdlEntitySet.setESType(esType);
     }
 
@@ -100,19 +100,12 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
         for (Iterator<EdmNavigationPropertyBinding> itor = getNavigationPropertyBindings()
                 .iterator(); itor.hasNext() && !found;) {
             EdmNavigationPropertyBinding binding = itor.next();
-            if (binding.getPath() == null || binding.getTarget() == null) {
-                throw new EdmException(
-                        "Path or Target in navigation property binding must not be null!");
-            }
+            checkBinding(binding);
             // Replace 'startsWith' to 'equals'
             if (path.equals(binding.getPath())) {
                 Target target = new Target(binding.getTarget(), getEntityContainer());
-                EdmEntityContainer entityContainer = edm
-                        .getEntityContainer(target.getEntityContainer());
-                if (entityContainer == null) {
-                    throw new EdmException("Cannot find entity container with name: "
-                            + target.getEntityContainer());
-                }
+                EdmEntityContainer entityContainer = getEntityContainer(
+                        target.getEntityContainer());
                 try {
                     bindingTarget = entityContainer.getEntitySet(target.getTargetName());
                     if (bindingTarget == null) {
@@ -130,6 +123,21 @@ public class ElasticEdmEntitySet extends EdmEntitySetImpl {
             }
         }
         return bindingTarget;
+    }
+
+    private void checkBinding(EdmNavigationPropertyBinding binding) {
+        if (binding.getPath() == null || binding.getTarget() == null) {
+            throw new EdmException(
+                    "Path or Target in navigation property binding must not be null!");
+        }
+    }
+
+    private EdmEntityContainer getEntityContainer(FullQualifiedName containerName) {
+        EdmEntityContainer entityContainer = edm.getEntityContainer(containerName);
+        if (entityContainer == null) {
+            throw new EdmException("Cannot find entity container with name: " + containerName);
+        }
+        return entityContainer;
     }
 
 }

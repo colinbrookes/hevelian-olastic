@@ -156,7 +156,7 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
     public abstract String getComplexTypeName(String type, String field);
 
     private static <K, V> void getAndPut(Map<K, Set<V>> map, K key, Set<V> newValues) {
-        Set<V> oldValues = map.containsKey(key) ? map.get(key) : new HashSet<V>();
+        Set<V> oldValues = map.containsKey(key) ? map.get(key) : new HashSet<>();
         oldValues.addAll(newValues);
         map.put(key, oldValues);
     }

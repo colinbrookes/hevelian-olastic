@@ -64,7 +64,7 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
             throws ODataApplicationException {
         ElasticEdmEntityType type = (ElasticEdmEntityType) ((UriResourcePartTyped) segment)
                 .getType();
-        String esType = type.getEType();
+        String esType = type.getESType();
         List<String> ids = collectIds(segment);
         if (nextSegment == null) {
             addIdQuery(esType, ids);

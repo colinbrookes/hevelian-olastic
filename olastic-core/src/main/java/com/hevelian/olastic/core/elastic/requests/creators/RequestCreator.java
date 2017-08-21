@@ -7,6 +7,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmBindingTarget;
@@ -111,8 +112,8 @@ public abstract class RequestCreator {
         }
         queryBuilder.addFilter(getFilterQuery(uriInfo)).addFilter(getSearchQuery(uriInfo));
         return new BaseRequest(
-                new Query(responseEntitySet.getEIndex(),
-                        new String[] { responseEntitySet.getEType() }, queryBuilder.build(), null),
+                new Query(responseEntitySet.getESIndex(),
+                        new String[] { responseEntitySet.getESType() }, queryBuilder.build(), null),
                 responseEntitySet, null);
         // TODO: pass pagination info here, and reuse in child (in request
         // creators)
@@ -204,10 +205,8 @@ public abstract class RequestCreator {
      * @param uriInfo
      *            URI info
      * @return search query
-     * @throws ODataApplicationException
-     *             if any error occurred
      */
-    protected BoolQueryBuilder getSearchQuery(UriInfo uriInfo) throws ODataApplicationException {
+    protected BoolQueryBuilder getSearchQuery(UriInfo uriInfo) {
         SearchOption searchOption = uriInfo.getSearchOption();
         ApplyOption applyOption = uriInfo.getApplyOption();
         BoolQueryBuilder searchQuery = new BoolQueryBuilder();
@@ -275,7 +274,7 @@ public abstract class RequestCreator {
         List<Sort> orderBy = new ArrayList<>();
         if (orderByOption != null) {
             orderBy.addAll(orderByOption.getOrders().stream().map(this::toSort)
-                    .filter(sort -> sort != null).collect(Collectors.toList()));
+                    .filter(Objects::nonNull).collect(Collectors.toList()));
         }
         return new Pagination(topNumber, skipNumber, orderBy);
     }

@@ -53,7 +53,7 @@ public class SearchRequestCreator extends SingleRequestCreator {
         ElasticEdmEntityType entityType = entitySet.getEntityType();
 
         Set<String> fields = getSelectList(uriInfo).stream()
-                .map(field -> entityType.getEProperties().get(field).getEField())
+                .map(field -> entityType.getESProperties().get(field).getEField())
                 .collect(Collectors.toSet());
         Pagination pagination = getPagination(uriInfo);
         SearchQuery searchQuery = new SearchQuery(baseQuery.getIndex(), baseQuery.getTypes(),

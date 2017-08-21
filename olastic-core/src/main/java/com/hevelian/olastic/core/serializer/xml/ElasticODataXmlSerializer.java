@@ -33,7 +33,7 @@ public class ElasticODataXmlSerializer extends ODataXmlSerializer {
             List<Property> properties, SelectOption select, String xml10InvalidCharReplacement,
             XMLStreamWriter writer) throws XMLStreamException, SerializerException {
         boolean all = ExpandSelectHelper.isAll(select);
-        Set<String> selected = all ? new HashSet<String>()
+        Set<String> selected = all ? new HashSet<>()
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
         for (Property property : properties) {
             String propertyName = property.getName();

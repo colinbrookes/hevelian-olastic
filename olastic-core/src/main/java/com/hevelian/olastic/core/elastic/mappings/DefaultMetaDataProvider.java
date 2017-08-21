@@ -77,23 +77,24 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
         // TODO: this workaround was implemented because of this ES 5.x issue
         // https://github.com/elastic/elasticsearch/issues/22209
         // revert this when the issue is fixed
-        try {
-            Object[] mappings = ((GetMappingsResponse) mappingss).getMappings().get(index).values()
-                    .toArray();
-            for (Object mapping : mappings) {
+        Object[] mappings = ((GetMappingsResponse) mappingss).getMappings().get(index).values()
+                .toArray();
+        for (Object mapping : mappings) {
+            try (XContentBuilder contentBuilder = XContentFactory
+                    .contentBuilder(XContentType.JSON)) {
                 MappingMetaData mappingMetaData = (MappingMetaData) mapping;
-                XContentBuilder contentBuilder = XContentFactory.contentBuilder(XContentType.JSON);
                 Object fieldMapping = mappingMetaData.getSourceAsMap().get(field);
                 contentBuilder.startObject();
                 contentBuilder.field(field, fieldMapping);
                 contentBuilder.endObject();
                 mappingsMapBuilder.put(mappingMetaData.type(),
                         new FieldMappingMetaData(field, contentBuilder.bytes()));
+            } catch (IOException e) {
+                log.debug(e);
+                throw new ODataRuntimeException("Can't parse elasticsearch mapping");
             }
-        } catch (IOException e) {
-            log.debug(e);
-            throw new ODataRuntimeException("Can't parse elasticsearch mapping");
         }
+
         return mappingsMapBuilder.build();
     }
 

@@ -11,8 +11,10 @@ import com.hevelian.olastic.core.elastic.requests.ESMultiRequest;
  * Contains logic needed for creating ES request.
  *
  * @author Taras Kohut
+ * @param <T>
+ *            query instance
  */
-public abstract class MultiRequestCreator extends RequestCreator {
+public abstract class MultiRequestCreator<T extends Query> extends RequestCreator {
 
     /**
      * Constructor to initialize default ES query builder.
@@ -39,7 +41,6 @@ public abstract class MultiRequestCreator extends RequestCreator {
      * @throws ODataApplicationException
      *             if any error occurred during request creation
      */
-    public abstract ESMultiRequest<? extends Query> create(UriInfo uriInfo)
-            throws ODataApplicationException;
+    public abstract ESMultiRequest<T> create(UriInfo uriInfo) throws ODataApplicationException;
 
 }

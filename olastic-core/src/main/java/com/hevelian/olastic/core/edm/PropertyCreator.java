@@ -61,7 +61,7 @@ public class PropertyCreator {
             } else if (property.getType() instanceof EdmSingle && value instanceof Double) {
                 // Because Elasticsearch returns 'float' values as 'double'
                 // Link: https://github.com/elastic/elasticsearch/issues/25792
-                modifiedValue = new Float(((Double) value).doubleValue());
+                modifiedValue = new Float((Double) value);
             }
             return createPrimitiveProperty(name, modifiedValue);
         } else {

@@ -32,6 +32,7 @@ import com.hevelian.olastic.core.edm.ElasticEdmEntityType;
 import com.hevelian.olastic.core.edm.ElasticEdmProperty;
 import com.hevelian.olastic.core.elastic.builders.ESQueryBuilder;
 import com.hevelian.olastic.core.elastic.pagination.Pagination;
+import com.hevelian.olastic.core.elastic.pagination.Sort;
 import com.hevelian.olastic.core.elastic.pagination.Sort.Direction;
 import com.hevelian.olastic.core.elastic.queries.AggregateQuery;
 import com.hevelian.olastic.core.elastic.queries.Query;
@@ -101,8 +102,8 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
             ElasticEdmEntityType entityType, Pagination pagination)
             throws ODataApplicationException {
         int size = pagination.getSkip() + pagination.getTop();
-        Map<String, Boolean> orders = pagination.getOrderBy().stream().collect(toMap(
-                order -> order.getProperty(), order -> order.getDirection() == Direction.ASC));
+        Map<String, Boolean> orders = pagination.getOrderBy().stream()
+                .collect(toMap(Sort::getProperty, order -> order.getDirection() == Direction.ASC));
         List<String> properties = getProperties(groupBy);
         reverse(properties);
 
@@ -216,7 +217,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
      * @return field for query
      */
     private static String getQueryField(String propertyName, ElasticEdmEntityType entityType) {
-        ElasticEdmProperty property = entityType.getEProperties().get(propertyName);
+        ElasticEdmProperty property = entityType.getESProperties().get(propertyName);
         return addKeywordIfNeeded(property.getEField(), property.getAnnotations());
     }
 

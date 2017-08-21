@@ -66,7 +66,7 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
             List<Property> properties, SelectOption select, JsonGenerator json)
             throws IOException, SerializerException {
         boolean all = ExpandSelectHelper.isAll(select);
-        Set<String> selected = all ? new HashSet<String>()
+        Set<String> selected = all ? new HashSet<>()
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
         for (Property property : properties) {
             String propertyName = property.getName();
@@ -91,27 +91,21 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
             Property property, PrimitiveSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
-        try {
-            ContextURL contextURL = checkContextURL(
-                    options == null ? null : options.getContextURL());
+        try (JsonGenerator json = new JsonFactory().createGenerator(outputStream)) {
+            ContextURL contextURL = getContextURL(options);
             CircleStreamBuffer buffer = new CircleStreamBuffer();
             outputStream = buffer.getOutputStream();
-            JsonGenerator json = new JsonFactory().createGenerator(outputStream);
             json.writeStartObject();
-            writeContextURL(contextURL, json);
-            writeMetadataETag(metadata, json);
-            writeOperations(property.getOperations(), json);
+            write(contextURL, json);
+            write(metadata, json);
+            write(property.getOperations(), json);
 
             if (property.isNull()) {
                 json.writeFieldName(JSON_NULL);
                 json.writeBoolean(true);
             } else {
                 json.writeFieldName(Constants.VALUE);
-                writePrimitive(type, property, options == null ? null : options.isNullable(),
-                        options == null ? null : options.getMaxLength(),
-                        options == null ? null : options.getPrecision(),
-                        options == null ? null : options.getScale(),
-                        options == null ? null : options.isUnicode(), json);
+                writePrimitive(type, property, options, json);
             }
             json.close();
             outputStream.close();
@@ -131,15 +125,17 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
     }
 
     /**
-     * Checks context URL.
+     * Gets and checks context URL.
      * 
-     * @param contextURL
-     *            context URL
+     * @param options
+     *            options for the serializer
      * @return context URL
      * @throws SerializerException
      *             if any error occurred
      */
-    protected ContextURL checkContextURL(ContextURL contextURL) throws SerializerException {
+    private ContextURL getContextURL(PrimitiveSerializerOptions options)
+            throws SerializerException {
+        ContextURL contextURL = options == null ? null : options.getContextURL();
         if (isODataMetadataNone) {
             return null;
         } else if (contextURL == null) {
@@ -159,7 +155,7 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
      * @throws IOException
      *             if any error occurred
      */
-    protected void writeContextURL(ContextURL contextURL, JsonGenerator json) throws IOException {
+    private void write(ContextURL contextURL, JsonGenerator json) throws IOException {
         if (!isODataMetadataNone && contextURL != null) {
             json.writeStringField(Constants.JSON_CONTEXT,
                     ContextURLBuilder.create(contextURL).toASCIIString());
@@ -176,8 +172,7 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
      * @throws IOException
      *             if any error occurred
      */
-    protected void writeMetadataETag(ServiceMetadata metadata, JsonGenerator json)
-            throws IOException {
+    private void write(ServiceMetadata metadata, JsonGenerator json) throws IOException {
         if (!isODataMetadataNone && metadata != null
                 && metadata.getServiceMetadataETagSupport() != null
                 && metadata.getServiceMetadataETagSupport().getMetadataETag() != null) {
@@ -196,7 +191,7 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
      * @throws IOException
      *             if any error occurred
      */
-    protected void writeOperations(final List<Operation> operations, final JsonGenerator json)
+    private void write(final List<Operation> operations, final JsonGenerator json)
             throws IOException {
         if (isODataMetadataFull) {
             for (Operation operation : operations) {
@@ -215,16 +210,8 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
      *            the EDM type
      * @param property
      *            property instance
-     * @param isNullable
-     *            is nullable
-     * @param maxLength
-     *            max length
-     * @param precision
-     *            precision
-     * @param scale
-     *            scale
-     * @param isUnicode
-     *            is unicode
+     * @param options
+     *            options for the serializer
      * @param json
      *            json generator
      * @throws EdmPrimitiveTypeException
@@ -234,9 +221,14 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
      * @throws SerializerException
      *             if any error occurred
      */
-    protected void writePrimitive(EdmPrimitiveType type, Property property, Boolean isNullable,
-            Integer maxLength, Integer precision, Integer scale, Boolean isUnicode,
-            JsonGenerator json) throws EdmPrimitiveTypeException, IOException, SerializerException {
+    private void writePrimitive(EdmPrimitiveType type, Property property,
+            PrimitiveSerializerOptions options, JsonGenerator json)
+            throws EdmPrimitiveTypeException, IOException, SerializerException {
+        Boolean isNullable = options == null ? null : options.isNullable();
+        Integer maxLength = options == null ? null : options.getMaxLength();
+        Integer precision = options == null ? null : options.getPrecision();
+        Integer scale = options == null ? null : options.getScale();
+        Boolean isUnicode = options == null ? null : options.isUnicode();
         if (property.isPrimitive()) {
             writePrimitiveValue(property.getName(), type, property.asPrimitive(), isNullable,
                     maxLength, precision, scale, isUnicode, json);
