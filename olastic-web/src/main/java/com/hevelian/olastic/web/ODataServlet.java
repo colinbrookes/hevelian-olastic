@@ -35,12 +35,10 @@ public class ODataServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7048611704658443045L;
     /** Elasticsearch client config. */
-    private final ESConfig config;
+    private ESConfig config;
 
-    /**
-     * Constructor initializes ES Config.
-     */
-    public ODataServlet() {
+    @Override
+    public void init() throws ServletException {
         config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
     }
 
