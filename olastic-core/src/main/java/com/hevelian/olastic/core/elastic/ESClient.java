@@ -179,8 +179,8 @@ public final class ESClient {
             throw new ODataApplicationException(
                     String.format("One or more indices %s not found.",
                             indicesToString(request.request().indices())),
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT, exception,
-                    Integer.toString(HttpStatusCode.NOT_FOUND.getStatusCode()));
+                    HttpStatusCode.GONE.getStatusCode(), Locale.ROOT, exception,
+                    Integer.toString(HttpStatusCode.GONE.getStatusCode()));
         } finally {
             log.debug(String.format("Executing query request:%n%s", request.request()));
             if (response != null) {
