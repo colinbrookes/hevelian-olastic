@@ -26,8 +26,8 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.internal.InternalSearchHit;
-import org.elasticsearch.search.internal.InternalSearchHits;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -74,15 +74,15 @@ public abstract class BaseProcessorTest {
     public static Client mockClient(List<Map<String, Object>> dataToReturn,
             SearchRequestBuilder builder) {
         Client client = mock(Client.class);
-        InternalSearchHit[] internalHitsArr = new InternalSearchHit[dataToReturn.size()];
+        SearchHit[] internalHitsArr = new SearchHit[dataToReturn.size()];
         for (int i = 0; i < dataToReturn.size(); i++) {
             Map<String, Object> data = dataToReturn.get(i);
-            InternalSearchHit hit = mock(InternalSearchHit.class);
+            SearchHit hit = mock(SearchHit.class);
             internalHitsArr[i] = hit;
             when(hit.getSource()).thenReturn(data);
             when(hit.getId()).thenReturn(Integer.toString(i));
         }
-        InternalSearchHits hits = new InternalSearchHits(internalHitsArr, internalHitsArr.length,
+        SearchHits hits = new SearchHits(internalHitsArr, internalHitsArr.length,
                 0);
 
         SearchResponse response = mock(SearchResponse.class);
