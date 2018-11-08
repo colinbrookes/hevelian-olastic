@@ -23,6 +23,7 @@ deploy:
     skip_cleanup: true
     on:
       repo: Hevelian/hevelian-olastic
+      all_branches: true
       jdk: oraclejdk8
 
 cache:
