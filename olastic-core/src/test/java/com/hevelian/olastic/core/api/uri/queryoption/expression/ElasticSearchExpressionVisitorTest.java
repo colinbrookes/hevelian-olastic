@@ -47,7 +47,7 @@ public class ElasticSearchExpressionVisitorTest {
 
     public static UriInfo buildUriInfo(ServiceMetadata metadata, OData odata, String rawODataPath,
             String rawQueryPath) throws UriParserException, UriValidationException {
-        return new Parser(metadata.getEdm(), odata).parseUri(rawODataPath, rawQueryPath, null);
+        return new Parser(metadata.getEdm(), odata).parseUri(rawODataPath, rawQueryPath, null, null);
     }
 
     @Test

@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.ContextURL;
+import org.apache.olingo.commons.api.data.Linked;
 import org.apache.olingo.commons.api.data.Operation;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
@@ -24,6 +25,7 @@ import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.core.serializer.SerializerResultImpl;
 import org.apache.olingo.server.core.serializer.json.ODataJsonSerializer;
 import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
@@ -63,11 +65,12 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
 
     @Override
     protected void writeProperties(ServiceMetadata metadata, EdmStructuredType type,
-            List<Property> properties, SelectOption select, JsonGenerator json)
+            List<Property> properties, SelectOption select, JsonGenerator json, Linked linked, ExpandOption expand)
             throws IOException, SerializerException {
         boolean all = ExpandSelectHelper.isAll(select);
         Set<String> selected = all ? new HashSet<>()
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
+        Set<List<String>> expandedPaths = ExpandSelectHelper.getExpandedItemsPath(expand);
         for (Property property : properties) {
             String propertyName = property.getName();
             if (all || selected.contains(propertyName)) {
@@ -79,7 +82,7 @@ public class ElasticODataJsonSerializer extends ODataJsonSerializer {
                 Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
                         : ExpandSelectHelper.getSelectedPaths(select.getSelectItems(),
                                 propertyName);
-                writeProperty(metadata, edmProperty, property, selectedPaths, json);
+                writeProperty(metadata, edmProperty, property, selectedPaths, json, expandedPaths, linked, expand);
             }
         }
     }
