@@ -6,3 +6,6 @@ Olastic Web [![Maven Central](https://img.shields.io/maven-central/v/com.hevelia
 
 # hevelian-olastic 
 This is a first known generic implementation of the OData services for Elasticsearch. It is based on [Apache Olingo](http://olingo.apache.org). The project is actively developed but needs even more support so feel free to join. Sources are a part of the PoC, so not everything is perfect yet. More description soon...
+
+# Usage
+See this project: https://github.com/tarasrng/olastic-demo
