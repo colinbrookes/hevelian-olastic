@@ -9,6 +9,8 @@ import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.olingo.commons.api.data.Linked;
+
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.EdmStructuredType;
@@ -17,6 +19,7 @@ import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.core.serializer.utils.ExpandSelectHelper;
 import org.apache.olingo.server.core.serializer.xml.ODataXmlSerializer;
 
@@ -31,10 +34,11 @@ public class ElasticODataXmlSerializer extends ODataXmlSerializer {
     @Override
     protected void writeProperties(ServiceMetadata metadata, EdmStructuredType type,
             List<Property> properties, SelectOption select, String xml10InvalidCharReplacement,
-            XMLStreamWriter writer) throws XMLStreamException, SerializerException {
+            XMLStreamWriter writer, Linked linked, ExpandOption expand) throws XMLStreamException, SerializerException {
         boolean all = ExpandSelectHelper.isAll(select);
         Set<String> selected = all ? new HashSet<>()
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
+        Set<List<String>> expandedPaths = ExpandSelectHelper.getExpandedItemsPath(expand);
         for (Property property : properties) {
             String propertyName = property.getName();
             if (all || selected.contains(propertyName)) {
@@ -47,7 +51,7 @@ public class ElasticODataXmlSerializer extends ODataXmlSerializer {
                         : ExpandSelectHelper.getSelectedPaths(select.getSelectItems(),
                                 propertyName);
                 writeProperty(metadata, edmProperty, property, selectedPaths,
-                        xml10InvalidCharReplacement, writer);
+                        xml10InvalidCharReplacement, writer, expandedPaths, linked, expand);
             }
         }
     }

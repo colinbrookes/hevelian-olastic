@@ -5,4 +5,5 @@
 	<suppress files=".*Test\.java" checks="[a-zA-Z0-9]*" />
 	<suppress files=".*Application\.java" checks="[a-zA-Z0-9]*" />
 	<suppress files=".ElasticODataJsonSerializer\.java" checks="[a-zA-Z0-9]*" />
+	<suppress files=".ElasticODataXmlSerializer\.java" checks="[a-zA-Z0-9]*" />
 </suppressions>
