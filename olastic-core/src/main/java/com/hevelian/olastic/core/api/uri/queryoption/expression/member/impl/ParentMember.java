@@ -1,6 +1,6 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import static org.elasticsearch.index.query.QueryBuilders.hasParentQuery;
+import static org.elasticsearch.join.query.JoinQueryBuilders.hasParentQuery;
 
 import java.util.List;
 import java.util.ListIterator;

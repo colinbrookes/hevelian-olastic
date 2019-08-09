@@ -1,6 +1,6 @@
 package com.hevelian.olastic.core.api.uri.queryoption.expression.member.impl;
 
-import static org.elasticsearch.index.query.QueryBuilders.hasChildQuery;
+import static org.elasticsearch.join.query.JoinQueryBuilders.hasChildQuery;
 
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.olingo.server.api.ODataApplicationException;

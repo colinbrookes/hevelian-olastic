@@ -41,7 +41,7 @@ public class EntityCollectionParser
         ElasticEdmEntityType entityType = entitySet.getEntityType();
         EntityCollection entities = new EntityCollection();
         for (SearchHit hit : response.getHits()) {
-            Map<String, Object> source = hit.getSource();
+            Map<String, Object> source = hit.getSourceAsMap();
 
             Entity entity = new Entity();
             entity.setId(ProcessorUtils.createId(entityType.getName(), hit.getId()));

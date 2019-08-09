@@ -34,6 +34,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
@@ -190,10 +191,9 @@ public class MultyElasticIndexCsdlEdmProviderTest {
     }
 
     @Test(expected = ODataException.class)
-    public void getProperties_MetaDataThrowsIOException_ODataExceptionRetrieved()
-            throws IOException, ODataException {
+    public void getProperties_MetaDataThrowsElasticsearchException_ODataExceptionRetrieved() throws ODataException {
         MappingMetaData mappingMetaData = mock(MappingMetaData.class);
-        when(mappingMetaData.sourceAsMap()).thenThrow(new IOException("test cause"));
+        when(mappingMetaData.sourceAsMap()).thenThrow(new ElasticsearchException("test cause"));
         MultyElasticIndexCsdlEdmProvider edmProvider = new MultyElasticIndexCsdlEdmProvider(
                 metaDataProvider, indices);
         edmProvider.getProperties(AUTHORS_INDEX, AUTHOR_TYPE, mappingMetaData);
@@ -446,7 +446,7 @@ public class MultyElasticIndexCsdlEdmProviderTest {
         when(metaDataProvider.getAllMappings(AUTHORS_INDEX)).thenReturn(mappingsBuilder.build());
         doAnswer(answer -> new ElasticCsdlEntityType().setESIndex(answer.getArgument(0))
                 .setName(answer.getArgument(1))).when(edmProvider).createEntityType(AUTHORS_INDEX,
-                        BOOK_TYPE);
+                BOOK_TYPE);
         List<ElasticCsdlEntityType> enityTypes = edmProvider.getEntityTypes(AUTHORS_INDEX);
         assertEquals(1, enityTypes.size());
         ElasticCsdlEntityType entityType = enityTypes.get(0);

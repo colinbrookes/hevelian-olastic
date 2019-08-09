@@ -31,7 +31,7 @@ public class EntityParser extends SingleResponseParser<EdmEntityType, Entity> {
         Iterator<SearchHit> hits = response.getHits().iterator();
         if (hits.hasNext()) {
             SearchHit firstHit = hits.next();
-            Map<String, Object> source = firstHit.getSource();
+            Map<String, Object> source = firstHit.getSourceAsMap();
 
             Entity entity = new Entity();
             entity.setId(ProcessorUtils.createId(entityType.getName(), firstHit.getId()));

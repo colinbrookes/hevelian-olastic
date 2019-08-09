@@ -3,7 +3,6 @@ package com.hevelian.olastic.core.common;
 import static com.hevelian.olastic.core.elastic.ElasticConstants.FIELD_DATATYPE_PROPERTY;
 import static com.hevelian.olastic.core.elastic.ElasticConstants.PROPERTIES_PROPERTY;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +14,7 @@ import java.util.Set;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.index.mapper.ObjectMapper;
 
 import com.carrotsearch.hppc.cursors.ObjectCursor;
@@ -133,8 +133,8 @@ public abstract class AbstractNestedTypeMapper implements NestedTypeMapper {
             return new ParsedMapWrapper(
                     mappingMetaDataProvider.getMappingForType(index, type).sourceAsMap())
                             .mapValue(PROPERTIES_PROPERTY);
-        } catch (IOException e) {
-            throw new ODataException("Unable to parse the mapping response from Elastcsearch.", e);
+        } catch (ElasticsearchException e) {
+            throw new ODataException("Unable to parse the mapping response from Elasticsearch.", e);
         }
     }
 

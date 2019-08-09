@@ -9,7 +9,6 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
@@ -40,7 +39,7 @@ public class ESConfigImpl implements ESConfig {
     public ESConfigImpl(String host, int port, String cluster) throws UnknownHostException {
         Settings settings = Settings.builder().put("cluster.name", cluster).build();
         this.client = initClient(settings,
-                new InetSocketTransportAddress(InetAddress.getByName(host), port));
+                new TransportAddress(InetAddress.getByName(host), port));
         initESClient();
     }
 

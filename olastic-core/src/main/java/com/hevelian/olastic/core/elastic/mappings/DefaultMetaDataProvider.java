@@ -9,6 +9,8 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequestBuil
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -20,7 +22,7 @@ import java.util.HashMap;
 /**
  * Basic implementation of the mapping metadata provider that retrieves mappings
  * from the Elasticsearch using the user defined client instance.
- * 
+ *
  * @author yuflyud
  */
 @Log4j2
@@ -30,9 +32,8 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
 
     /**
      * Initialize field.
-     * 
-     * @param client
-     *            Elasticsearch client
+     *
+     * @param client Elasticsearch client
      */
     public DefaultMetaDataProvider(Client client) {
         this.client = client;
@@ -65,7 +66,7 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
 
     @Override
     public ImmutableOpenMap<String, FieldMappingMetaData> getMappingsForField(String index,
-            String field) {
+                                                                              String field) {
         Object mappingss = cache.get(makeKey(index, field));
         if (mappingss == null) {
             mappingss = getClient().admin().indices().prepareGetMappings(index).execute()
@@ -74,9 +75,8 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
         }
 
         ImmutableOpenMap.Builder<String, FieldMappingMetaData> mappingsMapBuilder = new ImmutableOpenMap.Builder<>();
-        // TODO: this workaround was implemented because of this ES 5.x issue
+        // this workaround was implemented because of this ES issue
         // https://github.com/elastic/elasticsearch/issues/22209
-        // revert this when the issue is fixed
         Object[] mappings = ((GetMappingsResponse) mappingss).getMappings().get(index).values()
                 .toArray();
         for (Object mapping : mappings) {
@@ -87,8 +87,9 @@ public class DefaultMetaDataProvider implements MappingMetaDataProvider {
                 contentBuilder.startObject();
                 contentBuilder.field(field, fieldMapping);
                 contentBuilder.endObject();
+                BytesArray bytesArray = new BytesArray(Strings.toString(contentBuilder));
                 mappingsMapBuilder.put(mappingMetaData.type(),
-                        new FieldMappingMetaData(field, contentBuilder.bytes()));
+                        new FieldMappingMetaData(field, bytesArray));
             } catch (IOException e) {
                 log.debug(e);
                 throw new ODataRuntimeException("Can't parse elasticsearch mapping");

@@ -1,6 +1,8 @@
 package com.hevelian.olastic.core.elastic.builders;
 
 import static com.hevelian.olastic.core.utils.ProcessorUtils.throwNotImplemented;
+import static org.elasticsearch.join.query.JoinQueryBuilders.hasChildQuery;
+import static org.elasticsearch.join.query.JoinQueryBuilders.hasParentQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,7 +136,7 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
         QueryBuilder parentQuery = ids.isEmpty() ? QueryBuilders.matchAllQuery()
                 : buildIdQuery(type, ids);
         QueryBuilder resultQuery = getParentChildResultQuery(parentQuery);
-        parentChildQuery = QueryBuilders.hasParentQuery(type, resultQuery, false);
+        parentChildQuery = hasParentQuery(type, resultQuery, false);
     }
 
     /**
@@ -149,7 +151,7 @@ public class ESQueryBuilder<T extends ESQueryBuilder<T>> {
         QueryBuilder childQuery = ids.isEmpty() ? QueryBuilders.matchAllQuery()
                 : buildIdQuery(type, ids);
         QueryBuilder resultQuery = getParentChildResultQuery(childQuery);
-        parentChildQuery = QueryBuilders.hasChildQuery(type, resultQuery, ScoreMode.None);
+        parentChildQuery = hasChildQuery(type, resultQuery, ScoreMode.None);
     }
 
     /**

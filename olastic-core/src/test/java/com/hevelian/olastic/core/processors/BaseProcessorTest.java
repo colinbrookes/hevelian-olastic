@@ -79,7 +79,7 @@ public abstract class BaseProcessorTest {
             Map<String, Object> data = dataToReturn.get(i);
             SearchHit hit = mock(SearchHit.class);
             internalHitsArr[i] = hit;
-            when(hit.getSource()).thenReturn(data);
+            when(hit.getSourceAsMap()).thenReturn(data);
             when(hit.getId()).thenReturn(Integer.toString(i));
         }
         SearchHits hits = new SearchHits(internalHitsArr, internalHitsArr.length,

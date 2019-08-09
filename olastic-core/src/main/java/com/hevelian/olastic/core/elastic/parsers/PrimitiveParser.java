@@ -29,7 +29,7 @@ public class PrimitiveParser extends SingleResponseParser<EdmPrimitiveType, Prop
         ElasticEdmProperty edmProperty;
         Property property;
 
-        Map<String, Object> source = firstHit.getSource();
+        Map<String, Object> source = firstHit.getSourceAsMap();
         if (source.isEmpty()) {
             edmProperty = entityType.findPropertyByEField(ElasticConstants.ID_FIELD_NAME);
             property = createProperty(edmProperty.getName(), firstHit.getId(), entityType);

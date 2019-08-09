@@ -2,7 +2,6 @@ package com.hevelian.olastic.core.api.edm.provider;
 
 import static com.hevelian.olastic.core.api.edm.annotations.AnnotationProvider.ANALYZED_TERM_NAME;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.edm.provider.CsdlTerm;
 import org.apache.olingo.commons.api.ex.ODataException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
@@ -215,7 +215,7 @@ public abstract class ElasticCsdlEdmProvider extends CsdlAbstractEdmProvider {
                         .setCollection(csdlMapper.esFieldIsCollection(index, type, esFieldName)));
             }
             return properties;
-        } catch (IOException e) {
+        } catch (ElasticsearchException e) {
             throw new ODataException("Unable to parse the mapping response from Elasticsearch.", e);
         }
     }

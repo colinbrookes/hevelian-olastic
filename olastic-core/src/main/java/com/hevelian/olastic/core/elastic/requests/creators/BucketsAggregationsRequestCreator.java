@@ -23,8 +23,7 @@ import org.apache.olingo.server.api.uri.UriResourceKind;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupByItem;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
 import com.hevelian.olastic.core.edm.ElasticEdmEntitySet;
@@ -114,7 +113,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
                 .shardSize(getShardSize(size));
         getMetricsAggQueries(getAggregations(groupBy.getApplyOption()))
                 .forEach(groupByQuery::subAggregation);
-        List<Order> queryOrders = getQueryOrders(queryField, orders);
+        List<BucketOrder> queryOrders = getQueryOrders(queryField, orders);
         if (!queryOrders.isEmpty()) {
             groupByQuery.order(queryOrders);
         }
@@ -125,7 +124,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
                     .subAggregation(groupByQuery);
             Boolean termOrder = orders.remove(queryField);
             if (termOrder != null) {
-                groupByQuery.order(Terms.Order.term(termOrder));
+                groupByQuery.order(BucketOrder.key(termOrder));
             }
         }
 
@@ -153,7 +152,7 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
     }
 
     /**
-     * Get's properties from {@link #groupBy} for aggregation query.
+     * Get's properties from groupBy for aggregation query.
      * 
      * @param groupBy
      *            groupBy instance
@@ -188,20 +187,20 @@ public class BucketsAggregationsRequestCreator extends AbstractAggregationsReque
      *            orders map from URI
      * @return list of orders
      */
-    private List<Order> getQueryOrders(String field, Map<String, Boolean> ordersMap) {
-        List<Order> orders = new ArrayList<>();
+    private List<BucketOrder> getQueryOrders(String field, Map<String, Boolean> ordersMap) {
+        List<BucketOrder> orders = new ArrayList<>();
         Boolean termOrder = ordersMap.remove(field);
         if (termOrder != null) {
-            orders.add(Terms.Order.term(termOrder));
+            orders.add(BucketOrder.key(termOrder));
         }
         Boolean countOrder = ordersMap.remove(getCountAlias());
         if (countOrder != null) {
-            orders.add(Terms.Order.count(countOrder));
+            orders.add(BucketOrder.count(countOrder));
         }
         for (String alias : getMetricAliases()) {
             Boolean aliasOrder = ordersMap.remove(alias);
             if (aliasOrder != null) {
-                orders.add(Terms.Order.aggregation(alias, aliasOrder));
+                orders.add(BucketOrder.aggregation(alias, aliasOrder));
             }
         }
         return orders;
