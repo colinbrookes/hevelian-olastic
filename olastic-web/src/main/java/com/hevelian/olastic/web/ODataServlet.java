@@ -1,14 +1,14 @@
 package com.hevelian.olastic.web;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.extern.log4j.Log4j2;
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -31,6 +31,7 @@ import com.hevelian.olastic.core.processors.impl.PrimitiveProcessorImpl;
  * @author yuflyud
  * @author rdidyk
  */
+@Log4j2
 public class ODataServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7048611704658443045L;
@@ -38,18 +39,23 @@ public class ODataServlet extends HttpServlet {
     private ESConfig config;
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         config = (ESConfig) getServletContext().getAttribute(ESConfig.getName());
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        OData odata = ElasticOData.newInstance();
-        ServiceMetadata matadata = createServiceMetadata(req, odata, createEdmProvider());
-        ODataHttpHandler handler = odata.createHandler(matadata);
-        registerProcessors(handler);
-        handler.process(req, resp);
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            OData odata = ElasticOData.newInstance();
+            ServiceMetadata metadata = createServiceMetadata(req, odata, createEdmProvider());
+            ODataHttpHandler handler = odata.createHandler(metadata);
+            handler.register(new CustomErrorProcessor());
+            registerProcessors(handler);
+            handler.process(req, resp);
+        } catch (ODataRuntimeException e) {
+            log.error(e);
+            throw e;
+        }
     }
 
     /**
